@@ -523,13 +523,27 @@ local function on_force_created(event)
 	buy_prices[index] = {}
 end
 
-local function on_forces_merged(event)
-	local source_index = event.source_index
+local function on_forces_merging(event)
+	local source = event.source
+	local source_index = source.index
 	sell_prices[source_index] = nil
 	buy_prices[source_index] = nil
 	sell_boxes[source_index] = nil
 	buy_boxes[source_index] = nil
 	remove_index_among_embargoes(source_index)
+
+	local get_target = rendering.get_target
+	local is_valid = rendering.is_valid
+	local destroy = rendering.destroy
+	for _, id in pairs(rendering.get_all_ids()) do
+		if is_valid(id) then
+			local entity = get_target(id).entity
+			if entity.force == source then
+				all_boxes[entity.unit_number] = nil
+				destroy(id)
+			end
+		end
+	end
 end
 
 local function on_force_cease_fire_changed(event)
@@ -1089,7 +1103,7 @@ M.events = {
 	end,
 	[defines.events.on_player_removed] = delete_player_data,
 	[defines.events.on_force_created] = on_force_created,
-	[defines.events.on_forces_merged] = on_forces_merged,
+	[defines.events.on_forces_merging] = on_forces_merging,
 	[defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
 	[defines.events.on_player_changed_force] = function(event)
 		pcall(on_player_changed_force, event)
