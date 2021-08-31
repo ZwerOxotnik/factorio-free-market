@@ -243,6 +243,20 @@ local function clear_invalid_buy_boxes_data()
 	end
 end
 
+local function clear_invalid_invalid_entities()
+	clear_invalid_sell_boxes_data()
+	clear_invalid_buy_boxes_data()
+
+	for unit_number, data in pairs(all_boxes) do
+		if data[1].valid == false then
+			-- rendering.destroy(data[2])
+			all_boxes[unit_number] = nil
+		-- else
+				-- WIP
+		end
+	end
+end
+
 local function delete_player_data(event)
 	open_box[event.player_index] = nil
 end
@@ -1040,8 +1054,7 @@ local function update_global_data()
 
 	link_data()
 
-	clear_invalid_sell_boxes_data()
-	clear_invalid_buy_boxes_data()
+	clear_invalid_invalid_entities()
 	clear_invalid_prices(sell_prices)
 	clear_invalid_prices(buy_prices)
 	clear_invalid_embargoes()
@@ -1062,15 +1075,6 @@ local function update_global_data()
 	buy_prices[index] = buy_prices[index] or {}
 	buy_boxes[index] = buy_boxes[index] or {}
 	embargoes[index] = embargoes[index] or {}
-
-	for unit_number, data in pairs(all_boxes) do
-		if data[1].valid == false then
-			-- rendering.destroy(data[2])
-			all_boxes[unit_number] = nil
-		-- else
-				-- WIP
-		end
-	end
 end
 
 
@@ -1095,9 +1099,9 @@ M.add_remote_interface = add_remote_interface
 
 M.events = {
 	-- [defines.events.on_game_created_from_scenario] = on_game_created_from_scenario,
-	-- [defines.events.on_pre_surface_deleted] = on_pre_surface_deleted, -- TODO: validate data
-	-- [defines.events.on_pre_surface_cleared] = on_pre_surface_cleared,
-	-- [defines.events.on_chunk_deleted] = on_chunk_deleted,
+	[defines.events.on_surface_deleted] = clear_invalid_invalid_entities,
+	[defines.events.on_surface_cleared] = clear_invalid_invalid_entities,
+	[defines.events.on_chunk_deleted] = clear_invalid_invalid_entities,
 	[defines.events.on_player_created] = on_player_created,
 	[defines.events.on_player_joined_game] = function(event)
 		pcall(on_player_joined_game, event)
