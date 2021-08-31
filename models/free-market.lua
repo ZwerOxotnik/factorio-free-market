@@ -243,7 +243,7 @@ local function clear_invalid_buy_boxes_data()
 	end
 end
 
-local function clear_invalid_invalid_entities()
+local function clear_invalid_entities()
 	clear_invalid_sell_boxes_data()
 	clear_invalid_buy_boxes_data()
 
@@ -1054,7 +1054,7 @@ local function update_global_data()
 
 	link_data()
 
-	clear_invalid_invalid_entities()
+	clear_invalid_entities()
 	clear_invalid_prices(sell_prices)
 	clear_invalid_prices(buy_prices)
 	clear_invalid_embargoes()
@@ -1099,9 +1099,9 @@ M.add_remote_interface = add_remote_interface
 
 M.events = {
 	-- [defines.events.on_game_created_from_scenario] = on_game_created_from_scenario,
-	[defines.events.on_surface_deleted] = clear_invalid_invalid_entities,
-	[defines.events.on_surface_cleared] = clear_invalid_invalid_entities,
-	[defines.events.on_chunk_deleted] = clear_invalid_invalid_entities,
+	[defines.events.on_surface_deleted] = clear_invalid_entities,
+	[defines.events.on_surface_cleared] = clear_invalid_entities,
+	[defines.events.on_chunk_deleted] = clear_invalid_entities,
 	[defines.events.on_player_created] = on_player_created,
 	[defines.events.on_player_joined_game] = function(event)
 		pcall(on_player_joined_game, event)
