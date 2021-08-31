@@ -479,11 +479,20 @@ local function remove_index_among_embargoes(index)
 	end
 end
 
+local bold_font_color = {255, 230, 192}
 local anchor = {gui = defines.relative_gui_type.container_gui, position = defines.relative_gui_position.top}
 local function create_relative_gui(player)
 	local relative = player.gui.relative
-	relative.add{type = "button", style="flib_slot_button_grey", name = "FM_set_buy_box", caption = {"free-market.buy-gui"}, anchor = anchor}
-	relative.add{type = "button", style="flib_slot_button_grey", name = "FM_set_sell_box", caption = {"free-market.sell-gui"}, anchor = anchor}
+	local main_frame = relative.add{type = "frame", name = "FM_boxes_frame", anchor = anchor}
+	main_frame.style.vertical_align = "center"
+	main_frame.style.horizontally_stretchable = false
+	main_frame.style.bottom_margin = -14
+	local frame = main_frame.add{type = "frame", name = "content", style = "inside_shallow_frame"}
+	local buy_button = frame.add{type = "button", style="slot_button", name = "FM_set_buy_box", caption = {"free-market.buy-gui"}}
+	buy_button.style.font_color = bold_font_color
+	buy_button.style.right_margin = -6
+	local sell_button = frame.add{type = "button", style="slot_button", name = "FM_set_sell_box", caption = {"free-market.sell-gui"}}
+	sell_button.style.font_color = bold_font_color
 end
 
 --#endregion
