@@ -262,14 +262,27 @@ local function delete_player_data(event)
 end
 
 local function make_prices_header(table)
-	local label = {type = "label", caption = {"team-name"}}
-	table.add(label).style.horizontally_stretchable = true
-	label.caption = {"free-market.buy-header"}
-	table.add(label).style.horizontally_stretchable = true
-	label.caption = {"free-market.sell-header"}
-	table.add(label).style.horizontally_stretchable = true
-	label.caption = {"free-market.embargo-header"}
-	table.add(label).style.horizontally_stretchable = true
+	local label
+	local label_data = {type = "label", caption = {"team-name"}}
+
+	label = table.add(label_data)
+	label.style.horizontally_stretchable = true
+	label.style.minimal_width = 60
+
+	label_data.caption = {"free-market.buy-header"}
+	label = table.add(label_data)
+	label.style.horizontally_stretchable = true
+	label.style.minimal_width = 60
+
+	label_data.caption = {"free-market.sell-header"}
+	label = table.add(label_data)
+	label.style.horizontally_stretchable = true
+	label.style.minimal_width = 60
+
+	label_data.caption = {"free-market.embargo-header"}
+	label = table.add(label_data)
+	label.style.horizontally_stretchable = true
+	label.style.minimal_width = 65
 end
 
 local function update_prices_table(player, item_name, table)
@@ -285,13 +298,19 @@ local function update_prices_table(player, item_name, table)
 	for index, force_items in pairs(buy_prices) do
 		local data = result[index]
 		if data then
-			data.buy_price = tostring(force_items[item_name] or '')
+			local buy_value = force_items[item_name]
+			if buy_value then
+				data.buy_price = tostring(buy_value)
+			end
 		end
 	end
 	for index, force_items in pairs(sell_prices) do
 		local data = result[index]
 		if data then
-			data.sell_price = tostring(force_items[item_name] or '')
+			local sell_price = force_items[item_name]
+			if sell_price then
+				data.sell_price = tostring(sell_price)
+			end
 		end
 	end
 
@@ -302,9 +321,9 @@ local function update_prices_table(player, item_name, table)
 		if data.buy_price or data.sell_price then
 			label.caption = data.name
 			table.add(label)
-			label.caption = data.buy_price or ''
+			label.caption = (data.buy_price or '')
 			table.add(label)
-			label.caption = data.sell_price or ''
+			label.caption = (data.sell_price or '')
 			table.add(label)
 			checkbox.name = "FM_E_" .. data.name
 			checkbox.state = embargoes[force_index][other_force_index] or false
@@ -327,6 +346,7 @@ local function open_prices_gui(player)
 		return
 	end
 	local main_frame = screen.add{type = "frame", name = "FM_prices_frame", direction = "vertical"}
+	main_frame.style.horizontally_stretchable = true
 	local flow = main_frame.add(TITLEBAR_FLOW)
 	flow.add{type = "label",
 		style = "frame_title",
