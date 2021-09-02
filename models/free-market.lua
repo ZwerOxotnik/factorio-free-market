@@ -858,6 +858,11 @@ local GUIS = {
 		local entity = player.opened
 
 		if entity.type == "container" then
+			if player.force ~= entity.force then
+				player.print({"free-market.you-cant-change"})
+				return
+			end
+
 			if find_sell_box_data(entity) then
 				open_sell_box_gui(player, false, entity)
 			elseif find_buy_box_data(entity) then
@@ -873,6 +878,11 @@ local GUIS = {
 		local entity = player.opened
 
 		if entity.type == "container" then
+			if player.force ~= entity.force then
+				player.print({"free-market.you-cant-change"})
+				return
+			end
+
 			if find_buy_box_data(entity) then
 				open_buy_box_gui(player, false, entity)
 			elseif find_sell_box_data(entity) then
@@ -992,6 +1002,7 @@ end
 local function on_player_changed_surface(event)
 	local player = game.get_player(event.player_index)
 	destroy_boxes_gui(player)
+	destroy_prices_gui(player) -- TODO: change this
 end
 
 local function on_player_left_game(event)
