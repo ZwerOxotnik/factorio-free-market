@@ -964,8 +964,8 @@ local function check_buy_boxes()
 									end
 								end
 								forces_money_copy[other_force_index] = seller_money
+								:: skip_seller ::
 							end
-							:: skip_seller ::
 						end
 						:: fulfilled_needs ::
 						local found_items = need_count - stack.count
