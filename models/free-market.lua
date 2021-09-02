@@ -933,11 +933,10 @@ local function check_buy_boxes()
 							stack.count = count
 						else
 							need_count = need_count - count
-							if need_count == 0 then
+							if need_count <= 0 then
 								goto skip_buy
 							end
-							count = need_count
-							stack.count = count
+							stack.count = need_count
 							for other_force_index, _items_data in pairs(sell_boxes) do
 								local sell_price = sell_prices[other_force_index][item_name]
 								if not (sell_price and buy_price >= sell_price) then
@@ -953,11 +952,10 @@ local function check_buy_boxes()
 												local amount = removed_count * sell_price
 												buyer_money = buyer_money - amount
 												seller_money = seller_money + amount
-												if count == 0 then
+												stack.count = stack.count - removed_count
+												if stack.count <= 0 then
 													forces_money_copy[other_force_index] = seller_money
 													goto fulfilled_needs
-												else
-													stack.count = count - removed_count
 												end
 											end
 										end
