@@ -931,6 +931,9 @@ local function check_buy_boxes()
 							stack.count = count
 						else
 							need_count = need_count - count
+							if need_count == 0 then
+								goto skip_buy
+							end
 							count = need_count
 							stack.count = count
 							for other_force_index, _items_data in pairs(sell_boxes) do
@@ -968,6 +971,7 @@ local function check_buy_boxes()
 							stack.count = found_items
 							buy_box.insert(stack)
 						end
+						:: skip_buy ::
 					end
 				end
 			end
