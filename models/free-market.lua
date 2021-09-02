@@ -318,7 +318,7 @@ local function update_prices_table(player, item_name, table)
 	local force_index = force.index
 	local checkbox = {type = "checkbox", name = '', state = false}
 	for other_force_index, data in pairs(result) do
-		if data.buy_price or data.sell_price then
+		-- if data.buy_price or data.sell_price then
 			label.caption = data.name
 			table.add(label)
 			label.caption = (data.buy_price or '')
@@ -328,7 +328,7 @@ local function update_prices_table(player, item_name, table)
 			checkbox.name = "FM_E_" .. data.name
 			checkbox.state = embargoes[force_index][other_force_index] or false
 			table.add(checkbox)
-		end
+		-- end
 	end
 end
 
@@ -614,8 +614,10 @@ local function on_gui_checked_state_changed(event)
 	local force = player.force
 	local message
 	if is_embargo then
+		embargoes[force.index][other_force.index] = true
 		message = {"free-market.declared-embargo", force.name, other_force.name, player.name}
 	else
+		embargoes[force.index][other_force.index] = nil
 		message = {"free-market.canceled-embargo", force.name, other_force.name, player.name}
 	end
 	force.print(message)
