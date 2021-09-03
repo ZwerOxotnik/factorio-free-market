@@ -24,7 +24,6 @@ local all_boxes
 
 --#region Constants
 local floor = math.floor
-local min = math.min
 local remove = table.remove
 local match = string.match
 local call = remote.call
@@ -1187,7 +1186,9 @@ local function check_buy_boxes()
 					end
 					local buy_box = buy_data[1]
 					local need_count = buy_data[2]
-					need_count = min(need_count, purchasable_count)
+					if purchasable_count < need_count then
+						need_count = purchasable_count
+					end
 					local count = buy_box.get_item_count(item_name)
 					stack.name = item_name
 					if need_count < count then
