@@ -1,10 +1,11 @@
 ﻿---------------------------------------------------------------------------------------------------
-Version: 0.8.2
+Version: 0.8.3
 Date: 2021-09-03
   Changes:
     - Changed purchase algorithm (check only 1 team each Nth tick)
+    - Changed price list
   Bugfixes:
-    - Fixed buying of some expensive items
+    - Fixed buying of expensive items
 ---------------------------------------------------------------------------------------------------
 Version: 0.8.1
 Date: 2021-09-03

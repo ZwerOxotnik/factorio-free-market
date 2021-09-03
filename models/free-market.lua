@@ -23,6 +23,8 @@ local all_boxes
 
 
 --#region Constants
+local floor = math.floor
+local min = math.min
 local remove = table.remove
 local match = string.match
 local call = remote.call
@@ -54,6 +56,15 @@ local is_public_titles = settings.global["FM_is-public-titles"].value
 
 
 --#region utils
+
+---@param t? table
+---@return boolean
+local function is_empty(t)
+	for _ in pairs(t) do
+		return false
+	end
+	return true
+end
 
 ---@param entity LuaEntity
 ---@param item_name string
@@ -493,10 +504,15 @@ local function open_price_list_gui(player)
 	local row = content.add{type = "table", name = "row", column_count = 2}
 	row.add{type = "label", caption = {'', {"team"}, {"colon"}}}
 	local items = {}
-	local i = 0
-	for force_name in pairs(game.forces) do
-		i = i + 1
-		items[i] = force_name
+	local size = 0
+	for force_name, force in pairs(game.forces) do
+		local force_index = force.index
+		local f_sell_prices = sell_prices[force_index]
+		local f_buy_prices = buy_prices[force_index]
+		if (f_sell_prices and not is_empty(f_sell_prices)) or (f_buy_prices and not is_empty(f_buy_prices)) then
+			size = size + 1
+			items[size] = force_name
+		end
 	end
 	row.add{type = "drop-down", name = "FM_force_price_list", items = items}
 	local prices_frame = content.add{type = "frame", name = "deep_frame", style = "deep_frame_in_shallow_frame", direction = "vertical"}
@@ -1149,10 +1165,12 @@ local function check_buy_boxes()
 		forces_money_copy[_force_index] = value
 	end
 
-	local stack = {name = "", count = 0}
 	local items_data = buy_boxes[force_index]
+	if items_data == nil then return end
+
 	local buyer_money = forces_money_copy[force_index]
 	if buyer_money and buyer_money > money_treshold then
+		local stack = {name = "", count = 0}
 		local f_buy_prices = buy_prices[force_index]
 		for item_name, entities in pairs(items_data) do
 			if money_treshold >= buyer_money then
@@ -1161,8 +1179,15 @@ local function check_buy_boxes()
 			local buy_price = f_buy_prices[item_name]
 			if buy_price and buyer_money >= buy_price then
 				for _, buy_data in pairs(entities) do
+					local purchasable_count = buyer_money / buy_price
+					if purchasable_count < 1 then
+						goto skip_buy
+					else
+						purchasable_count = floor(purchasable_count)
+					end
 					local buy_box = buy_data[1]
 					local need_count = buy_data[2]
+					need_count = min(need_count, purchasable_count)
 					local count = buy_box.get_item_count(item_name)
 					stack.name = item_name
 					if need_count < count then
