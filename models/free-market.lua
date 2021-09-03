@@ -1129,83 +1129,98 @@ local function on_gui_click(event)
 end
 
 local function check_buy_boxes()
+	local force_index = mod_data.last_buyer_index
+	for _, force in pairs(game.forces) do
+		if force.index > force_index then
+			force_index = force.index
+			break
+		end
+	end
+	if force_index ~= mod_data.last_buyer_index then
+		mod_data.last_buyer_index = force_index
+	else
+		force_index = 1
+		mod_data.last_buyer_index = 1
+	end
+
 	local forces_money = call("EasyAPI", "get_forces_money")
 	local forces_money_copy = {}
-	for force_index, value in pairs(forces_money) do
-		forces_money_copy[force_index] = value
+	for _force_index, value in pairs(forces_money) do
+		forces_money_copy[_force_index] = value
 	end
 
 	local stack = {name = "", count = 0}
-	for force_index, items_data in pairs(buy_boxes) do
-		local buyer_money = forces_money_copy[force_index]
-		if buyer_money and buyer_money > money_treshold then
-			local f_buy_prices = buy_prices[force_index]
-			for item_name, entities in pairs(items_data) do
-				if money_treshold >= buyer_money then
-					goto not_enough_money
-				end
-				local buy_price = f_buy_prices[item_name]
-				if buy_price then
-					for _, buy_data in pairs(entities) do
-						local buy_box = buy_data[1]
-						local need_count = buy_data[2]
-						local count = buy_box.get_item_count(item_name)
-						stack.name = item_name
-						if need_count < count then
-							stack.count = count
-						else
-							need_count = need_count - count
-							if need_count <= 0 then
-								goto skip_buy
+	local items_data = buy_boxes[force_index]
+	local buyer_money = forces_money_copy[force_index]
+	if buyer_money and buyer_money > money_treshold then
+		local f_buy_prices = buy_prices[force_index]
+		for item_name, entities in pairs(items_data) do
+			if money_treshold >= buyer_money then
+				goto not_enough_money
+			end
+			local buy_price = f_buy_prices[item_name]
+			if buy_price and buyer_money >= buy_price then
+				for _, buy_data in pairs(entities) do
+					local buy_box = buy_data[1]
+					local need_count = buy_data[2]
+					local count = buy_box.get_item_count(item_name)
+					stack.name = item_name
+					if need_count < count then
+						stack.count = count
+					else
+						need_count = need_count - count
+						if need_count <= 0 then
+							goto skip_buy
+						end
+						stack.count = need_count
+						for other_force_index, _items_data in pairs(sell_boxes) do
+							local sell_price = sell_prices[other_force_index][item_name]
+							if not (sell_price and buy_price >= sell_price) then
+								goto skip_seller
 							end
-							stack.count = need_count
-							for other_force_index, _items_data in pairs(sell_boxes) do
-								local sell_price = sell_prices[other_force_index][item_name]
-								if not (sell_price and buy_price >= sell_price) then
-									goto skip_seller
-								end
-								local seller_money = forces_money_copy[other_force_index]
-								if force_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][force_index] then
-									local item_offers = _items_data[item_name]
-									if item_offers then
-										for _, sell_box in pairs(item_offers) do
-											local removed_count = sell_box.remove_item(stack)
-											if removed_count > 0 then
-												local amount = removed_count * sell_price
-												buyer_money = buyer_money - amount
-												seller_money = seller_money + amount
-												stack.count = stack.count - removed_count
-												if stack.count <= 0 then
-													forces_money_copy[other_force_index] = seller_money
-													goto fulfilled_needs
-												end
+							if force_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][force_index] then
+								local item_offers = _items_data[item_name]
+								if item_offers then
+									local seller_money = forces_money_copy[other_force_index]
+									for _, sell_box in pairs(item_offers) do
+										local removed_count = sell_box.remove_item(stack)
+										if removed_count > 0 then
+											local amount = removed_count * sell_price
+											buyer_money = buyer_money - amount
+											seller_money = seller_money + amount
+											stack.count = stack.count - removed_count
+											if stack.count <= 0 then
+												forces_money_copy[other_force_index] = seller_money
+												goto fulfilled_needs
 											end
 										end
 									end
+									forces_money_copy[other_force_index] = seller_money
 								end
-								forces_money_copy[other_force_index] = seller_money
-								:: skip_seller ::
 							end
+							:: skip_seller ::
 						end
-						:: fulfilled_needs ::
-						local found_items = need_count - stack.count
-						if found_items > 0 then
-							stack.count = found_items
-							buy_box.insert(stack)
-						end
-						:: skip_buy ::
 					end
+					:: fulfilled_needs ::
+					local found_items = need_count - stack.count
+					if found_items > 0 then
+						stack.count = found_items
+						buy_box.insert(stack)
+					end
+					:: skip_buy ::
 				end
 			end
-			:: not_enough_money ::
-			forces_money_copy[force_index] = buyer_money
 		end
+		:: not_enough_money ::
+		forces_money_copy[force_index] = buyer_money
+	else
+		return
 	end
 
 	local forces = game.forces
-	for force_index, value in pairs(forces_money_copy) do
-		if forces_money[force_index] ~= value then
-			call("EasyAPI", "set_force_money", forces[force_index], value)
+	for _force_index, value in pairs(forces_money_copy) do
+		if forces_money[_force_index] ~= value then
+			call("EasyAPI", "set_force_money", forces[_force_index], value)
 		end
 	end
 end
@@ -1317,6 +1332,7 @@ local function update_global_data()
 	mod_data.buy_prices = mod_data.buy_prices or {}
 	mod_data.embargoes = mod_data.embargoes or {}
 	mod_data.all_boxes = mod_data.all_boxes or {}
+	mod_data.last_buyer_index = 1
 
 	link_data()
 

@@ -1,4 +1,21 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.8.2
+Date: 2021-09-03
+  Changes:
+    - Changed purchase algorithm (check only 1 team each Nth tick)
+  Bugfixes:
+    - Fixed buying of some expensive items
+---------------------------------------------------------------------------------------------------
+Version: 0.8.1
+Date: 2021-09-03
+  Features:
+    - Added /price-list command to show all prices of selected team
+---------------------------------------------------------------------------------------------------
+Version: 0.8.0
+Date: 2021-09-03
+  Features:
+    - Added support of logistic containers
+---------------------------------------------------------------------------------------------------
 Version: 0.8.0
 Date: 2021-09-03
   Features:
