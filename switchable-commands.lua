@@ -16,5 +16,6 @@ Returns tables of commands without functions as command "settings". All paramete
 ]]--
 ---@type table<string, table>
 return {
-	prices = {}
+	prices = {},
+	price_list = {name = "price-list"}
 }

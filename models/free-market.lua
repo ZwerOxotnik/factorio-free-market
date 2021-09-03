@@ -293,6 +293,27 @@ local function make_prices_header(table)
 	label.style.minimal_width = 65
 end
 
+local function make_price_list_header(table)
+	local label
+	local label_data = {type = "label"}
+
+	for _=1, 2, 1 do
+		label_data.caption = {"item"}
+		label = table.add(label_data)
+		label.style.horizontally_stretchable = true
+
+		label_data.caption = {"free-market.buy-header"}
+		label = table.add(label_data)
+		label.style.horizontally_stretchable = true
+		label.style.minimal_width = 60
+
+		label_data.caption = {"free-market.sell-header"}
+		label = table.add(label_data)
+		label.style.horizontally_stretchable = true
+		label.style.minimal_width = 60
+	end
+end
+
 local function update_prices_table(player, item_name, table)
 	table.clear()
 	make_prices_header(table)
@@ -340,10 +361,45 @@ local function update_prices_table(player, item_name, table)
 	end
 end
 
+local function update_price_list_table(force, table)
+	table.clear()
+	make_price_list_header(table)
+	local force_index = force.index
+	local f_buy_prices = buy_prices[force_index] or {}
+	local f_sell_prices = sell_prices[force_index] or {}
+
+	local label = {type = "label"}
+	local button = {type = "choose-elem-button", elem_type = "item", ignored_by_interaction = true}
+	for item_name, buy_price in pairs(f_buy_prices) do
+		table.add(button).elem_value = item_name
+		label.caption = buy_price
+		table.add(label)
+		label.caption = (f_sell_prices[item_name] or '')
+		table.add(label)
+	end
+
+	local empty_label = {type = "label"}
+	for item_name, sell_price in pairs(f_sell_prices) do
+		if f_buy_prices[item_name] == nil then
+			table.add(button).elem_value = item_name
+			table.add(empty_label)
+			label.caption = sell_price
+			table.add(label)
+		end
+	end
+end
+
 local function destroy_prices_gui(player)
 	local screen = player.gui.screen
 	if screen.FM_prices_frame then
 		screen.FM_prices_frame.destroy()
+	end
+end
+
+local function destroy_price_list_gui(player)
+	local screen = player.gui.screen
+	if screen.FM_price_list_frame then
+		screen.FM_price_list_frame.destroy()
 	end
 end
 
@@ -412,6 +468,56 @@ local function open_prices_gui(player)
 	prices_table.draw_horizontal_lines = true
 	prices_table.draw_vertical_lines = true
 	make_prices_header(prices_table)
+	main_frame.force_auto_center()
+end
+
+local function open_price_list_gui(player)
+	local screen = player.gui.screen
+	if screen.FM_price_list_frame then
+		screen.FM_price_list_frame.destroy()
+		return
+	end
+	local main_frame = screen.add{type = "frame", name = "FM_price_list_frame", direction = "vertical"}
+	main_frame.style.horizontally_stretchable = true
+	local flow = main_frame.add(TITLEBAR_FLOW)
+	flow.add{type = "label",
+		style = "frame_title",
+		caption = {"free-market.price-list"},
+		ignored_by_interaction = true
+	}
+	flow.add(DRAG_HANDLER).drag_target = main_frame
+	flow.add(CLOSE_BUTTON)
+	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
+	local content = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
+	content.style.padding = 12
+	local row = content.add{type = "table", name = "row", column_count = 2}
+	row.add{type = "label", caption = {'', {"team"}, {"colon"}}}
+	local items = {}
+	local i = 0
+	for force_name in pairs(game.forces) do
+		i = i + 1
+		items[i] = force_name
+	end
+	row.add{type = "drop-down", name = "FM_force_price_list", items = items}
+	local prices_frame = content.add{type = "frame", name = "deep_frame", style = "deep_frame_in_shallow_frame", direction = "vertical"}
+	local scroll_pane = prices_frame.add{
+		type = "scroll-pane",
+		name = "scroll-pane",
+		horizontal_scroll_policy = "never"
+	}
+	scroll_pane.style.padding = 12
+	local prices_table = scroll_pane.add{type = "table", name = "price_list_table", column_count = 6}
+	prices_table.style.horizontal_spacing = 16
+	prices_table.style.vertical_spacing = 8
+	prices_table.style.column_alignments[1] = "center"
+	prices_table.style.column_alignments[2] = "center"
+	prices_table.style.column_alignments[3] = "center"
+	prices_table.style.column_alignments[4] = "center"
+	prices_table.style.column_alignments[5] = "center"
+	prices_table.style.column_alignments[6] = "center"
+	prices_table.draw_horizontal_lines = true
+	prices_table.draw_vertical_lines = true
+	make_price_list_header(prices_table)
 	main_frame.force_auto_center()
 end
 
@@ -563,6 +669,7 @@ local function on_player_joined_game(event)
 	local player = game.get_player(player_index)
 	destroy_boxes_gui(player)
 	destroy_prices_gui(player)
+	destroy_price_list_gui(player)
 end
 
 local function on_force_created(event)
@@ -741,6 +848,24 @@ local function on_gui_elem_changed(event)
 	parent.sell_price.text = tostring(sell_prices[force_index][item_name] or '')
 	parent.buy_price.text = tostring(buy_prices[force_index][item_name] or '')
 	update_prices_table(player, item_name, parent.parent.other_prices_frame["scroll-pane"].prices_table)
+end
+
+local function on_gui_selection_state_changed(event)
+	local element = event.element
+	if not match(element.name, "^FM_") then return end
+
+	if element.name ~= "FM_force_price_list" then return end
+
+	local parent = element.parent
+	local force = game.forces[element.items[element.selected_index]]
+	if force == nil then
+		local price_list_table = parent.parent.deep_frame["scroll-pane"].price_list_table
+		price_list_table.clear()
+		make_price_list_header(price_list_table)
+		return
+	end
+
+	update_price_list_table(force, parent.parent.deep_frame["scroll-pane"].price_list_table)
 end
 
 
@@ -1103,13 +1228,13 @@ end
 local function on_player_changed_surface(event)
 	local player = game.get_player(event.player_index)
 	destroy_boxes_gui(player)
-	destroy_prices_gui(player) -- TODO: change this
 end
 
 local function on_player_left_game(event)
 	local player = game.get_player(event.player_index)
 	destroy_boxes_gui(player)
 	destroy_prices_gui(player)
+	destroy_price_list_gui(player)
 end
 
 local mod_settings = {
@@ -1141,6 +1266,12 @@ local function prices_command(cmd)
 	local player = game.get_player(cmd.player_index)
 	if not (player and player.valid) then return end
 	open_prices_gui(player)
+end
+
+local function price_list_command(cmd)
+	local player = game.get_player(cmd.player_index)
+	if not (player and player.valid) then return end
+	open_price_list_gui(player)
 end
 
 --#endregion
@@ -1242,6 +1373,7 @@ M.events = {
 		pcall(on_player_joined_game, event)
 	end,
 	[defines.events.on_gui_checked_state_changed] = on_gui_checked_state_changed,
+	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
 		pcall(on_gui_click, event)
@@ -1277,7 +1409,8 @@ M.on_nth_tick = {
 }
 
 M.commands = {
-	prices = prices_command
+	prices = prices_command,
+	price_list = price_list_command
 }
 
 

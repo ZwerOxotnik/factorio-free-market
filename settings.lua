@@ -6,7 +6,3 @@ data:extend({
 	{type = "bool-setting", name = "FM_enable-auto-embargo", setting_type = "runtime-global", default_value = true},
 	{type = "bool-setting", name = "FM_is-public-titles", setting_type = "runtime-global", default_value = true}
 })
-
--- minimal price
--- FM max price
--- FM money threshold
