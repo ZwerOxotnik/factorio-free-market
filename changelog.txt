@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.8.0
+Date: 2021-09-03
+  Features:
+    - Added support of logistic containers
+    - Added hotkeys to set sell offers and set buy requests fast
+  Changes:
+    - Changed text style
+---------------------------------------------------------------------------------------------------
 Version: 0.7.8
 Date: 2021-09-02
   Bugfixes:

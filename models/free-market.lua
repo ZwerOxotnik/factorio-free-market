@@ -28,6 +28,8 @@ local match = string.match
 local call = remote.call
 local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
+local TEXT_OFFSET = {0, 0.3}
+local ALLOWED_TYPES = {["container"] = true, ["logistic-container"] = true}
 local TITLEBAR_FLOW = {type = "flow", style = "flib_titlebar_flow"}
 local DRAG_HANDLER = {type = "empty-widget", style = "flib_dialog_footer_drag_handle"}
 local CLOSE_BUTTON = {
@@ -255,6 +257,12 @@ local function clear_invalid_entities()
 				-- WIP
 		end
 	end
+end
+
+local function get_distance(start, stop)
+	local xdiff = start.x - stop.x
+	local ydiff = start.y - stop.y
+	return (xdiff * xdiff + ydiff * ydiff)^0.5
 end
 
 local function delete_player_data(event)
@@ -601,6 +609,93 @@ local function on_force_cease_fire_changed(event)
 	end
 end
 
+local function set_sell_box_key_pressed(event)
+	local player = game.get_player(event.player_index)
+	local entity = player.selected
+	if not ALLOWED_TYPES[entity.type] then return end
+	if get_distance(player.position, entity.position) > 30 then return end
+
+	if find_sell_box_data(entity) then
+		return
+	elseif find_buy_box_data(entity) then
+		return
+	end
+
+	local item = entity.get_inventory(defines.inventory.chest)[1]
+	if not item.valid_for_read then
+		player.print({"multiplayer.no-address", {"item"}})
+		return
+	end
+
+	-- TODO: refactor
+	local item_name = item.name
+
+	local force_sell_boxes = sell_boxes[player.force.index]
+	force_sell_boxes[item_name] = force_sell_boxes[item_name] or {}
+	table.insert(force_sell_boxes[item_name], entity)
+	local text_data = {
+		text = {"free-market.selling"},
+		vertical_alignment = "middle",
+		surface = player.surface,
+		scale_with_zoom = false,
+		only_in_alt_mode = true,
+		alignment = "center",
+		color = GREEN_COLOR,
+		target = entity,
+		target_offset = TEXT_OFFSET,
+		scale = 0.7,
+	}
+	if is_public_titles == false then
+		text_data.forces = {player.force}
+	end
+	local id = rendering.draw_text(text_data)
+	all_boxes[entity.unit_number] = {entity, id}
+end
+
+local function set_buy_box_key_pressed(event)
+	local player = game.get_player(event.player_index)
+	local entity = player.selected
+	if not ALLOWED_TYPES[entity.type] then return end
+	if get_distance(player.position, entity.position) > 30 then return end
+
+	if find_sell_box_data(entity) then
+		return
+	elseif find_buy_box_data(entity) then
+		return
+	end
+
+	local item = entity.get_inventory(defines.inventory.chest)[1]
+	if not item.valid_for_read then
+		player.print({"multiplayer.no-address", {"item"}})
+		return
+	end
+
+	-- TODO: refactor
+	local item_name = item.name
+	local stack_size = game.item_prototypes[item_name].stack_size
+
+	local force_buy_boxes = buy_boxes[player.force.index]
+	force_buy_boxes[item_name] = force_buy_boxes[item_name] or {}
+	table.insert(force_buy_boxes[item_name], {entity, stack_size})
+	local text_data = {
+		text = {"free-market.buying"},
+		vertical_alignment = "middle",
+		surface = player.surface,
+		scale_with_zoom = false,
+		only_in_alt_mode = true,
+		alignment = "center",
+		color = RED_COLOR,
+		target = entity,
+		target_offset = TEXT_OFFSET,
+		scale = 0.7,
+	}
+	if is_public_titles == false then
+		text_data.forces = {player.force}
+	end
+	local id = rendering.draw_text(text_data)
+	all_boxes[entity.unit_number] = {entity, id}
+end
+
 local function on_gui_checked_state_changed(event)
 	local force_name = match(event.element.name, "^FM_E_(.+)")
 	if force_name == nil then return end
@@ -693,6 +788,7 @@ local GUIS = {
 				alignment = "center",
 				color = RED_COLOR,
 				target = entity,
+				target_offset = TEXT_OFFSET,
 				scale = 0.7,
 			}
 			if is_public_titles == false then
@@ -726,6 +822,7 @@ local GUIS = {
 				alignment = "center",
 				color = GREEN_COLOR,
 				target = entity,
+				target_offset = TEXT_OFFSET,
 				scale = 0.7,
 			}
 			if is_public_titles == false then
@@ -859,7 +956,7 @@ local GUIS = {
 	FM_set_sell_box = function(element, player)
 		local entity = player.opened
 
-		if entity.type == "container" then
+		if ALLOWED_TYPES[entity.type] then
 			if player.force ~= entity.force then
 				player.print({"free-market.you-cant-change"})
 				return
@@ -879,7 +976,7 @@ local GUIS = {
 	FM_set_buy_box = function(element, player)
 		local entity = player.opened
 
-		if entity.type == "container" then
+		if ALLOWED_TYPES[entity.type] then
 			if player.force ~= entity.force then
 				player.print({"free-market.you-cant-change"})
 				return
@@ -1052,7 +1149,10 @@ end
 --#region Pre-game stage
 
 local function set_filters()
-	local filters = {{filter = "type", type = "container"}}
+	local filters = {
+		{filter = "type", mode = "or", type = "container"},
+		{filter = "type", mode = "or", type = "logistic-container"},
+	}
 	script.set_event_filter(defines.events.on_entity_died, filters)
 	script.set_event_filter(defines.events.on_robot_mined_entity, filters)
 	script.set_event_filter(defines.events.script_raised_destroy, filters)
@@ -1163,7 +1263,13 @@ M.events = {
 	[defines.events.on_player_mined_entity] = clear_box_data,
 	[defines.events.on_robot_mined_entity] = clear_box_data,
 	[defines.events.script_raised_destroy] = clear_box_data,
-	[defines.events.on_entity_died] = clear_box_data
+	[defines.events.on_entity_died] = clear_box_data,
+	["FM_set-sell-box"] = function(event)
+		pcall(set_sell_box_key_pressed, event)
+	end,
+	["FM_set-buy-box"] = function(event)
+		pcall(set_buy_box_key_pressed, event)
+	end
 }
 
 M.on_nth_tick = {
