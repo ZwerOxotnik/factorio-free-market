@@ -322,7 +322,6 @@ local function make_price_list_header(table)
 		dummy.style.minimal_width = 60
 	end
 
-	local label
 	local label_data = {type = "label"}
 
 	for _=1, 2, 1 do
