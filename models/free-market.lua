@@ -282,47 +282,56 @@ local function delete_player_data(event)
 end
 
 local function make_prices_header(table)
-	local label
+	local dummy
+	local dummy_data = {type = "empty-widget"}
+	dummy = table.add(dummy_data)
+	dummy.style.horizontally_stretchable = true
+	dummy.style.minimal_width = 60
+	dummy = table.add(dummy_data)
+	dummy.style.horizontally_stretchable = true
+	dummy.style.minimal_width = 60
+	dummy = table.add(dummy_data)
+	dummy.style.horizontally_stretchable = true
+	dummy.style.minimal_width = 60
+	dummy = table.add(dummy_data)
+	dummy.style.horizontally_stretchable = true
+	dummy.style.minimal_width = 65
+
 	local label_data = {type = "label", caption = {"team-name"}}
-
-	label = table.add(label_data)
-	label.style.horizontally_stretchable = true
-	label.style.minimal_width = 60
-
+	table.add(label_data)
 	label_data.caption = {"free-market.buy-header"}
-	label = table.add(label_data)
-	label.style.horizontally_stretchable = true
-	label.style.minimal_width = 60
-
+	table.add(label_data)
 	label_data.caption = {"free-market.sell-header"}
-	label = table.add(label_data)
-	label.style.horizontally_stretchable = true
-	label.style.minimal_width = 60
-
+	table.add(label_data)
 	label_data.caption = {"free-market.embargo-header"}
-	label = table.add(label_data)
-	label.style.horizontally_stretchable = true
-	label.style.minimal_width = 65
+	table.add(label_data)
 end
 
 local function make_price_list_header(table)
+	local dummy
+	local dummy_data = {type = "empty-widget"}
+	for _=1, 2, 1 do
+		dummy = table.add(dummy_data)
+		dummy.style.horizontally_stretchable = true
+		dummy.style.minimal_width = 30
+		dummy = table.add(dummy_data)
+		dummy.style.horizontally_stretchable = true
+		dummy.style.minimal_width = 60
+		dummy = table.add(dummy_data)
+		dummy.style.horizontally_stretchable = true
+		dummy.style.minimal_width = 60
+	end
+
 	local label
 	local label_data = {type = "label"}
 
 	for _=1, 2, 1 do
 		label_data.caption = {"item"}
-		label = table.add(label_data)
-		label.style.horizontally_stretchable = true
-
+		table.add(label_data)
 		label_data.caption = {"free-market.buy-header"}
-		label = table.add(label_data)
-		label.style.horizontally_stretchable = true
-		label.style.minimal_width = 60
-
+		table.add(label_data)
 		label_data.caption = {"free-market.sell-header"}
-		label = table.add(label_data)
-		label.style.horizontally_stretchable = true
-		label.style.minimal_width = 60
+		table.add(label_data)
 	end
 end
 
@@ -473,6 +482,7 @@ local function open_prices_gui(player)
 	local prices_table = scroll_pane.add{type = "table", name = "prices_table", column_count = 4}
 	prices_table.style.horizontal_spacing = 16
 	prices_table.style.vertical_spacing = 8
+	prices_table.style.top_margin = -16
 	prices_table.style.column_alignments[1] = "center"
 	prices_table.style.column_alignments[2] = "center"
 	prices_table.style.column_alignments[3] = "center"
@@ -526,6 +536,7 @@ local function open_price_list_gui(player)
 	local prices_table = scroll_pane.add{type = "table", name = "price_list_table", column_count = 6}
 	prices_table.style.horizontal_spacing = 16
 	prices_table.style.vertical_spacing = 8
+	prices_table.style.top_margin = -16
 	prices_table.style.column_alignments[1] = "center"
 	prices_table.style.column_alignments[2] = "center"
 	prices_table.style.column_alignments[3] = "center"
