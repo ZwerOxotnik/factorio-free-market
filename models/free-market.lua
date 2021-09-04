@@ -183,7 +183,9 @@ local function clear_invalid_embargoes()
 	end
 	for _, forces_data in pairs(embargoes) do
 		for index in pairs(forces_data) do
-			if game.forces[index] == nil then
+			if type(index) == "table" then -- TODO: change this
+				forces_data[index] = nil
+			elseif game.forces[index] == nil then
 				forces_data[index] = nil
 			end
 		end
@@ -198,7 +200,7 @@ local function clear_invalid_prices(prices)
 		else
 			for item_name in pairs(forces_data) do
 				if game.item_prototypes[item_name] == nil then
-					data[item_name] = nil
+					forces_data[item_name] = nil
 				end
 			end
 		end
@@ -722,7 +724,7 @@ end
 local function on_force_cease_fire_changed(event)
 	if is_auto_embargo then
 		local force_index = event.force.index
-		local other_force_index = event.other_force
+		local other_force_index = event.other_force.index
 		if event.added then
 			embargoes[force_index][other_force_index] = nil
 		else
