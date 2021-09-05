@@ -30,6 +30,7 @@ local call = remote.call
 local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
 local TEXT_OFFSET = {0, 0.3}
+local EMPTY_WIDGET = {type = "empty-widget"}
 local ALLOWED_TYPES = {["container"] = true, ["logistic-container"] = true}
 local TITLEBAR_FLOW = {type = "flow", style = "flib_titlebar_flow"}
 local DRAG_HANDLER = {type = "empty-widget", style = "flib_dialog_footer_drag_handle"}
@@ -283,27 +284,21 @@ end
 
 local function make_prices_header(table)
 	local dummy
-	local dummy_data = {type = "empty-widget"}
-	dummy = table.add(dummy_data)
+	dummy = table.add(EMPTY_WIDGET)
 	dummy.style.horizontally_stretchable = true
 	dummy.style.minimal_width = 60
-	dummy = table.add(dummy_data)
+	dummy = table.add(EMPTY_WIDGET)
 	dummy.style.horizontally_stretchable = true
 	dummy.style.minimal_width = 60
-	dummy = table.add(dummy_data)
+	dummy = table.add(EMPTY_WIDGET)
 	dummy.style.horizontally_stretchable = true
 	dummy.style.minimal_width = 60
-	dummy = table.add(dummy_data)
-	dummy.style.horizontally_stretchable = true
-	dummy.style.minimal_width = 65
 
 	local label_data = {type = "label", caption = {"team-name"}}
 	table.add(label_data)
 	label_data.caption = {"free-market.buy-header"}
 	table.add(label_data)
 	label_data.caption = {"free-market.sell-header"}
-	table.add(label_data)
-	label_data.caption = {"free-market.embargo-header"}
 	table.add(label_data)
 end
 
@@ -364,9 +359,7 @@ local function update_prices_table(player, item_name, table)
 	end
 
 	local label = {type = "label"}
-	local force_index = force.index
-	local checkbox = {type = "checkbox", name = '', state = false}
-	for other_force_index, data in pairs(result) do
+	for _, data in pairs(result) do
 		if data.buy_price or data.sell_price then
 			label.caption = data.name
 			table.add(label)
@@ -374,9 +367,6 @@ local function update_prices_table(player, item_name, table)
 			table.add(label)
 			label.caption = (data.sell_price or '')
 			table.add(label)
-			checkbox.name = "FM_E_" .. data.name
-			checkbox.state = embargoes[force_index][other_force_index] or false
-			table.add(checkbox)
 		end
 	end
 end
@@ -421,6 +411,68 @@ local function destroy_price_list_gui(player)
 	if screen.FM_price_list_frame then
 		screen.FM_price_list_frame.destroy()
 	end
+end
+
+local function update_embargo_table(embargo_table, player)
+	embargo_table.clear()
+
+	embargo_table.add{type = "label", caption = {"free-market.without-embargo-title"}}
+	embargo_table.add(EMPTY_WIDGET)
+	embargo_table.add{type = "label", caption = {"free-market.with-embargo-title"}}
+
+	local force_index = player.index
+	local embargoes_items = {}
+	local forces_items = {}
+	local f_embargoes = embargoes[player.index]
+	for force_name, force in pairs(game.forces) do
+		if #force.players > 0 and force.index ~= force_index then
+			if f_embargoes[force.index] then
+				embargoes_items[#embargoes_items+1] = force_name
+			else
+				forces_items[#forces_items+1] = force_name
+			end
+		end
+	end
+
+	local forces_list = embargo_table.add{type = "list-box", name = "forces_list", items = forces_items}
+	forces_list.style.horizontally_stretchable = true
+	forces_list.style.height = 200
+	local buttons_flow = embargo_table.add{type = "flow", direction = "vertical"}
+	buttons_flow.add{type = "sprite-button", name = "FM_cancel_embargo", style = "tool_button", sprite = "utility/left_arrow"}
+	buttons_flow.add{type = "sprite-button", name = "FM_declare_embargo", style = "tool_button", sprite = "utility/right_arrow"}
+	local embargo_list = embargo_table.add{type = "list-box", name = "embargo_list", items = embargoes_items}
+	embargo_list.style.horizontally_stretchable = true
+	embargo_list.style.height = 200
+end
+
+local function open_embargo_gui(player)
+	local screen = player.gui.screen
+	if screen.FM_embargo_frame then
+		screen.FM_embargo_frame.destroy()
+		return
+	end
+	local main_frame = screen.add{type = "frame", name = "FM_embargo_frame", direction = "vertical"}
+	main_frame.style.minimal_width = 340
+	main_frame.style.horizontally_stretchable = true
+	local flow = main_frame.add(TITLEBAR_FLOW)
+	flow.add{type = "label",
+		style = "frame_title",
+		caption = {"free-market.embargo-gui"},
+		ignored_by_interaction = true
+	}
+	flow.add(DRAG_HANDLER).drag_target = main_frame
+	flow.add(CLOSE_BUTTON)
+
+	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame"}
+	local embargo_table = shallow_frame.add{type = "table", name = "embargo_table", column_count = 3}
+	embargo_table.style.horizontally_stretchable = true
+	embargo_table.style.vertically_stretchable = true
+	embargo_table.style.column_alignments[1] = "center"
+	embargo_table.style.column_alignments[2] = "center"
+	embargo_table.style.column_alignments[3] = "center"
+
+	update_embargo_table(embargo_table, player)
+	main_frame.force_auto_center()
 end
 
 local function open_prices_gui(player)
@@ -478,14 +530,13 @@ local function open_prices_gui(player)
 		horizontal_scroll_policy = "never"
 	}
 	scroll_pane.style.padding = 12
-	local prices_table = scroll_pane.add{type = "table", name = "prices_table", column_count = 4}
+	local prices_table = scroll_pane.add{type = "table", name = "prices_table", column_count = 3}
 	prices_table.style.horizontal_spacing = 16
 	prices_table.style.vertical_spacing = 8
 	prices_table.style.top_margin = -16
 	prices_table.style.column_alignments[1] = "center"
 	prices_table.style.column_alignments[2] = "center"
 	prices_table.style.column_alignments[3] = "center"
-	prices_table.style.column_alignments[4] = "center"
 	prices_table.draw_horizontal_lines = true
 	prices_table.draw_vertical_lines = true
 	make_prices_header(prices_table)
@@ -830,29 +881,6 @@ local function set_buy_box_key_pressed(event)
 	all_boxes[entity.unit_number] = {entity, id}
 end
 
-local function on_gui_checked_state_changed(event)
-	local force_name = match(event.element.name, "^FM_E_(.+)")
-	if force_name == nil then return end
-
-	local other_force = game.forces[force_name]
-	if other_force == nil then return end
-
-	local element = event.element
-	local is_embargo = element.state
-	local player = game.get_player(event.player_index)
-	local force = player.force
-	local message
-	if is_embargo then
-		embargoes[force.index][other_force.index] = true
-		message = {"free-market.declared-embargo", force.name, other_force.name, player.name}
-	else
-		embargoes[force.index][other_force.index] = nil
-		message = {"free-market.canceled-embargo", force.name, other_force.name, player.name}
-	end
-	force.print(message)
-	other_force.print(message)
-end
-
 local function on_gui_elem_changed(event)
 	local element = event.element
 	if not match(element.name, "^FM_") then return end
@@ -1144,6 +1172,38 @@ local GUIS = {
 			end
 			open_box[player.index] = entity
 		end
+	end,
+	FM_declare_embargo = function(element, player)
+		local table_element = element.parent.parent
+		local forces_list = table_element.forces_list
+		if forces_list.selected_index == 0 then return end
+
+		local force_name = forces_list.items[forces_list.selected_index]
+		local other_force = game.forces[force_name]
+		if other_force and other_force.valid then
+			local force = player.force
+			embargoes[force.index][other_force.index] = true
+			local message = {"free-market.declared-embargo", force.name, other_force.name, player.name}
+			force.print(message)
+			other_force.print(message)
+		end
+		update_embargo_table(table_element, player)
+	end,
+	FM_cancel_embargo = function(element, player)
+		local table_element = element.parent.parent
+		local embargo_list = table_element.embargo_list
+		if embargo_list.selected_index == 0 then return end
+
+		local force_name = embargo_list.items[embargo_list.selected_index]
+		local other_force = game.forces[force_name]
+		if other_force and other_force.valid then
+			local force = player.force
+			embargoes[force.index][other_force.index] = nil
+			local message = {"free-market.canceled-embargo", force.name, other_force.name, player.name}
+			force.print(message)
+			other_force.print(message)
+		end
+		update_embargo_table(table_element, player)
 	end
 }
 local function on_gui_click(event)
@@ -1315,6 +1375,12 @@ end
 
 --#region Commands
 
+local function embargo_command(cmd)
+	local player = game.get_player(cmd.player_index)
+	if not (player and player.valid) then return end
+	open_embargo_gui(player)
+end
+
 local function prices_command(cmd)
 	local player = game.get_player(cmd.player_index)
 	if not (player and player.valid) then return end
@@ -1426,7 +1492,6 @@ M.events = {
 	[defines.events.on_player_joined_game] = function(event)
 		pcall(on_player_joined_game, event)
 	end,
-	[defines.events.on_gui_checked_state_changed] = on_gui_checked_state_changed,
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
@@ -1463,6 +1528,7 @@ M.on_nth_tick = {
 }
 
 M.commands = {
+	embargo = embargo_command,
 	prices = prices_command,
 	price_list = price_list_command
 }
