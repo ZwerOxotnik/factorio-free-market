@@ -19,6 +19,8 @@ local buy_boxes
 local open_box
 ---@type table<number, table>
 local all_boxes
+---@type table<number, number>
+local active_forces
 --#endregion
 
 
@@ -27,6 +29,7 @@ local floor = math.floor
 local remove = table.remove
 local match = string.match
 local call = remote.call
+local CHECK_FORCES_TICK = 3600
 local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
 local TEXT_OFFSET = {0, 0.3}
@@ -1215,16 +1218,36 @@ local function on_gui_click(event)
 	if f then f(element, player) end
 end
 
+local function check_forces()
+	local forces_money = call("EasyAPI", "get_forces_money")
+
+	active_forces = {}
+	local size = 0
+	for _, force in pairs(game.forces) do
+		local force_index = force.index
+		local items_data = buy_boxes[force_index]
+		if items_data then
+			local buyer_money = forces_money[force_index]
+			if buyer_money and buyer_money > money_treshold then
+				size = size + 1
+				active_forces[size] = force_index
+			end
+		end
+	end
+end
+
 local function check_buy_boxes()
 	local force_index = mod_data.last_buyer_index
-	for _, force in pairs(game.forces) do
-		if force.index > force_index then
-			force_index = force.index
+	for _, index in pairs(active_forces) do
+		if index > force_index then
+			force_index = index
 			break
 		end
 	end
 	if force_index ~= mod_data.last_buyer_index then
 		mod_data.last_buyer_index = force_index
+	elseif force_index == 1 then
+		return
 	else
 		force_index = 1
 		mod_data.last_buyer_index = 1
@@ -1357,6 +1380,12 @@ local mod_settings = {
 	["FM_minimal-price"] = function(value) minimal_price = value end,
 	["FM_maximal-price"] = function(value) maximal_price = value end,
 	["FM_update-tick"] = function(value)
+		if CHECK_FORCES_TICK == value then
+			settings.global["FM_update-tick"] = {
+				value = value + 1
+			}
+			return
+		end
 		script.on_nth_tick(update_tick, nil)
 		update_tick = value
 		script.on_nth_tick(value, check_buy_boxes)
@@ -1424,12 +1453,14 @@ local function link_data()
 	buy_prices = mod_data.buy_prices
 	open_box = mod_data.open_box
 	all_boxes = mod_data.all_boxes
+	active_forces = mod_data.active_forces
 end
 
 local function update_global_data()
 	global.free_market = global.free_market or {}
 	mod_data = global.free_market
 	mod_data.open_box = {}
+	mod_data.active_forces = mod_data.active_forces or {}
 	mod_data.sell_boxes = mod_data.sell_boxes or {}
 	mod_data.buy_boxes = mod_data.buy_boxes or {}
 	mod_data.sell_prices = mod_data.sell_prices or {}
@@ -1524,7 +1555,8 @@ M.events = {
 }
 
 M.on_nth_tick = {
-	[update_tick] = check_buy_boxes
+	[update_tick] = check_buy_boxes,
+	[CHECK_FORCES_TICK] = check_forces
 }
 
 M.commands = {
