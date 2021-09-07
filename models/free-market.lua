@@ -805,14 +805,12 @@ local function on_forces_merging(event)
 end
 
 local function on_force_cease_fire_changed(event)
-	if is_auto_embargo then
-		local force_index = event.force.index
-		local other_force_index = event.other_force.index
-		if event.added then
-			embargoes[force_index][other_force_index] = nil
-		else
-			embargoes[force_index][other_force_index] = true
-		end
+	local force_index = event.force.index
+	local other_force_index = event.other_force.index
+	if event.added then
+		embargoes[force_index][other_force_index] = nil
+	else
+		embargoes[force_index][other_force_index] = true
 	end
 end
 
@@ -1543,7 +1541,9 @@ M.events = {
 		pcall(on_player_changed_surface, event)
 	end,
 	[defines.events.on_force_cease_fire_changed] = function(event)
-		pcall(on_force_cease_fire_changed, event)
+		if is_auto_embargo then
+			pcall(on_force_cease_fire_changed, event)
+		end
 	end,
 	[defines.events.on_player_mined_entity] = clear_box_data,
 	[defines.events.on_robot_mined_entity] = clear_box_data,
