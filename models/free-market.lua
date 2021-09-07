@@ -762,6 +762,24 @@ local function on_force_created(event)
 	buy_prices[index] = {}
 end
 
+local function check_forces()
+	local forces_money = call("EasyAPI", "get_forces_money")
+
+	active_forces = {}
+	local size = 0
+	for _, force in pairs(game.forces) do
+		local force_index = force.index
+		local items_data = buy_boxes[force_index]
+		if items_data then
+			local buyer_money = forces_money[force_index]
+			if buyer_money and buyer_money > money_treshold then
+				size = size + 1
+				active_forces[size] = force_index
+			end
+		end
+	end
+end
+
 local function on_forces_merging(event)
 	local source = event.source
 	local source_index = source.index
@@ -783,10 +801,13 @@ local function on_forces_merging(event)
 			end
 		end
 	end
+	check_forces()
 end
 
 local function on_force_cease_fire_changed(event)
 	if is_auto_embargo then
+		if type(event.force) ~= "table" then return end
+		if type(event.other_force) ~= "table" then return end
 		local force_index = event.force.index
 		local other_force_index = event.other_force.index
 		if event.added then
@@ -1216,24 +1237,6 @@ local function on_gui_click(event)
 
 	local f = GUIS[element.name]
 	if f then f(element, player) end
-end
-
-local function check_forces()
-	local forces_money = call("EasyAPI", "get_forces_money")
-
-	active_forces = {}
-	local size = 0
-	for _, force in pairs(game.forces) do
-		local force_index = force.index
-		local items_data = buy_boxes[force_index]
-		if items_data then
-			local buyer_money = forces_money[force_index]
-			if buyer_money and buyer_money > money_treshold then
-				size = size + 1
-				active_forces[size] = force_index
-			end
-		end
-	end
 end
 
 local function check_buy_boxes()
