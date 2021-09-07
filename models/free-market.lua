@@ -765,7 +765,7 @@ end
 local function check_forces()
 	local forces_money = call("EasyAPI", "get_forces_money")
 
-	active_forces = {}
+	mod_data.active_forces = {}
 	local size = 0
 	for _, force in pairs(game.forces) do
 		local force_index = force.index
@@ -806,8 +806,6 @@ end
 
 local function on_force_cease_fire_changed(event)
 	if is_auto_embargo then
-		if type(event.force) ~= "table" then return end
-		if type(event.other_force) ~= "table" then return end
 		local force_index = event.force.index
 		local other_force_index = event.other_force.index
 		if event.added then
@@ -1544,7 +1542,9 @@ M.events = {
 	[defines.events.on_player_changed_surface] = function(event)
 		pcall(on_player_changed_surface, event)
 	end,
-	[defines.events.on_force_cease_fire_changed] = on_force_cease_fire_changed,
+	[defines.events.on_force_cease_fire_changed] = function(event)
+		pcall(on_force_cease_fire_changed, event)
+	end,
 	[defines.events.on_player_mined_entity] = clear_box_data,
 	[defines.events.on_robot_mined_entity] = clear_box_data,
 	[defines.events.script_raised_destroy] = clear_box_data,
