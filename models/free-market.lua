@@ -30,6 +30,7 @@ local remove = table.remove
 local match = string.match
 local call = remote.call
 local CHECK_FORCES_TICK = 3600
+local WHITE_COLOR = {1, 1, 1}
 local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
 local TEXT_OFFSET = {0, 0.3}
@@ -709,10 +710,10 @@ local function remove_index_among_embargoes(index)
 end
 
 local bold_font_color = {255, 230, 192}
-local anchor = {gui = defines.relative_gui_type.container_gui, position = defines.relative_gui_position.top}
-local function create_relative_gui(player)
+local top_anchor = {gui = defines.relative_gui_type.container_gui, position = defines.relative_gui_position.top}
+local function create_top_relative_gui(player)
 	local relative = player.gui.relative
-	local main_frame = relative.add{type = "frame", name = "FM_boxes_frame", anchor = anchor}
+	local main_frame = relative.add{type = "frame", name = "FM_boxes_frame", anchor = top_anchor}
 	main_frame.style.vertical_align = "center"
 	main_frame.style.horizontally_stretchable = false
 	main_frame.style.bottom_margin = -14
@@ -722,6 +723,31 @@ local function create_relative_gui(player)
 	buy_button.style.right_margin = -6
 	local sell_button = frame.add{type = "button", style="slot_button", name = "FM_set_sell_box", caption = {"free-market.sell-gui"}}
 	sell_button.style.font_color = bold_font_color
+end
+
+local left_anchor = {gui = defines.relative_gui_type.controller_gui, position = defines.relative_gui_position.left}
+local function create_left_relative_gui(player)
+	local relative = player.gui.relative
+	local main_table = relative.add{type = "table", name = "FM_buttons", anchor = left_anchor, column_count = 2}
+	main_table.style.vertical_align = "center"
+	main_table.style.horizontal_spacing = 0
+	main_table.style.vertical_spacing = 0
+	local button = main_table.add{type = "button", style = "side_menu_button", caption = ">", name = "FM_hide_left_buttons"}
+	button.style.font = "default-dialog-button"
+	button.style.font_color = WHITE_COLOR
+	button.style.top_padding = -4
+	button.style.width = 18
+	button.style.height = 20
+	local frame = main_table.add{type = "frame", name = "content"}
+	frame.style.right_margin = -14
+	local shallow_frame = frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame"}
+	local table = shallow_frame.add{type = "table", column_count = 2}
+	table.style.horizontal_spacing = 0
+	table.style.vertical_spacing = 0
+	table.add{type = "sprite-button", sprite = "FM_change-price", style="slot_button", name = "FM_change-price"}
+	table.add{type = "sprite-button", sprite = "FM_see-prices", style="slot_button", name = "FM_see-prices"}
+	table.add{type = "sprite-button", sprite = "FM_embargo", style="slot_button", name = "FM_embargo"}
+	table.add{type = "sprite-button", style = "slot_button"}
 end
 
 --#endregion
@@ -740,7 +766,9 @@ local function clear_box_data(event)
 end
 
 local function on_player_created(event)
-	create_relative_gui(game.get_player(event.player_index))
+	local player = game.get_player(event.player_index)
+	create_top_relative_gui(player)
+	create_left_relative_gui(player)
 end
 
 -- check
@@ -1224,6 +1252,25 @@ local GUIS = {
 			other_force.print(message)
 		end
 		update_embargo_table(table_element, player)
+	end,
+	["FM_change-price"] = function(element, player)
+		open_prices_gui(player)
+	end,
+	["FM_see-prices"] = function(element, player)
+		open_price_list_gui(player)
+	end,
+	["FM_embargo"] = function(element, player)
+		open_embargo_gui(player)
+	end,
+	FM_hide_left_buttons = function(element, player)
+		element.name = "FM_show_left_buttons"
+		element.caption = '<'
+		element.parent.children[2].visible = false
+	end,
+	FM_show_left_buttons = function(element, player)
+		element.name = "FM_hide_left_buttons"
+		element.caption = '>'
+		element.parent.children[2].visible = true
 	end
 }
 local function on_gui_click(event)
@@ -1475,6 +1522,18 @@ local function update_global_data()
 	clear_invalid_prices(buy_prices)
 	clear_invalid_embargoes()
 
+	for _, player in pairs(game.players) do
+		if player.valid then
+			local relative = player.gui.relative
+			if relative.FM_buttons == nil then
+				create_left_relative_gui(player)
+			end
+			if relative.FM_boxes_frame == nil then
+				create_top_relative_gui(player)
+			end
+		end
+	end
+
 	for _, force in pairs(game.forces) do
 		if #force.players > 0 then
 			local index = force.index
@@ -1503,7 +1562,8 @@ M.on_init = function()
 	set_filters()
 	for _, player in pairs(game.players) do
 		if player.valid then
-			create_relative_gui(player)
+			create_left_relative_gui(player)
+			create_top_relative_gui(player)
 		end
 	end
 end
