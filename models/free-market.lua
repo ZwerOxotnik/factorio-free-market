@@ -794,6 +794,7 @@ local function check_forces()
 	local forces_money = call("EasyAPI", "get_forces_money")
 
 	mod_data.active_forces = {}
+	active_forces = mod_data.active_forces
 	local size = 0
 	for _, force in pairs(game.forces) do
 		local force_index = force.index
@@ -1290,6 +1291,7 @@ local function check_buy_boxes()
 			break
 		end
 	end
+
 	if force_index ~= mod_data.last_buyer_index then
 		mod_data.last_buyer_index = force_index
 	elseif force_index == 1 then
