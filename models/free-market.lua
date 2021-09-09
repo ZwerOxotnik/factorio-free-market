@@ -1562,12 +1562,6 @@ end
 M.on_init = function()
 	update_global_data()
 	set_filters()
-	for _, player in pairs(game.players) do
-		if player.valid then
-			create_left_relative_gui(player)
-			create_top_relative_gui(player)
-		end
-	end
 end
 M.on_configuration_changed = update_global_data
 M.add_remote_interface = add_remote_interface
