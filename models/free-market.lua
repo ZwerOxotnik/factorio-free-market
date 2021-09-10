@@ -846,6 +846,7 @@ end
 local function set_sell_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
+	if not entity.operable then return end
 	if not ALLOWED_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end
 
@@ -889,6 +890,7 @@ end
 local function set_buy_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
+	if not entity.operable then return end
 	if not ALLOWED_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end
 
