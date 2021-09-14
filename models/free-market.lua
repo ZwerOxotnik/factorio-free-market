@@ -713,6 +713,9 @@ local bold_font_color = {255, 230, 192}
 local top_anchor = {gui = defines.relative_gui_type.container_gui, position = defines.relative_gui_position.top}
 local function create_top_relative_gui(player)
 	local relative = player.gui.relative
+	if relative.FM_boxes_frame then
+		relative.FM_boxes_frame.destroy()
+	end
 	local main_frame = relative.add{type = "frame", name = "FM_boxes_frame", anchor = top_anchor}
 	main_frame.style.vertical_align = "center"
 	main_frame.style.horizontally_stretchable = false
@@ -728,6 +731,9 @@ end
 local left_anchor = {gui = defines.relative_gui_type.controller_gui, position = defines.relative_gui_position.left}
 local function create_left_relative_gui(player)
 	local relative = player.gui.relative
+	if relative.FM_buttons then
+		relative.FM_buttons.destroy()
+	end
 	local main_table = relative.add{type = "table", name = "FM_buttons", anchor = left_anchor, column_count = 2}
 	main_table.style.vertical_align = "center"
 	main_table.style.horizontal_spacing = 0
