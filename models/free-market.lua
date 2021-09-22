@@ -830,7 +830,7 @@ local function on_forces_merging(event)
 	for _, id in pairs(rendering.get_all_ids()) do
 		if is_valid(id) then
 			local entity = get_target(id).entity
-			if entity.force == source then
+			if not (entity and entity.valid) or entity.force == source then
 				all_boxes[entity.unit_number] = nil
 				destroy(id)
 			end
