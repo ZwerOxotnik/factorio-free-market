@@ -227,8 +227,11 @@ local function clear_invalid_sell_boxes_data()
 				else
 					for i=#entities, 1, -1 do
 						if entities[i].valid == false then
-							remove(entities[i], i)
+							remove(entities, i)
 						end
+					end
+					if #entities == 0 then
+						data[item_name] = nil
 					end
 				end
 			end
@@ -251,10 +254,13 @@ local function clear_invalid_buy_boxes_data()
 				else
 					for i=#entities, 1, -1 do
 						if entities[i][1].valid == false then
-							remove(entities[i], i)
+							remove(entities, i)
 						elseif not entities[i][2] then
-							remove(entities[i], i)
+							remove(entities, i)
 						end
+					end
+					if #entities == 0 then
+						data[item_name] = nil
 					end
 				end
 			end
