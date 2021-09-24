@@ -759,7 +759,7 @@ local function create_left_relative_gui(player)
 	table.add{type = "sprite-button", sprite = "FM_change-price", style="slot_button", name = "FM_change-price"}
 	table.add{type = "sprite-button", sprite = "FM_see-prices", style="slot_button", name = "FM_see-prices"}
 	table.add{type = "sprite-button", sprite = "FM_embargo", style="slot_button", name = "FM_embargo"}
-	table.add{type = "sprite-button", style = "slot_button"}
+	table.add{type = "sprite-button", sprite = "info", style = "slot_button", name = "FM_show_hint"}
 end
 
 --#endregion
@@ -1277,6 +1277,9 @@ local GUIS = {
 	["FM_embargo"] = function(element, player)
 		open_embargo_gui(player)
 	end,
+	["FM_show_hint"] = function(element, player)
+		player.print({"free-market.hint"})
+	end,
 	FM_hide_left_buttons = function(element, player)
 		element.name = "FM_show_left_buttons"
 		element.caption = '<'
@@ -1454,7 +1457,7 @@ local mod_settings = {
 	end
 }
 local function on_runtime_mod_setting_changed(event)
-	if event.setting_type ~= "runtime-global" then return end
+	-- if event.setting_type ~= "runtime-global" then return end
 	if not match(event.setting, "^FM_") then return end
 
 	local f = mod_settings[event.setting]
@@ -1568,6 +1571,22 @@ local function update_global_data()
 	embargoes[index] = embargoes[index] or {}
 end
 
+local function on_configuration_changed(event)
+	local mod_changes = event.mod_changes["free-market"]
+	if not (mod_changes and mod_changes.old_version) then return end
+
+	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
+
+	update_global_data()
+
+	if version < 0.11 then
+		for _, player in pairs(game.players) do
+			if player.valid then
+				create_left_relative_gui(player)
+			end
+		end
+	end
+end
 
 M.on_load = function ()
 	link_data()
@@ -1577,7 +1596,7 @@ M.on_init = function()
 	update_global_data()
 	set_filters()
 end
-M.on_configuration_changed = update_global_data
+M.on_configuration_changed = on_configuration_changed
 M.add_remote_interface = add_remote_interface
 
 --#endregion
