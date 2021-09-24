@@ -1572,12 +1572,12 @@ local function update_global_data()
 end
 
 local function on_configuration_changed(event)
+	update_global_data()
+
 	local mod_changes = event.mod_changes["free-market"]
 	if not (mod_changes and mod_changes.old_version) then return end
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
-
-	update_global_data()
 
 	if version < 0.11 then
 		for _, player in pairs(game.players) do
