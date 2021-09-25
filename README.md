@@ -3,13 +3,13 @@
 
 ---
 
-<p align="center">
+<!-- <p align="center">
   <img
     width="144"
     src="thumbnail.png"
-    alt="Example mod"
+    alt="thumbnail.png"
   />
-</p>
+</p> -->
 
 <p align="center">
   <a href="https://github.com/ZwerOxotnik/factorio-free-market/tags">
