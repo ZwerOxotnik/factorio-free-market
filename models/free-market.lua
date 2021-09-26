@@ -28,12 +28,16 @@ local active_forces
 local floor = math.floor
 local remove = table.remove
 local match = string.match
+local sub = string.sub
 local call = remote.call
+local draw_text = rendering.draw_text
 local CHECK_FORCES_TICK = 3600
 local WHITE_COLOR = {1, 1, 1}
 local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
 local TEXT_OFFSET = {0, 0.3}
+local BUYING_TEXT = {"free-market.buying"}
+local SELLING_TEXT = {"free-market.selling"}
 local EMPTY_WIDGET = {type = "empty-widget"}
 local ALLOWED_TYPES = {["container"] = true, ["logistic-container"] = true}
 local TITLEBAR_FLOW = {type = "flow", style = "flib_titlebar_flow"}
@@ -197,6 +201,61 @@ local function clear_invalid_embargoes()
 	end
 end
 
+---@param item_name string
+---@param player PlayerIdentification
+---@param entity LuaEntity
+local function set_sell_box_data(item_name, player, entity)
+	local force_sell_boxes = sell_boxes[player.force.index]
+	force_sell_boxes[item_name] = force_sell_boxes[item_name] or {}
+	table.insert(force_sell_boxes[item_name], entity)
+	local text_data = {
+		text = SELLING_TEXT,
+		vertical_alignment = "middle",
+		surface = player.surface,
+		scale_with_zoom = false,
+		only_in_alt_mode = true,
+		alignment = "center",
+		color = GREEN_COLOR,
+		target = entity,
+		target_offset = TEXT_OFFSET,
+		scale = 0.7,
+	}
+	if is_public_titles == false then
+		text_data.forces = {player.force}
+	end
+	local id = draw_text(text_data)
+	all_boxes[entity.unit_number] = {entity, id}
+end
+
+---@param item_name string
+---@param player PlayerIdentification
+---@param entity LuaEntity
+---@param count? number
+local function set_buy_box_data(item_name, player, entity, count)
+	count = count or game.item_prototypes[item_name].stack_size
+
+	local force_buy_boxes = buy_boxes[player.force.index]
+	force_buy_boxes[item_name] = force_buy_boxes[item_name] or {}
+	table.insert(force_buy_boxes[item_name], {entity, count})
+	local text_data = {
+		text = BUYING_TEXT,
+		vertical_alignment = "middle",
+		surface = player.surface,
+		scale_with_zoom = false,
+		only_in_alt_mode = true,
+		alignment = "center",
+		color = RED_COLOR,
+		target = entity,
+		target_offset = TEXT_OFFSET,
+		scale = 0.7,
+	}
+	if is_public_titles == false then
+		text_data.forces = {player.force}
+	end
+	local id = draw_text(text_data)
+	all_boxes[entity.unit_number] = {entity, id}
+end
+
 local function clear_invalid_prices(prices)
 	for index, forces_data in pairs(prices) do
 		if game.forces[index] == nil then
@@ -339,9 +398,11 @@ local function make_price_list_header(table)
 	end
 end
 
-local function update_prices_table(player, item_name, table)
-	table.clear()
-	make_prices_header(table)
+---@param player PlayerIdentification
+---@param item_name string
+local function update_prices_table(player, item_name, table_element)
+	table_element.clear()
+	make_prices_header(table_element)
 	local force = player.force
 	local result = {}
 	for name, _force in pairs(game.forces) do
@@ -372,11 +433,11 @@ local function update_prices_table(player, item_name, table)
 	for _, data in pairs(result) do
 		if data.buy_price or data.sell_price then
 			label.caption = data.name
-			table.add(label)
+			table_element.add(label)
 			label.caption = (data.buy_price or '')
-			table.add(label)
+			table_element.add(label)
 			label.caption = (data.sell_price or '')
-			table.add(label)
+			table_element.add(label)
 		end
 	end
 end
@@ -389,9 +450,9 @@ local function update_price_list_table(force, table)
 	local f_sell_prices = sell_prices[force_index] or {}
 
 	local label = {type = "label"}
-	local button = {type = "choose-elem-button", elem_type = "item", ignored_by_interaction = true}
+	local button = {type = "sprite-button"}
 	for item_name, buy_price in pairs(f_buy_prices) do
-		table.add(button).elem_value = item_name
+		table.add(button).sprite = "item/" .. item_name
 		label.caption = buy_price
 		table.add(label)
 		label.caption = (f_sell_prices[item_name] or '')
@@ -401,7 +462,7 @@ local function update_price_list_table(force, table)
 	local empty_label = {type = "label"}
 	for item_name, sell_price in pairs(f_sell_prices) do
 		if f_buy_prices[item_name] == nil then
-			table.add(button).elem_value = item_name
+			table.add(button).sprite = "item/" .. item_name
 			table.add(empty_label)
 			label.caption = sell_price
 			table.add(label)
@@ -485,7 +546,9 @@ local function open_embargo_gui(player)
 	main_frame.force_auto_center()
 end
 
-local function open_prices_gui(player)
+---@param player PlayerIdentification
+---@param item_name? string
+local function open_prices_gui(player, item_name)
 	local screen = player.gui.screen
 	if screen.FM_prices_frame then
 		screen.FM_prices_frame.destroy()
@@ -514,10 +577,17 @@ local function open_prices_gui(player)
 	-- row.style.column_alignments[4] = "right"
 	-- row.style.column_alignments[5] = "right"
 	-- row.style.column_alignments[6] = "right"
-	row.add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item"}
+	local item = row.add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item"}
+	item.elem_value = item_name
 	row.add{type = "label", caption = {"free-market.buy-gui"}}
 	local buy_textfield = row.add{type = "textfield", name = "buy_price", numeric = true, allow_decimal = false, allow_negative = false}
 	buy_textfield.style.width = 70
+	if item_name then
+		local price = buy_prices[player.force.index][item_name]
+		if price then
+			buy_textfield.text = tostring(price)
+		end
+	end
 	row.add{
 		type = "sprite-button",
 		name = "FM_confirm_buy_price",
@@ -527,6 +597,12 @@ local function open_prices_gui(player)
 	row.add{type = "label", caption = {"free-market.sell-gui"}}
 	local sell_textfield = row.add{type = "textfield", name = "sell_price", numeric = true, allow_decimal = false, allow_negative = false}
 	sell_textfield.style.width = 70
+	if item_name then
+		local price = sell_prices[player.force.index][item_name]
+		if price then
+			sell_textfield.text = tostring(price)
+		end
+	end
 	row.add{
 		type = "sprite-button",
 		name = "FM_confirm_sell_price",
@@ -549,8 +625,13 @@ local function open_prices_gui(player)
 	prices_table.style.column_alignments[3] = "center"
 	prices_table.draw_horizontal_lines = true
 	prices_table.draw_vertical_lines = true
-	make_prices_header(prices_table)
+	if item_name then
+		update_prices_table(player, item_name, prices_table)
+	else
+		make_prices_header(prices_table)
+	end
 	main_frame.force_auto_center()
+	return content
 end
 
 local function open_price_list_gui(player)
@@ -609,7 +690,7 @@ local function open_price_list_gui(player)
 	main_frame.force_auto_center()
 end
 
----@param player LuaPlayer
+---@param player PlayerIdentification
 ---@param is_new boolean# Is new buy box?
 ---@param entity? LuaEntity # The buy box when is_new = true
 local function open_buy_box_gui(player, is_new, entity)
@@ -630,8 +711,8 @@ local function open_buy_box_gui(player, is_new, entity)
 	}
 	flow.add(DRAG_HANDLER).drag_target = main_frame
 	flow.add(CLOSE_BUTTON)
-	local shallow_frame = main_frame.add{type = "frame", style = "inside_shallow_frame", direction = "vertical"}
-	local row = shallow_frame.add{type = "table", column_count = 4}
+	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
+	local row = shallow_frame.add{type = "table", name = "content_row", column_count = 4}
 	row.style.padding = 12
 	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item"}
 	row.add{type = "label", caption = {'', {"free-market.count-gui"}, {"colon"}}}
@@ -665,7 +746,7 @@ local function destroy_boxes_gui(player)
 	open_box[player.index] = nil
 end
 
----@param player LuaPlayer
+---@param player PlayerIdentification
 ---@param is_new boolean # Is new sell box?
 ---@param entity? LuaEntity # The sell box when is_new = true
 local function open_sell_box_gui(player, is_new, entity)
@@ -874,29 +955,7 @@ local function set_sell_box_key_pressed(event)
 		return
 	end
 
-	-- TODO: refactor
-	local item_name = item.name
-
-	local force_sell_boxes = sell_boxes[player.force.index]
-	force_sell_boxes[item_name] = force_sell_boxes[item_name] or {}
-	table.insert(force_sell_boxes[item_name], entity)
-	local text_data = {
-		text = {"free-market.selling"},
-		vertical_alignment = "middle",
-		surface = player.surface,
-		scale_with_zoom = false,
-		only_in_alt_mode = true,
-		alignment = "center",
-		color = GREEN_COLOR,
-		target = entity,
-		target_offset = TEXT_OFFSET,
-		scale = 0.7,
-	}
-	if is_public_titles == false then
-		text_data.forces = {player.force}
-	end
-	local id = rendering.draw_text(text_data)
-	all_boxes[entity.unit_number] = {entity, id}
+	set_sell_box_data(item.name, player, entity)
 end
 
 local function set_buy_box_key_pressed(event)
@@ -918,30 +977,7 @@ local function set_buy_box_key_pressed(event)
 		return
 	end
 
-	-- TODO: refactor
-	local item_name = item.name
-	local stack_size = game.item_prototypes[item_name].stack_size
-
-	local force_buy_boxes = buy_boxes[player.force.index]
-	force_buy_boxes[item_name] = force_buy_boxes[item_name] or {}
-	table.insert(force_buy_boxes[item_name], {entity, stack_size})
-	local text_data = {
-		text = {"free-market.buying"},
-		vertical_alignment = "middle",
-		surface = player.surface,
-		scale_with_zoom = false,
-		only_in_alt_mode = true,
-		alignment = "center",
-		color = RED_COLOR,
-		target = entity,
-		target_offset = TEXT_OFFSET,
-		scale = 0.7,
-	}
-	if is_public_titles == false then
-		text_data.forces = {player.force}
-	end
-	local id = rendering.draw_text(text_data)
-	all_boxes[entity.unit_number] = {entity, id}
+	set_buy_box_data(item.name, player, entity)
 end
 
 local function on_gui_elem_changed(event)
@@ -1010,69 +1046,71 @@ local GUIS = {
 		local player_index = player.index
 		local entity = open_box[player_index]
 		if entity then
-			local stack_size = game.item_prototypes[item_name].stack_size
 			local inventory_size = #entity.get_inventory(defines.inventory.chest)
-			local max_count = stack_size * inventory_size
+			local max_count = game.item_prototypes[item_name].stack_size * inventory_size
 			if count > max_count then
 				player.print({"gui-map-generator.invalid-value-for-field", count, 1, max_count})
 				element.parent.count.text = tostring(max_count)
 				return
 			end
 
-			local force_buy_boxes = buy_boxes[player.force.index]
-			force_buy_boxes[item_name] = force_buy_boxes[item_name] or {}
-			table.insert(force_buy_boxes[item_name], {entity, count})
-			local text_data = {
-				text = {"free-market.buying"},
-				vertical_alignment = "middle",
-				surface = player.surface,
-				scale_with_zoom = false,
-				only_in_alt_mode = true,
-				alignment = "center",
-				color = RED_COLOR,
-				target = entity,
-				target_offset = TEXT_OFFSET,
-				scale = 0.7,
-			}
-			if is_public_titles == false then
-				text_data.forces = {player.force}
+			set_buy_box_data(item_name, player, entity, count)
+
+			-- TODO: refactor
+			local force_index = player.force.index
+			if buy_prices[force_index][item_name] == nil then
+				local prices_frame = player.gui.screen.FM_prices_frame
+				local content_flow
+				if prices_frame == nil then
+					content_flow = open_prices_gui(player, item_name)
+					prices_frame = player.gui.screen.FM_prices_frame
+				else
+					content_flow = prices_frame.shallow_frame.content_flow
+					content_flow.row.FM_prices_item.elem_value = item_name
+					local sell_price = sell_prices[force_index][item_name]
+					if sell_price then
+						content_flow.row.sell_price.text = tostring(sell_price)
+					end
+					update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+				end
+				content_flow.row.buy_price.focus()
 			end
-			local id = rendering.draw_text(text_data)
-			all_boxes[entity.unit_number] = {entity, id}
+		else
+			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
 		open_box[player_index] = nil
 		player.gui.screen.FM_buy_box_frame.destroy()
 	end,
 	FM_confirm_sell_box = function(element, player)
-		local item = element.parent.FM_item.elem_value
-		if not item then
+		local item_name = element.parent.FM_item.elem_value
+		if not item_name then
 			player.print({"multiplayer.no-address", {"item"}})
 			return
 		end
 
 		local player_index = player.index
+
 		local entity = open_box[player_index]
 		if entity then
-			local force_sell_boxes = sell_boxes[player.force.index]
-			force_sell_boxes[item] = force_sell_boxes[item] or {}
-			table.insert(force_sell_boxes[item], entity)
-			local text_data = {
-				text = {"free-market.selling"},
-				vertical_alignment = "middle",
-				surface = player.surface,
-				scale_with_zoom = false,
-				only_in_alt_mode = true,
-				alignment = "center",
-				color = GREEN_COLOR,
-				target = entity,
-				target_offset = TEXT_OFFSET,
-				scale = 0.7,
-			}
-			if is_public_titles == false then
-				text_data.forces = {player.force}
+			set_sell_box_data(item_name, player, entity)
+			local force_index = player.force.index
+			if sell_prices[force_index][item_name] == nil then
+				local prices_frame = player.gui.screen.FM_prices_frame
+				local content_flow
+				if prices_frame == nil then
+					content_flow = open_prices_gui(player, item_name)
+					prices_frame = player.gui.screen.FM_prices_frame
+				else
+					content_flow = prices_frame.shallow_frame.content_flow
+					content_flow.row.FM_prices_item.elem_value = item_name
+					local buy_price = buy_prices[force_index][item_name]
+					if buy_price then
+						content_flow.row.buy_price.text = tostring(buy_price)
+					end
+					update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+				end
+				content_flow.row.sell_price.focus()
 			end
-			local id = rendering.draw_text(text_data)
-			all_boxes[entity.unit_number] = {entity, id}
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
@@ -1211,7 +1249,31 @@ local GUIS = {
 				player.print({"free-market.this-is-buy-box"})
 				return
 			else
-				open_sell_box_gui(player, true)
+				local item = entity.get_inventory(defines.inventory.chest)[1]
+				if not item.valid_for_read then
+					open_sell_box_gui(player, true)
+				else
+					local item_name = item.name
+					set_sell_box_data(item_name, player, entity)
+					local force_index = player.force.index
+					if sell_prices[force_index][item_name] == nil then
+						local prices_frame = player.gui.screen.FM_prices_frame
+						local content_flow
+						if prices_frame == nil then
+							content_flow = open_prices_gui(player, item_name)
+							prices_frame = player.gui.screen.FM_prices_frame
+						else
+							content_flow = prices_frame.shallow_frame.content_flow
+							content_flow.row.FM_prices_item.elem_value = item_name
+							local buy_price = buy_prices[force_index][item_name]
+							if buy_price then
+								content_flow.row.buy_price.text = tostring(buy_price)
+							end
+							update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+						end
+						content_flow.row.sell_price.focus()
+					end
+				end
 			end
 			open_box[player.index] = entity
 		end
@@ -1231,7 +1293,36 @@ local GUIS = {
 				player.print({"free-market.this-is-sell-box"})
 				return
 			else
-				open_buy_box_gui(player, true)
+				local item = entity.get_inventory(defines.inventory.chest)[1]
+				if not item.valid_for_read then
+					open_buy_box_gui(player, true)
+				else
+					open_buy_box_gui(player, true)
+					local content_row = player.gui.screen.FM_buy_box_frame.shallow_frame.content_row
+					local item_name = item.name
+					content_row.FM_item.elem_value = item_name
+					content_row.count.text = tostring(game.item_prototypes[item_name].stack_size)
+
+					-- TODO: refactor
+					local force_index = player.force.index
+					if buy_prices[force_index][item_name] == nil then
+						local prices_frame = player.gui.screen.FM_prices_frame
+						local content_flow
+						if prices_frame == nil then
+							content_flow = open_prices_gui(player, item_name)
+							prices_frame = player.gui.screen.FM_prices_frame
+						else
+							content_flow = prices_frame.shallow_frame.content_flow
+							content_flow.row.FM_prices_item.elem_value = item_name
+							local sell_price = sell_prices[force_index][item_name]
+							if sell_price then
+								content_flow.row.sell_price.text = tostring(sell_price)
+							end
+							update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+						end
+						content_flow.row.buy_price.focus()
+					end
+				end
 			end
 			open_box[player.index] = entity
 		end
@@ -1294,10 +1385,28 @@ local GUIS = {
 local function on_gui_click(event)
 	local player = game.get_player(event.player_index)
 	local element = event.element
-	if not match(element.name, "^FM_") then return end
-
-	local f = GUIS[element.name]
-	if f then f(element, player) end
+	if element.name == '' then
+		if element.parent.name == "price_list_table" then
+			local item_name = sub(element.sprite, 6)
+			local force_index = player.force.index
+			local prices_frame = player.gui.screen.FM_prices_frame
+			if prices_frame == nil then
+				open_prices_gui(player, item_name)
+			else
+				local content_flow = prices_frame.shallow_frame.content_flow
+				content_flow.row.FM_prices_item.elem_value = item_name
+				local sell_price = sell_prices[force_index][item_name]
+				content_flow.row.sell_price.text = tostring(sell_price or '')
+				local buy_price = buy_prices[force_index][item_name]
+				content_flow.row.buy_price.text = tostring(buy_price or '')
+				update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+			end
+		end
+		return
+	elseif match(element.name, "^FM_") then
+		local f = GUIS[element.name]
+		if f then f(element, player) end
+	end
 end
 
 local function check_buy_boxes()
