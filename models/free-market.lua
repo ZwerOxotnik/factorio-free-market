@@ -1407,23 +1407,22 @@ local function on_gui_click(event)
 end
 
 local function check_buy_boxes()
-	next(active_forces, mod_data.last_buyer_index)
-	-- local force_index = mod_data.last_buyer_index
-	-- for _, index in pairs(active_forces) do
-	-- 	if index > force_index then
-	-- 		force_index = index
-	-- 		break
-	-- 	end
-	-- end
+	local force_index = mod_data.last_buyer_index
+	for _, index in pairs(active_forces) do
+		if index > force_index then
+			force_index = index
+			break
+		end
+	end
 
-	-- if force_index ~= mod_data.last_buyer_index then
-	-- 	mod_data.last_buyer_index = force_index
-	-- elseif force_index == 1 then
-	-- 	return
-	-- else
-	-- 	force_index = 1
-	-- 	mod_data.last_buyer_index = 1
-	-- end
+	if force_index ~= mod_data.last_buyer_index then
+		mod_data.last_buyer_index = force_index
+	elseif force_index == 1 then
+		return
+	else
+		force_index = 1
+		mod_data.last_buyer_index = 1
+	end
 
 	local forces_money = call("EasyAPI", "get_forces_money")
 	local forces_money_copy = {}

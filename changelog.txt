@@ -1,4 +1,9 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.12.2
+Date: 2021-09-26
+  Bugfixes:
+    - Fixed check of buy boxes (bug from v0.12.0)
+---------------------------------------------------------------------------------------------------
 Version: 0.12.1
 Date: 2021-09-26
   Changes:
@@ -15,8 +20,8 @@ Date: 2021-09-26
 Version: 0.11.1
 Date: 2021-09-24
   Bugfixes:
-    - Fixed check of prototypes (bug from 0.11.0)
-    - Fixed Russian localization (bug from 0.11.0)
+    - Fixed check of prototypes (bug from v0.11.0)
+    - Fixed Russian localization (bug from v0.11.0)
 ---------------------------------------------------------------------------------------------------
 Version: 0.11.0
 Date: 2021-09-24
