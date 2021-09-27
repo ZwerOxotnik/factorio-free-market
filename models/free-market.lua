@@ -85,6 +85,8 @@ local function find_sell_box_data_by_item_name(entity, item_name)
 	end
 end
 
+---@param entity LuaEntity
+---@return string? #item name
 local function find_sell_box_data(entity)
 	for item_name, data in pairs(sell_boxes[entity.force.index]) do
 		for _, _entity in pairs(data) do
@@ -95,6 +97,9 @@ local function find_sell_box_data(entity)
 	end
 end
 
+---@param entity LuaEntity
+---@return string? #item name
+---@return number? #count
 local function find_buy_box_data(entity)
 	for item_name, entities in pairs(buy_boxes[entity.force.index]) do
 		for _, buy_box in pairs(entities) do
@@ -148,6 +153,8 @@ local function change_count_in_buy_box_data(entity, item_name, count)
 	end
 end
 
+---@param entity LuaEntity
+---@return boolean?
 local function find_clear_sell_box_data(entity)
 	for _, data in pairs(sell_boxes[entity.force.index]) do
 		for k, _entity in pairs(data) do
@@ -159,6 +166,8 @@ local function find_clear_sell_box_data(entity)
 	end
 end
 
+---@param entity LuaEntity
+---@return boolean?
 local function find_clear_buy_box_data(entity)
 	for _, entities in pairs(buy_boxes[entity.force.index]) do
 		for k, buy_box in pairs(entities) do
@@ -170,6 +179,7 @@ local function find_clear_buy_box_data(entity)
 	end
 end
 
+---@param entity LuaEntity
 ---@return boolean
 local function find_clear_box_data(entity)
 	if find_clear_sell_box_data(entity) then
@@ -940,9 +950,49 @@ local function set_sell_box_key_pressed(event)
 	if not ALLOWED_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end
 
-	if find_sell_box_data(entity) then
+	local force_index = player.force.index
+	local item_name = find_sell_box_data(entity)
+	if item_name then
+		-- TODO: refactor
+		if sell_prices[force_index][item_name] == nil then
+			local prices_frame = player.gui.screen.FM_prices_frame
+			local content_flow
+			if prices_frame == nil then
+				content_flow = open_prices_gui(player, item_name)
+				prices_frame = player.gui.screen.FM_prices_frame
+			else
+				content_flow = prices_frame.shallow_frame.content_flow
+				content_flow.row.FM_prices_item.elem_value = item_name
+				local buy_price = buy_prices[force_index][item_name]
+				if buy_price then
+					content_flow.row.buy_price.text = tostring(buy_price)
+				end
+				update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+			end
+			content_flow.row.sell_price.focus()
+		end
 		return
-	elseif find_buy_box_data(entity) then
+	end
+	item_name = find_buy_box_data(entity)
+	if item_name then
+		-- TODO: refactor
+		if buy_prices[force_index][item_name] == nil then
+			local prices_frame = player.gui.screen.FM_prices_frame
+			local content_flow
+			if prices_frame == nil then
+				content_flow = open_prices_gui(player, item_name)
+				prices_frame = player.gui.screen.FM_prices_frame
+			else
+				content_flow = prices_frame.shallow_frame.content_flow
+				content_flow.row.FM_prices_item.elem_value = item_name
+				local sell_price = sell_prices[force_index][item_name]
+				if sell_price then
+					content_flow.row.sell_price.text = tostring(sell_price)
+				end
+				update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+			end
+			content_flow.row.buy_price.focus()
+		end
 		return
 	end
 
@@ -962,9 +1012,49 @@ local function set_buy_box_key_pressed(event)
 	if not ALLOWED_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end
 
-	if find_sell_box_data(entity) then
+	local force_index = player.force.index
+	local item_name = find_sell_box_data(entity)
+	if item_name then
+		-- TODO: refactor
+		if sell_prices[force_index][item_name] == nil then
+			local prices_frame = player.gui.screen.FM_prices_frame
+			local content_flow
+			if prices_frame == nil then
+				content_flow = open_prices_gui(player, item_name)
+				prices_frame = player.gui.screen.FM_prices_frame
+			else
+				content_flow = prices_frame.shallow_frame.content_flow
+				content_flow.row.FM_prices_item.elem_value = item_name
+				local buy_price = buy_prices[force_index][item_name]
+				if buy_price then
+					content_flow.row.buy_price.text = tostring(buy_price)
+				end
+				update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+			end
+			content_flow.row.sell_price.focus()
+		end
 		return
-	elseif find_buy_box_data(entity) then
+	end
+	item_name = find_buy_box_data(entity)
+	if item_name then
+		-- TODO: refactor
+		if buy_prices[force_index][item_name] == nil then
+			local prices_frame = player.gui.screen.FM_prices_frame
+			local content_flow
+			if prices_frame == nil then
+				content_flow = open_prices_gui(player, item_name)
+				prices_frame = player.gui.screen.FM_prices_frame
+			else
+				content_flow = prices_frame.shallow_frame.content_flow
+				content_flow.row.FM_prices_item.elem_value = item_name
+				local sell_price = sell_prices[force_index][item_name]
+				if sell_price then
+					content_flow.row.sell_price.text = tostring(sell_price)
+				end
+				update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+			end
+			content_flow.row.buy_price.focus()
+		end
 		return
 	end
 
