@@ -27,7 +27,6 @@ local active_forces
 --#region Constants
 local floor = math.floor
 local remove = table.remove
-local find = string.find
 local sub = string.sub
 local call = remote.call
 local draw_text = rendering.draw_text
@@ -1045,8 +1044,6 @@ end
 
 local function on_gui_elem_changed(event)
 	local element = event.element
-	if not find(element.name, "^FM_") then return end
-
 	if element.name ~= "FM_prices_item" then return end
 
 	local player = game.get_player(event.player_index)
@@ -1069,8 +1066,6 @@ end
 
 local function on_gui_selection_state_changed(event)
 	local element = event.element
-	if not find(element.name, "^FM_") then return end
-
 	if element.name ~= "FM_force_price_list" then return end
 
 	local parent = element.parent
@@ -1413,7 +1408,7 @@ local function on_gui_click(event)
 			end
 		end
 		return
-	elseif find(element.name, "^FM_") then
+	else
 		local f = GUIS[element.name]
 		if f then f(element, player) end
 	end
@@ -1577,8 +1572,6 @@ local mod_settings = {
 }
 local function on_runtime_mod_setting_changed(event)
 	-- if event.setting_type ~= "runtime-global" then return end
-	if not find(event.setting, "^FM_") then return end
-
 	local f = mod_settings[event.setting]
 	if f then f(settings.global[event.setting].value) end
 end
