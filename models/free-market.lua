@@ -1082,6 +1082,24 @@ end
 
 
 local GUIS = {
+	[''] = function(element, player)
+		if element.parent.name ~= "price_list_table" then return end
+
+		local item_name = sub(element.sprite, 6)
+		local force_index = player.force.index
+		local prices_frame = player.gui.screen.FM_prices_frame
+		if prices_frame == nil then
+			open_prices_gui(player, item_name)
+		else
+			local content_flow = prices_frame.shallow_frame.content_flow
+			content_flow.row.FM_prices_item.elem_value = item_name
+			local sell_price = sell_prices[force_index][item_name]
+			content_flow.row.sell_price.text = tostring(sell_price or '')
+			local buy_price = buy_prices[force_index][item_name]
+			content_flow.row.buy_price.text = tostring(buy_price or '')
+			update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+		end
+	end,
 	FM_close = function(element)
 		element.parent.parent.destroy()
 	end,
@@ -1388,30 +1406,9 @@ local GUIS = {
 	end
 }
 local function on_gui_click(event)
-	local player = game.get_player(event.player_index)
 	local element = event.element
-	if element.name == '' then
-		if element.parent.name == "price_list_table" then
-			local item_name = sub(element.sprite, 6)
-			local force_index = player.force.index
-			local prices_frame = player.gui.screen.FM_prices_frame
-			if prices_frame == nil then
-				open_prices_gui(player, item_name)
-			else
-				local content_flow = prices_frame.shallow_frame.content_flow
-				content_flow.row.FM_prices_item.elem_value = item_name
-				local sell_price = sell_prices[force_index][item_name]
-				content_flow.row.sell_price.text = tostring(sell_price or '')
-				local buy_price = buy_prices[force_index][item_name]
-				content_flow.row.buy_price.text = tostring(buy_price or '')
-				update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
-			end
-		end
-		return
-	else
-		local f = GUIS[element.name]
-		if f then f(element, player) end
-	end
+	local f = GUIS[element.name]
+	if f then f(element, game.get_player(event.player_index)) end
 end
 
 local function check_buy_boxes()
