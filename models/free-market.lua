@@ -1406,9 +1406,8 @@ local GUIS = {
 	end
 }
 local function on_gui_click(event)
-	local element = event.element
-	local f = GUIS[element.name]
-	if f then f(element, game.get_player(event.player_index)) end
+	local f = GUIS[event.element.name]
+	if f then f(event.element, game.get_player(event.player_index)) end
 end
 
 local function check_buy_boxes()
