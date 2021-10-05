@@ -29,6 +29,7 @@ local floor = math.floor
 local remove = table.remove
 local sub = string.sub
 local call = remote.call
+local insert = table.insert
 local draw_text = rendering.draw_text
 local CHECK_FORCES_TICK = 3600
 local WHITE_COLOR = {1, 1, 1}
@@ -63,12 +64,6 @@ local is_public_titles = settings.global["FM_is-public-titles"].value
 
 
 --#region utils
-
----@param t? table
----@return boolean
-local function is_empty(t)
-	return next(t) == nil
-end
 
 ---@param entity LuaEntity
 ---@param item_name string
@@ -152,55 +147,16 @@ local function change_count_in_buy_box_data(entity, item_name, count)
 	end
 end
 
----@param entity LuaEntity
----@return boolean?
-local function find_clear_sell_box_data(entity)
-	for _, data in pairs(sell_boxes[entity.force.index]) do
-		for k, _entity in pairs(data) do
-			if _entity == entity then
-				remove(data, k)
-				return true
-			end
-		end
-	end
-end
-
----@param entity LuaEntity
----@return boolean?
-local function find_clear_buy_box_data(entity)
-	for _, entities in pairs(buy_boxes[entity.force.index]) do
-		for k, buy_box in pairs(entities) do
-			if buy_box[1] == entity then
-				remove(entities, k)
-				return true
-			end
-		end
-	end
-end
-
----@param entity LuaEntity
----@return boolean
-local function find_clear_box_data(entity)
-	if find_clear_sell_box_data(entity) then
-		return true
-	elseif find_clear_buy_box_data(entity) then
-		return true
-	else
-		return false
-	end
-end
-
 local function clear_invalid_embargoes()
+	local forces = game.forces
 	for index in pairs(embargoes) do
-		if game.forces[index] == nil then
+		if forces[index] == nil then
 			embargoes[index] = nil
 		end
 	end
 	for _, forces_data in pairs(embargoes) do
 		for index in pairs(forces_data) do
-			if type(index) == "table" then -- TODO: change this
-				forces_data[index] = nil
-			elseif game.forces[index] == nil then
+			if forces[index] == nil then
 				forces_data[index] = nil
 			end
 		end
@@ -213,7 +169,8 @@ end
 local function set_sell_box_data(item_name, player, entity)
 	local force_sell_boxes = sell_boxes[player.force.index]
 	force_sell_boxes[item_name] = force_sell_boxes[item_name] or {}
-	table.insert(force_sell_boxes[item_name], entity)
+	local items = force_sell_boxes[item_name]
+	items[#items+1] = entity
 	local text_data = {
 		text = SELLING_TEXT,
 		vertical_alignment = "middle",
@@ -230,7 +187,7 @@ local function set_sell_box_data(item_name, player, entity)
 		text_data.forces = {player.force}
 	end
 	local id = draw_text(text_data)
-	all_boxes[entity.unit_number] = {entity, id}
+	all_boxes[entity.unit_number] = {entity, id, nil, items}
 end
 
 ---@param item_name string
@@ -242,7 +199,8 @@ local function set_buy_box_data(item_name, player, entity, count)
 
 	local force_buy_boxes = buy_boxes[player.force.index]
 	force_buy_boxes[item_name] = force_buy_boxes[item_name] or {}
-	table.insert(force_buy_boxes[item_name], {entity, count})
+	local items = force_buy_boxes[item_name]
+	items[#items+1] = {entity, count}
 	local text_data = {
 		text = BUYING_TEXT,
 		vertical_alignment = "middle",
@@ -259,7 +217,7 @@ local function set_buy_box_data(item_name, player, entity, count)
 		text_data.forces = {player.force}
 	end
 	local id = draw_text(text_data)
-	all_boxes[entity.unit_number] = {entity, id}
+	all_boxes[entity.unit_number] = {entity, id, true, items}
 end
 
 local function clear_invalid_prices(prices)
@@ -338,11 +296,9 @@ local function clear_invalid_entities()
 	clear_invalid_buy_boxes_data()
 
 	for unit_number, data in pairs(all_boxes) do
-		if data[1].valid == false then
+		if not data[1].valid then
 			-- rendering.destroy(data[2])
 			all_boxes[unit_number] = nil
-		-- else
-				-- WIP
 		end
 	end
 end
@@ -532,7 +488,8 @@ local function open_embargo_gui(player)
 	main_frame.style.minimal_width = 340
 	main_frame.style.horizontally_stretchable = true
 	local flow = main_frame.add(TITLEBAR_FLOW)
-	flow.add{type = "label",
+	flow.add{
+		type = "label",
 		style = "frame_title",
 		caption = {"free-market.embargo-gui"},
 		ignored_by_interaction = true
@@ -563,13 +520,15 @@ local function open_prices_gui(player, item_name)
 	local main_frame = screen.add{type = "frame", name = "FM_prices_frame", direction = "vertical"}
 	main_frame.style.horizontally_stretchable = true
 	local flow = main_frame.add(TITLEBAR_FLOW)
-	flow.add{type = "label",
+	flow.add{
+		type = "label",
 		style = "frame_title",
 		caption = {"free-market.prices"},
 		ignored_by_interaction = true
 	}
 	flow.add(DRAG_HANDLER).drag_target = main_frame
-	flow.add{type = "sprite-button",
+	flow.add{
+		type = "sprite-button",
 		style = "frame_action_button",
 		sprite = "refresh_white_icon",
 		name = "FM_refresh_prices_table"
@@ -667,7 +626,7 @@ local function open_price_list_gui(player)
 		local force_index = force.index
 		local f_sell_prices = sell_prices[force_index]
 		local f_buy_prices = buy_prices[force_index]
-		if (f_sell_prices and not is_empty(f_sell_prices)) or (f_buy_prices and not is_empty(f_buy_prices)) then
+		if (f_sell_prices and next(f_sell_prices)) or (f_buy_prices and next(f_buy_prices)) then
 			size = size + 1
 			items[size] = force_name
 		end
@@ -734,7 +693,9 @@ local function open_buy_box_gui(player, is_new, entity)
 	else
 		confirm_button.name = "FM_change_buy_box"
 		local item_name, count = find_buy_box_data(entity)
-		count_element.text = tostring(count or '')
+		if count then
+			count_element.text = tostring(count)
+		end
 		FM_item.elem_value = item_name
 		row.add{type = "label", visible = false, name = "prev_item", caption = item_name}
 	end
@@ -905,8 +866,23 @@ local function clear_box_data(event)
 
 	local entity = event.entity
 	local unit_number = entity.unit_number
-	-- rendering.destroy(all_boxes[unit_number][2])
-	find_clear_box_data(entity)
+	local entity_data = all_boxes[unit_number]
+	if entity_data[3] then -- Is buying?
+		for k, buy_box in pairs(entity_data[4]) do
+			if buy_box[1] == entity then
+				remove(entity_data[4], k)
+				break
+			end
+		end
+	else
+		for k, _entity in pairs(entity_data[4]) do
+			if _entity == entity then
+				remove(entity_data[4], k)
+				break
+			end
+		end
+	end
+	-- rendering.destroy(entity_data[2])
 	all_boxes[unit_number] = nil
 end
 
@@ -1173,7 +1149,7 @@ local GUIS = {
 					if #force_sell_boxes[prev_item_name] then
 						force_sell_boxes[prev_item_name] = nil
 					end
-					table.insert(force_sell_boxes[item_name], entity)
+					insert(force_sell_boxes[item_name], entity)
 				else
 					player.print({"gui-train.invalid"})
 				end
@@ -1204,7 +1180,7 @@ local GUIS = {
 					local force_buy_boxes = buy_boxes[player.force.index]
 					force_buy_boxes[item_name] = force_buy_boxes[item_name] or {}
 					remove_certain_buy_box(entity, prev_item_name)
-					table.insert(force_buy_boxes[item_name], {entity, count})
+					insert(force_buy_boxes[item_name], {entity, count})
 				end
 			else
 				player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -1693,6 +1669,10 @@ local function on_configuration_changed(event)
 				create_left_relative_gui(player)
 			end
 		end
+	end
+
+	if version < 0.13 then
+		game.print({'', {"mod-name.free-market"}, {"colon"}, "[WARNING] this version doesn't migrate old data, please use older version <0.13.0"}, RED_COLOR)
 	end
 end
 
