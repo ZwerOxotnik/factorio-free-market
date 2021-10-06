@@ -12,6 +12,9 @@ local CONST_COMMANDS = require("__free-market__/const-commands")
 local SWITCHABLE_COMMANDS = require("__free-market__/switchable-commands")
 
 
+local find = string.find
+
+
 ---@param s string
 local function trim(s)
 	return s:match'^%s*(.*%S)' or ''
@@ -218,10 +221,11 @@ end
 
 ---@return boolean
 local function on_runtime_mod_setting_changed(event)
-	if event.setting_type ~= "runtime-global" then return end
-	local setting_name = event.setting
-	if string.find(setting_name, '^fm_') ~= 1 then return end
+	-- if event.setting_type ~= "runtime-global" then return end
+	if find(event.setting, '^fm_') ~= 1 then return end
 
+	local setting_name = event.setting
+	-- TODO: change
 	local command_name = string.gsub(setting_name, '^fm', "")
 	local func = find_func_by_command_name(command_name) -- WARNING: check this throughly!
 	if func == nil then

@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.14.0
+Date: 2021-10-06
+  Changes:
+    - Optimized some events
+    - Refactored
+  Notes:
+    - [WARNING] this version doesn't migrate old data, please use older version <0.14.0 if your save had been the mod already
+---------------------------------------------------------------------------------------------------
 Version: 0.13.0
 Date: 2021-10-05
   Changes:
