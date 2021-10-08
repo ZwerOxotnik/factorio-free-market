@@ -67,20 +67,6 @@ local is_public_titles = settings.global["FM_is-public-titles"].value
 
 ---@param entity LuaEntity
 ---@param item_name string
----@return number?
-local function find_sell_box_data_by_item_name(entity, item_name)
-	local entities = sell_boxes[entity.force.index][item_name]
-	if entities == nil then return end
-
-	for k, _entity in pairs(entities) do
-		if _entity == entity then
-			return k
-		end
-	end
-end
-
----@param entity LuaEntity
----@param item_name string
 local function remove_certain_sell_box(entity, item_name)
 	local f_sell_boxes = sell_boxes[entity.force.index]
 	local entities = f_sell_boxes[item_name]
@@ -1386,20 +1372,21 @@ local function on_gui_click(event)
 end
 
 local function check_buy_boxes()
-	local force_index = mod_data.last_buyer_index
-	for _, index in pairs(active_forces) do
-		if index > force_index then
-			force_index = index
+	local last_buyer_index = mod_data.last_buyer_index
+	for i=1, #active_forces do
+		local force_index = active_forces[i]
+		if force_index > last_buyer_index then
+			last_buyer_index = force_index
 			break
 		end
 	end
 
-	if force_index ~= mod_data.last_buyer_index then
-		mod_data.last_buyer_index = force_index
-	elseif force_index == 1 then
+	if last_buyer_index ~= mod_data.last_buyer_index then
+		mod_data.last_buyer_index = last_buyer_index
+	elseif last_buyer_index == 1 then
 		return
 	else
-		force_index = 1
+		last_buyer_index = 1
 		mod_data.last_buyer_index = 1
 	end
 
@@ -1409,13 +1396,13 @@ local function check_buy_boxes()
 		forces_money_copy[_force_index] = value
 	end
 
-	local items_data = buy_boxes[force_index]
+	local items_data = buy_boxes[last_buyer_index]
 	if items_data == nil then return end
 
-	local buyer_money = forces_money_copy[force_index]
+	local buyer_money = forces_money_copy[last_buyer_index]
 	if buyer_money and buyer_money > money_treshold then
 		local stack = {name = "", count = 0}
-		local f_buy_prices = buy_prices[force_index]
+		local f_buy_prices = buy_prices[last_buyer_index]
 		for item_name, entities in pairs(items_data) do
 			if money_treshold >= buyer_money then
 				goto not_enough_money
@@ -1450,11 +1437,12 @@ local function check_buy_boxes()
 							if not (sell_price and buy_price >= sell_price) then
 								goto skip_seller
 							end
-							if force_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][force_index] then
+							if last_buyer_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][last_buyer_index] then
 								local item_offers = _items_data[item_name]
 								if item_offers then
 									local seller_money = forces_money_copy[other_force_index]
-									for _, sell_box in pairs(item_offers) do
+									for j=1, #item_offers do
+										local sell_box = item_offers[j]
 										local removed_count = sell_box.remove_item(stack)
 										if removed_count > 0 then
 											local amount = removed_count * sell_price
@@ -1484,7 +1472,7 @@ local function check_buy_boxes()
 			end
 		end
 		:: not_enough_money ::
-		forces_money_copy[force_index] = buyer_money
+		forces_money_copy[last_buyer_index] = buyer_money
 	else
 		return
 	end
