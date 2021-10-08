@@ -141,7 +141,7 @@ local function clear_invalid_embargoes()
 end
 
 ---@param item_name string
----@param player PlayerIdentification
+---@param player LuaPlayer
 ---@param entity LuaEntity
 local function set_sell_box_data(item_name, player, entity)
 	local force_sell_boxes = sell_boxes[player.force.index]
@@ -169,7 +169,7 @@ local function set_sell_box_data(item_name, player, entity)
 end
 
 ---@param item_name string
----@param player PlayerIdentification
+---@param player LuaPlayer
 ---@param entity LuaEntity
 ---@param count? number
 local function set_buy_box_data(item_name, player, entity, count)
@@ -283,6 +283,7 @@ local function clear_invalid_entities()
 	end
 end
 
+---@return number
 local function get_distance(start, stop)
 	local xdiff = start.x - stop.x
 	local ydiff = start.y - stop.y
@@ -340,7 +341,7 @@ local function make_price_list_header(table)
 	end
 end
 
----@param player PlayerIdentification
+---@param player LuaPlayer
 ---@param item_name string
 local function update_prices_table(player, item_name, table_element)
 	table_element.clear()
@@ -489,7 +490,7 @@ local function open_embargo_gui(player)
 	main_frame.force_auto_center()
 end
 
----@param player PlayerIdentification
+---@param player LuaPlayer
 ---@param item_name? string
 local function open_prices_gui(player, item_name)
 	local screen = player.gui.screen
@@ -635,7 +636,7 @@ local function open_price_list_gui(player)
 	main_frame.force_auto_center()
 end
 
----@param player PlayerIdentification
+---@param player LuaPlayer
 ---@param is_new boolean# Is new buy box?
 ---@param entity? LuaEntity # The buy box when is_new = true
 local function open_buy_box_gui(player, is_new, entity)
@@ -696,7 +697,7 @@ local function destroy_boxes_gui(player)
 	open_box[player.index] = nil
 end
 
----@param player PlayerIdentification
+---@param player LuaPlayer
 ---@param is_new boolean # Is new sell box?
 ---@param entity? LuaEntity # The sell box when is_new = true
 local function open_sell_box_gui(player, is_new, entity)
@@ -792,7 +793,7 @@ local function create_left_relative_gui(player)
 	table.add{type = "sprite-button", sprite = "info", style = "slot_button", name = "FM_show_hint"}
 end
 
----@param player PlayerIdentification
+---@param player LuaPlayer
 ---@param item_name string
 local function check_buy_price(player, item_name)
 	local force_index = player.force.index
@@ -815,7 +816,7 @@ local function check_buy_price(player, item_name)
 	end
 end
 
----@param player PlayerIdentification
+---@param player LuaPlayer
 ---@param item_name string
 local function check_sell_price(player, item_name)
 	local force_index = player.force.index
@@ -1421,7 +1422,8 @@ local function check_buy_boxes()
 			end
 			local buy_price = f_buy_prices[item_name]
 			if buy_price and buyer_money >= buy_price then
-				for _, buy_data in pairs(entities) do
+				for i=1, #entities do
+					local buy_data = entities[i]
 					local purchasable_count = buyer_money / buy_price
 					if purchasable_count < 1 then
 						goto skip_buy
