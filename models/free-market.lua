@@ -54,11 +54,22 @@ local CLOSE_BUTTON = {
 
 
 --#region Settings
+---@type number
 local update_tick = settings.global["FM_update-tick"].value
+
+---@type boolean
 local is_auto_embargo = settings.global["FM_enable-auto-embargo"].value
+
+---@type number
 local money_treshold = settings.global["FM_money-treshold"].value
+
+---@type number
 local minimal_price = settings.global["FM_minimal-price"].value
+
+---@type number
 local maximal_price = settings.global["FM_maximal-price"].value
+
+---@type boolean
 local is_public_titles = settings.global["FM_is-public-titles"].value
 --#endregion
 
@@ -150,7 +161,7 @@ local function set_sell_box_data(item_name, player, entity)
 		text_data.forces = {player.force}
 	end
 	local id = draw_text(text_data)
-	-- (it kind of messy. Perhaps, there's another way)
+	-- (it's kind of messy data. Perhaps, there's another way)
 	all_boxes[entity.unit_number] = {entity, id, nil, items, item_name}
 end
 
@@ -181,7 +192,7 @@ local function set_buy_box_data(item_name, player, entity, count)
 		text_data.forces = {player.force}
 	end
 	local id = draw_text(text_data)
-	-- (it kind of messy. Perhaps, there's another way)
+	-- (it's kind of messy data. Perhaps, there's another way)
 	all_boxes[entity.unit_number] = {entity, id, true, items, item_name}
 end
 
@@ -1372,23 +1383,26 @@ local function on_gui_click(event)
 end
 
 local function check_buy_boxes()
-	local last_buyer_index = mod_data.last_buyer_index
-	for i=1, #active_forces do
-		local force_index = active_forces[i]
-		if force_index > last_buyer_index then
-			last_buyer_index = force_index
-			break
+	local last_checked_index = mod_data.last_checked_index
+	local buyer_index
+	if last_checked_index then
+		buyer_index = active_forces[last_checked_index]
+		if buyer_index then
+			mod_data.last_checked_index = last_checked_index + 1
+		else
+			mod_data.last_checked_index = nil
+		end
+	else
+		last_checked_index, buyer_index = next(active_forces)
+		if last_checked_index then
+			mod_data.last_checked_index = last_checked_index
+		else
+			return
 		end
 	end
 
-	if last_buyer_index ~= mod_data.last_buyer_index then
-		mod_data.last_buyer_index = last_buyer_index
-	elseif last_buyer_index == 1 then
-		return
-	else
-		last_buyer_index = 1
-		mod_data.last_buyer_index = 1
-	end
+	local items_data = buy_boxes[buyer_index]
+	if items_data == nil then return end
 
 	local forces_money = call("EasyAPI", "get_forces_money")
 	local forces_money_copy = {}
@@ -1396,13 +1410,10 @@ local function check_buy_boxes()
 		forces_money_copy[_force_index] = value
 	end
 
-	local items_data = buy_boxes[last_buyer_index]
-	if items_data == nil then return end
-
-	local buyer_money = forces_money_copy[last_buyer_index]
+	local buyer_money = forces_money_copy[buyer_index]
 	if buyer_money and buyer_money > money_treshold then
 		local stack = {name = "", count = 0}
-		local f_buy_prices = buy_prices[last_buyer_index]
+		local f_buy_prices = buy_prices[buyer_index]
 		for item_name, entities in pairs(items_data) do
 			if money_treshold >= buyer_money then
 				goto not_enough_money
@@ -1437,7 +1448,7 @@ local function check_buy_boxes()
 							if not (sell_price and buy_price >= sell_price) then
 								goto skip_seller
 							end
-							if last_buyer_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][last_buyer_index] then
+							if buyer_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][buyer_index] then
 								local item_offers = _items_data[item_name]
 								if item_offers then
 									local seller_money = forces_money_copy[other_force_index]
@@ -1472,7 +1483,7 @@ local function check_buy_boxes()
 			end
 		end
 		:: not_enough_money ::
-		forces_money_copy[last_buyer_index] = buyer_money
+		forces_money_copy[buyer_index] = buyer_money
 	else
 		return
 	end
@@ -1604,7 +1615,6 @@ local function update_global_data()
 	mod_data.buy_prices = mod_data.buy_prices or {}
 	mod_data.embargoes = mod_data.embargoes or {}
 	mod_data.all_boxes = mod_data.all_boxes or {}
-	mod_data.last_buyer_index = 1
 
 	link_data()
 
