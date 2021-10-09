@@ -14,6 +14,8 @@ Version: 0.14.4
 Date: 2021-10-09
   Changes:
     - Refactored slightly
+  Notes:
+    - Something is off (check with v0.14.2)
 ---------------------------------------------------------------------------------------------------
 Version: 0.14.3
 Date: 2021-10-09
