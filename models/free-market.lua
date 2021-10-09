@@ -27,6 +27,7 @@ local active_forces
 --#region Constants
 local floor = math.floor
 local tremove = table.remove
+local find = string.find
 local sub = string.sub
 local call = remote.call
 local draw_text = rendering.draw_text
@@ -39,6 +40,8 @@ local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
 local TEXT_OFFSET = {0, 0.3}
 local LABEL = {type = "label"}
+local FLOW = {type = "flow"}
+local SPRITE_BUTTON = {type = "sprite-button"}
 local BUYING_TEXT = {"free-market.buying"}
 local SELLING_TEXT = {"free-market.selling"}
 local EMPTY_WIDGET = {type = "empty-widget"}
@@ -317,27 +320,24 @@ end
 
 local function make_price_list_header(table)
 	local dummy
-	for _=1, 2 do
-		dummy = table.add(EMPTY_WIDGET)
-		dummy.style.horizontally_stretchable = true
-		dummy.style.minimal_width = 30
-		dummy = table.add(EMPTY_WIDGET)
-		dummy.style.horizontally_stretchable = true
-		dummy.style.minimal_width = 60
-		dummy = table.add(EMPTY_WIDGET)
-		dummy.style.horizontally_stretchable = true
-		dummy.style.minimal_width = 60
-	end
+	dummy = table.add(EMPTY_WIDGET)
+	dummy.style.horizontally_stretchable = true
+	dummy.style.minimal_width = 30
+	dummy = table.add(EMPTY_WIDGET)
+	dummy.style.horizontally_stretchable = true
+	dummy.style.minimal_width = 60
+	dummy = table.add(EMPTY_WIDGET)
+	dummy.style.horizontally_stretchable = true
+	dummy.style.minimal_width = 60
 
-	for _=1, 2 do
-		table.add(LABEL).caption = {"item"}
-		table.add(LABEL).caption = {"free-market.buy-header"}
-		table.add(LABEL).caption = {"free-market.sell-header"}
-	end
+	table.add(LABEL).caption = {"item"}
+	table.add(LABEL).caption = {"free-market.buy-header"}
+	table.add(LABEL).caption = {"free-market.sell-header"}
 end
 
 ---@param player LuaPlayer
 ---@param item_name string
+---@param table_element GuiElement
 local function update_prices_table(player, item_name, table_element)
 	table_element.clear()
 	make_prices_header(table_element)
@@ -376,25 +376,102 @@ local function update_prices_table(player, item_name, table_element)
 	end
 end
 
-local function update_price_list_table(force, table)
-	table.clear()
-	make_price_list_header(table)
+---@param force LuaForce
+---@param table_element GuiElement
+local function update_price_list_table(force, table_element)
+	local parent = table_element.parent
+	table_element.destroy()
+	-- It's messy. I'll try to change it later
+	table_element = parent.add{type = "table", name = "price_list_table", column_count = 3}
+	table_element.style.horizontal_spacing = 16
+	table_element.style.vertical_spacing = 8
+	table_element.style.top_margin = -16
+	table_element.style.column_alignments[1] = "center"
+	table_element.style.column_alignments[2] = "center"
+	table_element.style.column_alignments[3] = "center"
+	table_element.style.column_alignments[4] = "center"
+	table_element.style.column_alignments[5] = "center"
+	table_element.style.column_alignments[6] = "center"
+	table_element.draw_horizontal_lines = true
+	table_element.draw_vertical_lines = true
+	make_price_list_header(table_element)
 	local force_index = force.index
 	local f_buy_prices = buy_prices[force_index] or {}
 	local f_sell_prices = sell_prices[force_index] or {}
 
-	local button = {type = "sprite-button"}
 	for item_name, buy_price in pairs(f_buy_prices) do
-		table.add(button).sprite = "item/" .. item_name
-		table.add(LABEL).caption = buy_price
-		table.add(LABEL).caption = (f_sell_prices[item_name] or '')
+		table_element.add(SPRITE_BUTTON).sprite = "item/" .. item_name
+		table_element.add(LABEL).caption = buy_price
+		table_element.add(LABEL).caption = (f_sell_prices[item_name] or '')
 	end
 
 	for item_name, sell_price in pairs(f_sell_prices) do
 		if f_buy_prices[item_name] == nil then
-			table.add(button).sprite = "item/" .. item_name
-			table.add(LABEL)
-			table.add(LABEL).caption = sell_price
+			table_element.add(SPRITE_BUTTON).sprite = "item/" .. item_name
+			table_element.add(EMPTY_WIDGET)
+			table_element.add(LABEL).caption = sell_price
+		end
+	end
+end
+
+---@param force LuaForce
+---@param table_element GuiElement
+---@param text_filter string
+local function update_price_list_by_sell_filter(force, table_element, text_filter)
+	local parent = table_element.parent
+	table_element.destroy()
+	-- It's messy. I'll try to change it later
+	table_element = parent.add{type = "table", name = "price_list_table", column_count = 2}
+	table_element.style.horizontal_spacing = 16
+	table_element.style.vertical_spacing = 8
+	table_element.style.top_margin = -16
+	table_element.style.column_alignments[1] = "center"
+	table_element.style.column_alignments[2] = "center"
+	table_element.style.column_alignments[3] = "center"
+	table_element.style.column_alignments[4] = "center"
+	table_element.draw_horizontal_lines = true
+	table_element.draw_vertical_lines = true
+	make_price_list_header(table_element)
+	table_element.children[5].destroy()
+	table_element.children[2].destroy()
+	local force_index = force.index
+	local f_sell_prices = sell_prices[force_index] or {}
+
+	for item_name, buy_price in pairs(f_sell_prices) do
+		if find(item_name:lower(), text_filter) then
+			table_element.add(SPRITE_BUTTON).sprite = "item/" .. item_name
+			table_element.add(LABEL).caption = buy_price
+		end
+	end
+end
+
+---@param force LuaForce
+---@param table_element GuiElement
+---@param text_filter string
+local function update_price_list_by_buy_filter(force, table_element, text_filter)
+	local parent = table_element.parent
+	table_element.destroy()
+	 -- It's messy. I'll try to change it later
+	table_element = parent.add{type = "table", name = "price_list_table", column_count = 2}
+	table_element.style.horizontal_spacing = 16
+	table_element.style.vertical_spacing = 8
+	table_element.style.top_margin = -16
+	table_element.style.column_alignments[1] = "center"
+	table_element.style.column_alignments[2] = "center"
+	table_element.style.column_alignments[3] = "center"
+	table_element.style.column_alignments[4] = "center"
+	table_element.draw_horizontal_lines = true
+	table_element.draw_vertical_lines = true
+	make_price_list_header(table_element)
+	table_element.children[6].destroy()
+	table_element.children[3].destroy()
+	local force_index = force.index
+	local f_buy_prices = buy_prices[force_index] or {}
+
+	for item_name, buy_price in pairs(f_buy_prices) do
+		if find(item_name:lower(), text_filter) then
+			table_element.add(SPRITE_BUTTON).sprite = "item/" .. item_name
+			table_element.add(LABEL).caption = buy_price
 		end
 	end
 end
@@ -504,7 +581,7 @@ local function open_prices_gui(player, item_name)
 	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
 	local content = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
 	content.style.padding = 12
-	local row = content.add{type = "table", name = "row", column_count = 7}
+	local row = content.add{type = "table", name = "row", column_count = 7} -- TODO: change name
 	-- row.style.horizontally_stretchable = true
 	-- row.style.column_alignments[4] = "right"
 	-- row.style.column_alignments[5] = "right"
@@ -574,6 +651,7 @@ local function open_price_list_gui(player)
 	end
 	local main_frame = screen.add{type = "frame", name = "FM_price_list_frame", direction = "vertical"}
 	main_frame.style.horizontally_stretchable = true
+	main_frame.style.maximal_height = 700
 	local flow = main_frame.add(TITLEBAR_FLOW)
 	flow.add{
 		type = "label",
@@ -584,10 +662,12 @@ local function open_price_list_gui(player)
 	flow.add(DRAG_HANDLER).drag_target = main_frame
 	flow.add(CLOSE_BUTTON)
 	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
-	local content = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
-	content.style.padding = 12
-	local row = content.add{type = "table", name = "row", column_count = 2}
-	row.add(LABEL).caption = {'', {"team"}, {"colon"}}
+	local content_flow = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
+	content_flow.style.padding = 12
+
+	local team_row = content_flow.add(FLOW)
+	team_row.name = "row" -- TODO: change name
+	team_row.add(LABEL).caption = {'', {"team"}, {"colon"}}
 	local items = {}
 	local size = 0
 	for force_name, force in pairs(game.forces) do
@@ -599,15 +679,33 @@ local function open_price_list_gui(player)
 			items[size] = force_name
 		end
 	end
-	row.add{type = "drop-down", name = "FM_force_price_list", items = items}
-	local prices_frame = content.add{type = "frame", name = "deep_frame", style = "deep_frame_in_shallow_frame", direction = "vertical"}
+	team_row.add{type = "drop-down", name = "FM_force_price_list", items = items}
+
+	local search_row = content_flow.add({type = "table", name = "search_row", column_count = 4})
+	search_row.add{type = "textfield", name = "FM_search_text"}
+	search_row.add(LABEL).caption = {'', {"gui.search"}, {"colon"}}
+	search_row.add{
+		type = "drop-down",
+		name = "FM_search_price_drop_down",
+		items = {{"free-market.sell-offer-gui"}, {"free-market.buy-request-gui"}}
+	}
+	search_row.add{
+		type = "sprite-button",
+		style = "frame_action_button",
+		name = "FM_search_by_price",
+		hovered_sprite = "utility/search_black",
+		clicked_sprite = "utility/search_black",
+		sprite = "utility/search_white"
+	}
+
+	local prices_frame = content_flow.add{type = "frame", name = "deep_frame", style = "deep_frame_in_shallow_frame", direction = "vertical"}
 	local scroll_pane = prices_frame.add{
 		type = "scroll-pane",
 		name = "scroll-pane",
 		horizontal_scroll_policy = "never"
 	}
 	scroll_pane.style.padding = 12
-	local prices_table = scroll_pane.add{type = "table", name = "price_list_table", column_count = 6}
+	local prices_table = scroll_pane.add{type = "table", name = "price_list_table", column_count = 3}
 	prices_table.style.horizontal_spacing = 16
 	prices_table.style.vertical_spacing = 8
 	prices_table.style.top_margin = -16
@@ -736,7 +834,7 @@ local function remove_index_among_embargoes(index)
 	end
 end
 
-local bold_font_color = {255, 230, 192}
+local BOLD_FONT_COLOR = {255, 230, 192}
 local top_anchor = {gui = defines.relative_gui_type.container_gui, position = defines.relative_gui_position.top}
 local function create_top_relative_gui(player)
 	local relative = player.gui.relative
@@ -749,10 +847,10 @@ local function create_top_relative_gui(player)
 	main_frame.style.bottom_margin = -14
 	local frame = main_frame.add{type = "frame", name = "content", style = "inside_shallow_frame"}
 	local buy_button = frame.add{type = "button", style="slot_button", name = "FM_set_buy_box", caption = {"free-market.buy-gui"}}
-	buy_button.style.font_color = bold_font_color
+	buy_button.style.font_color = BOLD_FONT_COLOR
 	buy_button.style.right_margin = -6
 	local sell_button = frame.add{type = "button", style="slot_button", name = "FM_set_sell_box", caption = {"free-market.sell-gui"}}
-	sell_button.style.font_color = bold_font_color
+	sell_button.style.font_color = BOLD_FONT_COLOR
 end
 
 local left_anchor = {gui = defines.relative_gui_type.controller_gui, position = defines.relative_gui_position.left}
@@ -1020,15 +1118,15 @@ local function on_gui_selection_state_changed(event)
 	if element.name ~= "FM_force_price_list" then return end
 
 	local parent = element.parent
+	local price_list_table = parent.parent.deep_frame["scroll-pane"].price_list_table
 	local force = game.forces[element.items[element.selected_index]]
 	if force == nil then
-		local price_list_table = parent.parent.deep_frame["scroll-pane"].price_list_table
 		price_list_table.clear()
 		make_price_list_header(price_list_table)
 		return
 	end
 
-	update_price_list_table(force, parent.parent.deep_frame["scroll-pane"].price_list_table)
+	update_price_list_table(force, price_list_table)
 end
 
 
@@ -1370,6 +1468,37 @@ local GUIS = {
 		element.name = "FM_hide_left_buttons"
 		element.caption = '>'
 		element.parent.children[2].visible = true
+	end,
+	FM_search_by_price = function(element, player)
+		local search_row = element.parent
+		local selected_index = search_row.FM_search_price_drop_down.selected_index
+		if selected_index == 0 then -- Nothing selected
+			return
+		end
+
+		local content_flow = search_row.parent
+		local drop_down = content_flow.row.FM_force_price_list
+		local force = game.forces[drop_down.items[drop_down.selected_index]]
+		if force == nil then
+			return
+		end
+
+		local search_text = search_row.FM_search_text.text
+		if #search_text > 50 then
+			return
+		end
+		local price_list_table = content_flow.deep_frame["scroll-pane"].price_list_table
+		if search_text == '' then
+			update_price_list_table(force, price_list_table)
+			return
+		end
+
+		search_text = ".?" .. search_text:lower():gsub(" ", ".?") .. ".?"
+		if selected_index == 1 then -- it's sell offer
+			update_price_list_by_sell_filter(force, price_list_table, search_text)
+		else -- it's buy request
+			update_price_list_by_buy_filter(force, price_list_table, search_text)
+		end
 	end
 }
 local function on_gui_click(event)
@@ -1657,7 +1786,9 @@ local function on_configuration_changed(event)
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
-	if version < 0.14 then
+	if version < 0.13 then
+		game.print({'', {"mod-name.free-market"}, {"colon"}, " [WARNING] this version doesn't migrate old data, please use older version <0.13.0"}, RED_COLOR)
+	elseif version < 0.14 then
 		game.print({'', {"mod-name.free-market"}, {"colon"}, " [WARNING] this version doesn't migrate old data, please use older version <0.14.0"}, RED_COLOR)
 	end
 end

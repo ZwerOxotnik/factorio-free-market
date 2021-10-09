@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.15.0
+Date: 2021-10-09
+  Features:
+    - Added search in price list
+  Changes:
+    - Changed style of table in the price list (I'll do it again)
+    - Refactored some code
+---------------------------------------------------------------------------------------------------
 Version: 0.14.6
 Date: 2021-10-09
   Changes:
