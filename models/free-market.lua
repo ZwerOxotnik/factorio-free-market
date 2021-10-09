@@ -26,16 +26,19 @@ local active_forces
 
 --#region Constants
 local floor = math.floor
-local remove = table.remove
+local tremove = table.remove
 local sub = string.sub
 local call = remote.call
-local insert = table.insert
 local draw_text = rendering.draw_text
+local get_render_target = rendering.get_target
+local is_render_valid = rendering.is_valid
+local rendering_destroy = rendering.destroy
 local CHECK_FORCES_TICK = 3600
 local WHITE_COLOR = {1, 1, 1}
 local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
 local TEXT_OFFSET = {0, 0.3}
+local LABEL = {type = "label"}
 local BUYING_TEXT = {"free-market.buying"}
 local SELLING_TEXT = {"free-market.selling"}
 local EMPTY_WIDGET = {type = "empty-widget"}
@@ -81,9 +84,9 @@ local is_public_titles = settings.global["FM_is-public-titles"].value
 local function remove_certain_sell_box(entity, item_name)
 	local f_sell_boxes = sell_boxes[entity.force.index]
 	local entities = f_sell_boxes[item_name]
-	for k, _entity in pairs(entities) do
-		if _entity == entity then
-			remove(entities, k)
+	for i = 1, #entities do
+		if entities[i] == entity then
+			tremove(entities, i)
 			if #entities == 0 then
 				f_sell_boxes[item_name] = nil
 			end
@@ -97,9 +100,10 @@ end
 local function remove_certain_buy_box(entity, item_name)
 	local f_buy_boxes = buy_boxes[entity.force.index]
 	local entities = f_buy_boxes[item_name]
-	for k, buy_box in pairs(entities) do
+	for i = 1, #entities do
+		local buy_box = entities[i]
 		if buy_box[1] == entity then
-			remove(entities, k)
+			tremove(entities, i)
 			if #entities == 0 then
 				f_buy_boxes[item_name] = nil
 			end
@@ -113,7 +117,8 @@ end
 ---@param count number
 local function change_count_in_buy_box_data(entity, item_name, count)
 	local data = buy_boxes[entity.force.index][item_name]
-	for _, buy_box in pairs(data) do
+	for i = 1, #data do
+		local buy_box = data[i]
 		if buy_box[1] == entity then
 			buy_box[2] = count
 			return
@@ -227,7 +232,7 @@ local function clear_invalid_sell_boxes_data()
 				else
 					for i=#entities, 1, -1 do
 						if entities[i].valid == false then
-							remove(entities, i)
+							tremove(entities, i)
 						end
 					end
 					if #entities == 0 then
@@ -240,8 +245,10 @@ local function clear_invalid_sell_boxes_data()
 end
 
 local function clear_invalid_buy_boxes_data()
+	local forces = game.forces
+	local item_prototypes = game.item_prototypes
 	for index, data in pairs(buy_boxes) do
-		if game.forces[index] == nil then
+		if forces[index] == nil then
 			buy_boxes[index] = nil
 			sell_boxes[index] = nil
 			embargoes[index] = nil
@@ -249,14 +256,14 @@ local function clear_invalid_buy_boxes_data()
 			buy_prices[index] = nil
 		else
 			for item_name, entities in pairs(data) do
-				if game.item_prototypes[item_name] == nil then
+				if item_prototypes[item_name] == nil then
 					data[item_name] = nil
 				else
 					for i=#entities, 1, -1 do
 						if entities[i][1].valid == false then
-							remove(entities, i)
+							tremove(entities, i)
 						elseif not entities[i][2] then
-							remove(entities, i)
+							tremove(entities, i)
 						end
 					end
 					if #entities == 0 then
@@ -303,38 +310,29 @@ local function make_prices_header(table)
 	dummy.style.horizontally_stretchable = true
 	dummy.style.minimal_width = 60
 
-	local label_data = {type = "label", caption = {"team-name"}}
-	table.add(label_data)
-	label_data.caption = {"free-market.buy-header"}
-	table.add(label_data)
-	label_data.caption = {"free-market.sell-header"}
-	table.add(label_data)
+	table.add(LABEL).caption = {"team-name"}
+	table.add(LABEL).caption = {"free-market.buy-header"}
+	table.add(LABEL).caption = {"free-market.sell-header"}
 end
 
 local function make_price_list_header(table)
 	local dummy
-	local dummy_data = {type = "empty-widget"}
-	for _=1, 2, 1 do
-		dummy = table.add(dummy_data)
+	for _=1, 2 do
+		dummy = table.add(EMPTY_WIDGET)
 		dummy.style.horizontally_stretchable = true
 		dummy.style.minimal_width = 30
-		dummy = table.add(dummy_data)
+		dummy = table.add(EMPTY_WIDGET)
 		dummy.style.horizontally_stretchable = true
 		dummy.style.minimal_width = 60
-		dummy = table.add(dummy_data)
+		dummy = table.add(EMPTY_WIDGET)
 		dummy.style.horizontally_stretchable = true
 		dummy.style.minimal_width = 60
 	end
 
-	local label_data = {type = "label"}
-
-	for _=1, 2, 1 do
-		label_data.caption = {"item"}
-		table.add(label_data)
-		label_data.caption = {"free-market.buy-header"}
-		table.add(label_data)
-		label_data.caption = {"free-market.sell-header"}
-		table.add(label_data)
+	for _=1, 2 do
+		table.add(LABEL).caption = {"item"}
+		table.add(LABEL).caption = {"free-market.buy-header"}
+		table.add(LABEL).caption = {"free-market.sell-header"}
 	end
 end
 
@@ -369,15 +367,11 @@ local function update_prices_table(player, item_name, table_element)
 		end
 	end
 
-	local label = {type = "label"}
 	for _, data in pairs(result) do
 		if data.buy_price or data.sell_price then
-			label.caption = data.name
-			table_element.add(label)
-			label.caption = (data.buy_price or '')
-			table_element.add(label)
-			label.caption = (data.sell_price or '')
-			table_element.add(label)
+			table_element.add(LABEL).caption = data.name
+			table_element.add(LABEL).caption = (data.buy_price or '')
+			table_element.add(LABEL).caption = (data.sell_price or '')
 		end
 	end
 end
@@ -389,23 +383,18 @@ local function update_price_list_table(force, table)
 	local f_buy_prices = buy_prices[force_index] or {}
 	local f_sell_prices = sell_prices[force_index] or {}
 
-	local label = {type = "label"}
 	local button = {type = "sprite-button"}
 	for item_name, buy_price in pairs(f_buy_prices) do
 		table.add(button).sprite = "item/" .. item_name
-		label.caption = buy_price
-		table.add(label)
-		label.caption = (f_sell_prices[item_name] or '')
-		table.add(label)
+		table.add(LABEL).caption = buy_price
+		table.add(LABEL).caption = (f_sell_prices[item_name] or '')
 	end
 
-	local empty_label = {type = "label"}
 	for item_name, sell_price in pairs(f_sell_prices) do
 		if f_buy_prices[item_name] == nil then
 			table.add(button).sprite = "item/" .. item_name
-			table.add(empty_label)
-			label.caption = sell_price
-			table.add(label)
+			table.add(LABEL)
+			table.add(LABEL).caption = sell_price
 		end
 	end
 end
@@ -427,9 +416,9 @@ end
 local function update_embargo_table(embargo_table, player)
 	embargo_table.clear()
 
-	embargo_table.add{type = "label", caption = {"free-market.without-embargo-title"}}
+	embargo_table.add(LABEL).caption = {"free-market.without-embargo-title"}
 	embargo_table.add(EMPTY_WIDGET)
-	embargo_table.add{type = "label", caption = {"free-market.with-embargo-title"}}
+	embargo_table.add(LABEL).caption = {"free-market.with-embargo-title"}
 
 	local force_index = player.index
 	local embargoes_items = {}
@@ -522,7 +511,7 @@ local function open_prices_gui(player, item_name)
 	-- row.style.column_alignments[6] = "right"
 	local item = row.add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item"}
 	item.elem_value = item_name
-	row.add{type = "label", caption = {"free-market.buy-gui"}}
+	row.add(LABEL).caption = {"free-market.buy-gui"}
 	local buy_textfield = row.add{type = "textfield", name = "buy_price", numeric = true, allow_decimal = false, allow_negative = false}
 	buy_textfield.style.width = 70
 	if item_name then
@@ -537,7 +526,7 @@ local function open_prices_gui(player, item_name)
 		style = "item_and_count_select_confirm",
 		sprite = "utility/check_mark"
 	}
-	row.add{type = "label", caption = {"free-market.sell-gui"}}
+	row.add(LABEL).caption = {"free-market.sell-gui"}
 	local sell_textfield = row.add{type = "textfield", name = "sell_price", numeric = true, allow_decimal = false, allow_negative = false}
 	sell_textfield.style.width = 70
 	if item_name then
@@ -586,7 +575,8 @@ local function open_price_list_gui(player)
 	local main_frame = screen.add{type = "frame", name = "FM_price_list_frame", direction = "vertical"}
 	main_frame.style.horizontally_stretchable = true
 	local flow = main_frame.add(TITLEBAR_FLOW)
-	flow.add{type = "label",
+	flow.add{
+		type = "label",
 		style = "frame_title",
 		caption = {"free-market.price-list"},
 		ignored_by_interaction = true
@@ -597,7 +587,7 @@ local function open_price_list_gui(player)
 	local content = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
 	content.style.padding = 12
 	local row = content.add{type = "table", name = "row", column_count = 2}
-	row.add{type = "label", caption = {'', {"team"}, {"colon"}}}
+	row.add(LABEL).caption = {'', {"team"}, {"colon"}}
 	local items = {}
 	local size = 0
 	for force_name, force in pairs(game.forces) do
@@ -647,7 +637,8 @@ local function open_buy_box_gui(player, is_new, entity)
 	end
 	local main_frame = screen.add{type = "frame", name = "FM_buy_box_frame", direction = "vertical"}
 	local flow = main_frame.add(TITLEBAR_FLOW)
-	flow.add{type = "label",
+	flow.add{
+		type = "label",
 		style = "frame_title",
 		caption = {"free-market.buy-request-gui"},
 		ignored_by_interaction = true
@@ -671,7 +662,9 @@ local function open_buy_box_gui(player, is_new, entity)
 	else
 		confirm_button.name = "FM_change_buy_box"
 		local entity_data = all_boxes[entity.unit_number]
-		for _, buy_box in pairs(entity_data[4]) do
+		local entities_data = entity_data[4]
+		for i = 1, #entities_data do
+			local buy_box = entities_data[i]
 			if buy_box[1] == entity then
 				count_element.text = tostring(buy_box[2])
 				break
@@ -848,16 +841,19 @@ local function clear_box_data(event)
 	local unit_number = entity.unit_number
 	local entity_data = all_boxes[unit_number]
 	if entity_data[3] then -- Is buying?
-		for k, buy_box in pairs(entity_data[4]) do
+		local entities_data = entity_data[4]
+		for i = 1, #entities_data do
+			local buy_box = entities_data[i]
 			if buy_box[1] == entity then
-				remove(entity_data[4], k)
+				tremove(entity_data[4], i)
 				break
 			end
 		end
 	else
-		for k, _entity in pairs(entity_data[4]) do
-			if _entity == entity then
-				remove(entity_data[4], k)
+		local entities = entity_data[4]
+		for i = 1, #entities do
+			if entities[i] == entity then
+				tremove(entity_data[4], i)
 				break
 			end
 		end
@@ -919,15 +915,14 @@ local function on_forces_merging(event)
 	buy_boxes[source_index] = nil
 	remove_index_among_embargoes(source_index)
 
-	local get_target = rendering.get_target
-	local is_valid = rendering.is_valid
-	local destroy = rendering.destroy
-	for _, id in pairs(rendering.get_all_ids()) do
-		if is_valid(id) then
-			local entity = get_target(id).entity
+	local ids = rendering.get_all_ids()
+	for i = 1, #ids do
+		local id = ids[i]
+		if is_render_valid(id) then
+			local entity = get_render_target(id).entity
 			if not (entity and entity.valid) or entity.force == source then
 				all_boxes[entity.unit_number] = nil
-				destroy(id)
+				rendering_destroy(id)
 			end
 		end
 	end
