@@ -1391,6 +1391,7 @@ local function check_buy_boxes()
 			mod_data.last_checked_index = last_checked_index + 1
 		else
 			mod_data.last_checked_index = nil
+			return
 		end
 	else
 		last_checked_index, buyer_index = next(active_forces)
