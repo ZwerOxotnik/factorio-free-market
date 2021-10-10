@@ -1,4 +1,10 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.15.2
+Date: 2021-10-10
+  Features:
+    - Added chance of ignoring of offline teams (admins can change it the map settings)
+    - Changed check of teams slightly
+---------------------------------------------------------------------------------------------------
 Version: 0.15.1
 Date: 2021-10-09
   Changes:

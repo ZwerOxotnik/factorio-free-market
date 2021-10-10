@@ -26,6 +26,7 @@ local active_forces
 
 --#region Constants
 local floor = math.floor
+local random = math.random
 local tremove = table.remove
 local find = string.find
 local sub = string.sub
@@ -74,6 +75,9 @@ local minimal_price = settings.global["FM_minimal-price"].value
 
 ---@type number
 local maximal_price = settings.global["FM_maximal-price"].value
+
+---@type number
+local skip_offline_team_chance = settings.global["FM_skip_offline_team_chance"].value
 
 ---@type boolean
 local is_public_titles = settings.global["FM_is-public-titles"].value
@@ -983,15 +987,32 @@ local function check_forces()
 	active_forces = mod_data.active_forces
 	local size = 0
 	for _, force in pairs(game.forces) do
-		local force_index = force.index
-		local items_data = buy_boxes[force_index]
-		if items_data then
-			local buyer_money = forces_money[force_index]
-			if buyer_money and buyer_money > money_treshold then
-				size = size + 1
-				active_forces[size] = force_index
+		if #force.connected_players > 0 then
+			local force_index = force.index
+			local items_data = buy_boxes[force_index]
+			if items_data then
+				local buyer_money = forces_money[force_index]
+				if buyer_money and buyer_money > money_treshold then
+					size = size + 1
+					active_forces[size] = force_index
+				end
+			end
+		elseif random(99) > skip_offline_team_chance then
+			local force_index = force.index
+			local items_data = buy_boxes[force_index]
+			if items_data then
+				local buyer_money = forces_money[force_index]
+				if buyer_money and buyer_money > money_treshold then
+					size = size + 1
+					active_forces[size] = force_index
+				end
 			end
 		end
+	end
+
+	if active_forces < 2 then
+		mod_data.active_forces = {}
+		active_forces = mod_data.active_forces
 	end
 end
 
@@ -1645,6 +1666,7 @@ local mod_settings = {
 	["FM_money-treshold"] = function(value) money_treshold = value end,
 	["FM_minimal-price"] = function(value) minimal_price = value end,
 	["FM_maximal-price"] = function(value) maximal_price = value end,
+	["FM_skip_offline_team_chance"] = function(value) skip_offline_team_chance = value end,
 	["FM_update-tick"] = function(value)
 		if CHECK_FORCES_TICK == value then
 			settings.global["FM_update-tick"] = {
