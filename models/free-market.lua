@@ -35,7 +35,8 @@ local draw_text = rendering.draw_text
 local get_render_target = rendering.get_target
 local is_render_valid = rendering.is_valid
 local rendering_destroy = rendering.destroy
-local CHECK_FORCES_TICK = 3600
+local CHECK_FORCES_TICK = 60 * 90
+local CHECK_TEAMS_DATA_TICK = 60 * 60 * 20
 local WHITE_COLOR = {1, 1, 1}
 local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
@@ -980,6 +981,23 @@ local function on_force_created(event)
 	buy_prices[index] = {}
 end
 
+local function check_teams_data()
+	for _, items_data in pairs(sell_boxes) do
+		for item_name, entities in pairs(items_data) do
+			if next(entities) == nil then
+				items_data[item_name] = nil
+			end
+		end
+	end
+	for _, items_data in pairs(buy_boxes) do
+		for item_name, entities in pairs(items_data) do
+			if next(entities) == nil then
+				items_data[item_name] = nil
+			end
+		end
+	end
+end
+
 local function check_forces()
 	local forces_money = call("EasyAPI", "get_forces_money")
 
@@ -1673,6 +1691,11 @@ local mod_settings = {
 				value = value + 1
 			}
 			return
+		elseif CHECK_TEAMS_DATA_TICK == value then
+			settings.global["FM_update-tick"] = {
+				value = value + 1
+			}
+			return
 		end
 		script.on_nth_tick(update_tick, nil)
 		update_tick = value
@@ -1866,7 +1889,8 @@ M.events = {
 
 M.on_nth_tick = {
 	[update_tick] = check_buy_boxes,
-	[CHECK_FORCES_TICK] = check_forces
+	[CHECK_FORCES_TICK] = check_forces,
+	[CHECK_TEAMS_DATA_TICK] = check_teams_data
 }
 
 M.commands = {

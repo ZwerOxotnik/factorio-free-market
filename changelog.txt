@@ -1,6 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.15.5
+Date: 2021-10-12
+  Changes:
+    - Slightly changed tick events
+    - Optimized (mod removes unnecessary data every ~20 minutes)
+---------------------------------------------------------------------------------------------------
 Version: 0.15.4
-Date: 2021-10-11
+Date: 2021-10-12
   Changes:
     - Slightly improved check of teams (works better on public servers)
 ---------------------------------------------------------------------------------------------------
