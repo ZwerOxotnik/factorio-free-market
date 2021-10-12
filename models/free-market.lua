@@ -1010,7 +1010,7 @@ local function check_forces()
 		end
 	end
 
-	if active_forces < 2 then
+	if #active_forces < 2 then
 		mod_data.active_forces = {}
 		active_forces = mod_data.active_forces
 	end
