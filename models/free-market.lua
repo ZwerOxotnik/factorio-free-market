@@ -990,7 +990,7 @@ local function check_forces()
 		if #force.connected_players > 0 then
 			local force_index = force.index
 			local items_data = buy_boxes[force_index]
-			if items_data then
+			if items_data and next(items_data) then
 				local buyer_money = forces_money[force_index]
 				if buyer_money and buyer_money > money_treshold then
 					size = size + 1
@@ -1000,7 +1000,7 @@ local function check_forces()
 		elseif random(99) > skip_offline_team_chance then
 			local force_index = force.index
 			local items_data = buy_boxes[force_index]
-			if items_data then
+			if items_data and next(items_data) then
 				local buyer_money = forces_money[force_index]
 				if buyer_money and buyer_money > money_treshold then
 					size = size + 1
