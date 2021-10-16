@@ -1277,7 +1277,7 @@ local GUIS = {
 		if entity then
 			local entity_data = all_boxes[entity.unit_number]
 			local prev_item_name = entity_data[5]
-			if item_name then
+			if item_name and count then
 				if prev_item_name == item_name then
 					change_count_in_buy_box_data(entity, item_name, count)
 				else
@@ -1309,6 +1309,7 @@ local GUIS = {
 		local parent = element.parent
 		local item_name = parent.FM_prices_item.elem_value
 		if item_name == nil then return end
+
 		local force_index = player.force.index
 		local force_sell_prices = sell_prices[force_index]
 		local sell_price_element = parent.sell_price
@@ -1332,6 +1333,7 @@ local GUIS = {
 		local parent = element.parent
 		local item_name = parent.FM_prices_item.elem_value
 		if item_name == nil then return end
+
 		local force_index = player.force.index
 		local force_buy_prices = buy_prices[force_index]
 		local buy_price_element = parent.buy_price
