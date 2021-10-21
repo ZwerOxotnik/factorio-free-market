@@ -1646,9 +1646,12 @@ local function check_buy_boxes()
 	end
 
 	local forces = game.forces
-	for _force_index, value in pairs(forces_money_copy) do
-		if forces_money[_force_index] ~= value then
-			call("EasyAPI", "set_force_money", forces[_force_index], value)
+	for _force_index, money in pairs(forces_money_copy) do
+		local prev_money = forces_money[_force_index]
+		if prev_money ~= money then
+			local force = forces[_force_index]
+			call("EasyAPI", "set_force_money", force, money)
+			force.item_production_statistics.on_flow("trading", money - prev_money)
 		end
 	end
 end

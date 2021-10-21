@@ -1,6 +1,6 @@
 {
 	"name": "free-market",
-	"version": "0.15.7",
+	"version": "0.16.0",
 	"factorio_version": "1.1",
 	"title": "Free market",
 	"author": "ZwerOxotnik",
@@ -12,6 +12,7 @@
 		"EasyAPI >= 0.3.8",
 		"money-UI",
 		"flib",
+		"base",
 		"(?) diplomacy"
 	]
 }

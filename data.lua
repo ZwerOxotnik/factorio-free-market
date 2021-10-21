@@ -21,5 +21,14 @@ data:extend({
 		filename = "__free-market__/graphics/embargo.png",
 		width = 32, height = 32,
 		flags = {"gui-icon"}
-	}
+	}, {
+    type = "item",
+    name = "trading",
+    icon = "__base__/graphics/icons/market.png",
+    icon_size = 64, icon_mipmaps = 4,
+    flags = {"hidden"},
+    subgroup = "science-pack",
+    order = "y",
+    stack_size = 100000
+  },
 })
