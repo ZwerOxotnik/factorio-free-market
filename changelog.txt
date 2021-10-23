@@ -1,10 +1,15 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.16.1
+Date: 2021-10-23
+  Changes:
+    - Doesn't show some unnecessary items for trading (not fully works)
+  Notes:
+    - Important message for people who have 2 forces (teams) only: Both forces have to have 1 buy offer at least. Otherwise, this mod will ignore trading.
+---------------------------------------------------------------------------------------------------
 Version: 0.16.0
 Date: 2021-10-21
   Features:
     - Players can see profits in the production tab (press "P" button)
-  Notes:
-    - Important message for people who have 2 forces (teams) only: Both forces have to have 1 buy offer at least. Otherwise, this mod will ignore trading.
 ---------------------------------------------------------------------------------------------------
 Version: 0.15.7
 Date: 2021-10-17

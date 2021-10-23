@@ -58,6 +58,11 @@ local CLOSE_BUTTON = {
 	type = "sprite-button",
 	name = "FM_close"
 }
+local ITEM_FILTERS = {
+	{filter = "type", type = "blueprint-book", invert = true, mode = "and"},
+	{filter = "selection-tool", invert = true, mode = "and"},
+	{filter = "tool", invert = true, mode = "and"}
+}
 --#endregion
 
 
@@ -569,7 +574,7 @@ local function open_prices_gui(player, item_name)
 	-- row.style.column_alignments[4] = "right"
 	-- row.style.column_alignments[5] = "right"
 	-- row.style.column_alignments[6] = "right"
-	local item = row.add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item"}
+	local item = row.add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 	item.elem_value = item_name
 	row.add(LABEL).caption = {"free-market.buy-gui"}
 	local buy_textfield = row.add{type = "textfield", name = "buy_price", numeric = true, allow_decimal = false, allow_negative = false}
@@ -1122,10 +1127,9 @@ local function set_buy_box_key_pressed(event)
 end
 
 local function on_gui_elem_changed(event)
-	local element = event.element
-	if element.name ~= "FM_prices_item" then return end
+	if event.element.name ~= "FM_prices_item" then return end
 
-	local player = game.get_player(event.player_index)
+	local element = event.element
 	local parent = element.parent
 	local item_name = element.elem_value
 	if item_name == nil then
@@ -1137,6 +1141,7 @@ local function on_gui_elem_changed(event)
 		return
 	end
 
+	local player = game.get_player(event.player_index)
 	local force_index = player.force.index
 	parent.sell_price.text = tostring(sell_prices[force_index][item_name] or '')
 	parent.buy_price.text = tostring(buy_prices[force_index][item_name] or '')
