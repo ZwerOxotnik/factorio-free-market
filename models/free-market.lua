@@ -1575,6 +1575,8 @@ local function check_buy_boxes()
 	local buyer_money = forces_money_copy[buyer_index]
 	if buyer_money and buyer_money > money_treshold then
 		local stack = {name = "", count = 0}
+		local stack_count = 0 -- for micro-optimization
+		local payment = 0
 		local f_buy_prices = buy_prices[buyer_index]
 		for item_name, entities in pairs(items_data) do
 			if money_treshold >= buyer_money then
@@ -1596,48 +1598,51 @@ local function check_buy_boxes()
 						need_count = purchasable_count
 					end
 					local count = buy_box.get_item_count(item_name)
-					stack.name = item_name
+					stack["name"] = item_name
 					if need_count < count then
-						stack.count = count
+						stack_count = count
 					else
 						need_count = need_count - count
 						if need_count <= 0 then
 							goto skip_buy
 						end
-						stack.count = need_count
+						stack["count"] = need_count
+						stack_count = need_count
 						for other_force_index, _items_data in pairs(sell_boxes) do
-							local sell_price = sell_prices[other_force_index][item_name]
-							if not (sell_price and buy_price >= sell_price) then
-								goto skip_seller
-							end
 							if buyer_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][buyer_index] then
+								local sell_price = sell_prices[other_force_index][item_name]
+								if not (sell_price and buy_price >= sell_price) then
+									goto skip_seller
+								end
 								local item_offers = _items_data[item_name]
 								if item_offers then
-									local seller_money = forces_money_copy[other_force_index]
 									for j=1, #item_offers do
 										local sell_box = item_offers[j]
 										local removed_count = sell_box.remove_item(stack)
 										if removed_count > 0 then
-											local amount = removed_count * sell_price
-											buyer_money = buyer_money - amount
-											seller_money = seller_money + amount
-											stack.count = stack.count - removed_count
-											if stack.count <= 0 then
-												forces_money_copy[other_force_index] = seller_money
+											stack_count = stack_count - removed_count
+											if stack_count <= 0 then
+												payment = need_count * sell_price
+												buyer_money = buyer_money - payment
+												forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
 												goto fulfilled_needs
+											else
+												stack["count"] = stack_count
 											end
 										end
 									end
-									forces_money_copy[other_force_index] = seller_money
+									payment = (need_count - stack_count) * sell_price
+									buyer_money = buyer_money - payment
+									forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
 								end
 							end
 							:: skip_seller ::
 						end
 					end
 					:: fulfilled_needs ::
-					local found_items = need_count - stack.count
+					local found_items = need_count - stack_count
 					if found_items > 0 then
-						stack.count = found_items
+						stack["count"] = found_items
 						buy_box.insert(stack)
 					end
 					:: skip_buy ::
