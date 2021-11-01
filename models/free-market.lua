@@ -25,7 +25,7 @@ local active_forces
 
 
 --#region Constants
-local tostring, tonumber = tostring, tonumber
+local tostring, tonumber, pcall = tostring, tonumber, pcall
 local floor = math.floor
 local random = math.random
 local tremove = table.remove
@@ -750,7 +750,7 @@ local function open_buy_box_gui(player, is_new, entity)
 	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
 	local row = shallow_frame.add{type = "table", name = "content_row", column_count = 4}
 	row.style.padding = 12
-	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item"}
+	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 	row.add{type = "label", caption = {'', {"free-market.count-gui"}, {"colon"}}}
 	local count_element = row.add{type = "textfield", name = "count", numeric = true, allow_decimal = false, allow_negative = false}
 	count_element.style.width = 70
@@ -815,7 +815,7 @@ local function open_sell_box_gui(player, is_new, entity)
 	local shallow_frame = main_frame.add{type = "frame", style = "inside_shallow_frame", direction = "vertical"}
 	local row = shallow_frame.add{type = "table", column_count = 2}
 	row.style.padding = 12
-	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item"}
+	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 	local confirm_button = row.add{
 		type = "sprite-button",
 		style = "item_and_count_select_confirm",
