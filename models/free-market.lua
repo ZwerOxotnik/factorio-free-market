@@ -1766,7 +1766,20 @@ end
 local function add_remote_interface()
 	-- https://lua-api.factorio.com/latest/LuaRemote.html
 	remote.remove_interface("free-market") -- For safety
-	remote.add_interface("free-market", {})
+	remote.add_interface("free-market", {
+		get_mod_data = function() return mod_data end,
+		change_count_in_buy_box_data = change_count_in_buy_box_data,
+		remove_certain_sell_box = remove_certain_sell_box,
+		remove_certain_buy_box = remove_certain_buy_box,
+		set_sell_box_data = set_sell_box_data,
+		set_buy_box_data = set_buy_box_data,
+		set_sell_price = function(item_name, force_index, price)
+			sell_prices[force_index][item_name] = price
+		end,
+		set_buy_price = function(item_name, force_index, price)
+			buy_prices[force_index][item_name] = price
+		end
+	})
 end
 
 local function link_data()
