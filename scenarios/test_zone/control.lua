@@ -1,6 +1,6 @@
-local dummy_forces_count = 5
-local repeat_count = 5
-local max_items = 50
+local dummy_forces_count = 7
+local repeat_count = 8
+local max_items = 200
 local position = {x=0, y=0}
 local count = 0
 local stack = {name = "", count = 200}
@@ -52,6 +52,8 @@ script.on_event(defines.events.on_player_created, function(event)
 		max_items = #game.item_prototypes
 	end
 	game.print("This scenario isn't safe for multipalyer probably and it uses for testing \"Free market\".")
-	game.print("Created " .. dummy_forces_count .. " dummy forces.")
-	game.print("Created " .. count*2 .. " boxes, using " .. max_items .. " items.")
+	game.print("Created " .. dummy_forces_count .. " dummy forces and using " .. max_items .. " items.")
+	game.print("Created " .. count .. " sell boxes")
+	game.print("Created " .. count .. " buy boxes")
+	game.print("Created " .. 0 .. " pull boxes")
 end)
