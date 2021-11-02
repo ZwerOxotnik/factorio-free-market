@@ -50,7 +50,7 @@ local PULL_TYPE = 3
 local SELL_TYPE = 2
 local BUY_TYPE = 1
 local CHECK_FORCES_TICK = 60 * 60 * 1.5
-local CHECK_TEAMS_DATA_TICK = 60 * 60 * 20
+local CHECK_TEAMS_DATA_TICK = 60 * 60 * 25
 local WHITE_COLOR = {1, 1, 1}
 local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
@@ -1125,6 +1125,13 @@ local function on_force_created(event)
 end
 
 local function check_teams_data()
+	for _, items_data in pairs(pull_boxes) do
+		for item_name, entities in pairs(items_data) do
+			if next(entities) == nil then
+				items_data[item_name] = nil
+			end
+		end
+	end
 	for _, items_data in pairs(sell_boxes) do
 		for item_name, entities in pairs(items_data) do
 			if next(entities) == nil then
