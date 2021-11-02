@@ -21,6 +21,11 @@ local open_box
 local all_boxes
 ---@type table<number, number>
 local active_forces
+
+--- {force index = {[item name] = count}}
+---@type table<number, table<string, number>>
+local storages
+
 --#endregion
 
 
@@ -70,6 +75,9 @@ local ITEM_FILTERS = {
 --#region Settings
 ---@type number
 local update_tick = settings.global["FM_update-tick"].value
+
+---@type number
+local update_sell_tick = settings.global["FM_update-sell-tick"].value
 
 ---@type boolean
 local is_auto_embargo = settings.global["FM_enable-auto-embargo"].value
@@ -160,7 +168,8 @@ end
 ---@param player LuaPlayer #LuaPlayer
 ---@param entity LuaEntity #LuaEntity
 local function set_sell_box_data(item_name, player, entity)
-	local force_sell_boxes = sell_boxes[player.force.index]
+	local force_index = player.force.index
+	local force_sell_boxes = sell_boxes[force_index]
 	force_sell_boxes[item_name] = force_sell_boxes[item_name] or {}
 	local items = force_sell_boxes[item_name]
 	items[#items+1] = entity
@@ -239,6 +248,7 @@ local function clear_invalid_sell_boxes_data()
 			embargoes[index] = nil
 			sell_prices[index] = nil
 			buy_prices[index] = nil
+			storages[index] = nil
 		else
 			for item_name, entities in pairs(data) do
 				if game.item_prototypes[item_name] == nil then
@@ -268,6 +278,7 @@ local function clear_invalid_buy_boxes_data()
 			embargoes[index] = nil
 			sell_prices[index] = nil
 			buy_prices[index] = nil
+			storages[index] = nil
 		else
 			for item_name, entities in pairs(data) do
 				if item_prototypes[item_name] == nil then
@@ -987,6 +998,7 @@ local function on_force_created(event)
 	embargoes[index] = {}
 	sell_prices[index] = {}
 	buy_prices[index] = {}
+	storages[index] = {}
 end
 
 local function check_teams_data()
@@ -1050,6 +1062,10 @@ local function on_forces_merging(event)
 	sell_boxes[source_index] = nil
 	buy_boxes[source_index] = nil
 	remove_index_among_embargoes(source_index)
+
+	local destination_index = event.destination.index
+	storages[destination_index] = storages[destination_index] + storages[source_index]
+	storages[source_index] = nil
 
 	local ids = rendering.get_all_ids()
 	for i = 1, #ids do
@@ -1546,6 +1562,23 @@ local function on_gui_click(event)
 	if f then f(event.element, game.get_player(event.player_index)) end
 end
 
+local function check_sell_boxes()
+	local stack = {name = "", count = 1000000}
+	for other_force_index, _items_data in pairs(sell_boxes) do
+		local storage = storages[other_force_index]
+		for item_name, item_offers in pairs(_items_data) do
+			stack.name = item_name
+			local sum = 0
+			for j=1, #item_offers do
+				sum = sum + item_offers[j].remove_item(stack)
+			end
+			if sum > 0 then
+				storage[item_name] = (storage[item_name] or 0) + sum
+			end
+		end
+	end
+end
+
 local function check_buy_boxes()
 	local last_checked_index = mod_data.last_checked_index
 	local buyer_index
@@ -1578,7 +1611,7 @@ local function check_buy_boxes()
 	local buyer_money = forces_money_copy[buyer_index]
 	if buyer_money and buyer_money > money_treshold then
 		local stack = {name = "", count = 0}
-		local stack_count = 0 -- for micro-optimization
+		local stack_count = 0 -- for optimization
 		local payment = 0
 		local f_buy_prices = buy_prices[buyer_index]
 		for item_name, entities in pairs(items_data) do
@@ -1609,32 +1642,27 @@ local function check_buy_boxes()
 						if need_count <= 0 then
 							goto skip_buy
 						end
-						stack["count"] = need_count
 						stack_count = need_count
-						for other_force_index, _items_data in pairs(sell_boxes) do
+						for other_force_index, storage in pairs(storages) do
 							if buyer_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][buyer_index] then
 								local sell_price = sell_prices[other_force_index][item_name]
 								if sell_price and buy_price >= sell_price then
-									local item_offers = _items_data[item_name]
-									if item_offers then
-										for j=1, #item_offers do
-											local sell_box = item_offers[j]
-											local removed_count = sell_box.remove_item(stack)
-											if removed_count > 0 then
-												stack_count = stack_count - removed_count
-												if stack_count <= 0 then
-													payment = need_count * sell_price
-													buyer_money = buyer_money - payment
-													forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
-													goto fulfilled_needs
-												else
-													stack["count"] = stack_count
-												end
-											end
+									local count_in_storage = storage[item_name]
+									if count_in_storage then
+										if count_in_storage > stack_count then
+											storage[item_name] = count_in_storage - stack_count
+											stack_count = 0
+											payment = need_count * sell_price
+											buyer_money = buyer_money - payment
+											forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
+											goto fulfilled_needs
+										else
+											stack_count = stack_count - count_in_storage
+											storage[item_name] = 0
+											payment = (need_count - stack_count) * sell_price
+											buyer_money = buyer_money - payment
+											forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
 										end
-										payment = (need_count - stack_count) * sell_price
-										buyer_money = buyer_money - payment
-										forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
 									end
 								end
 							end
@@ -1679,6 +1707,7 @@ local function on_player_changed_force(event)
 		buy_prices[index] = buy_prices[index] or {}
 		buy_boxes[index] = buy_boxes[index] or {}
 		embargoes[index] = embargoes[index] or {}
+		storages[index] = storages[index] or {}
 	end
 end
 
@@ -1712,9 +1741,35 @@ local mod_settings = {
 				value = value + 1
 			}
 			return
+		elseif update_sell_tick == value then
+			settings.global["FM_update-tick"] = {
+				value = value + 1
+			}
+			return
 		end
 		script.on_nth_tick(update_tick, nil)
 		update_tick = value
+		script.on_nth_tick(value, check_buy_boxes)
+	end,
+	["FM_update_sell_tick"] = function(value)
+		if CHECK_FORCES_TICK == value then
+			settings.global["FM_update-sell-tick"] = {
+				value = value + 1
+			}
+			return
+		elseif CHECK_TEAMS_DATA_TICK == value then
+			settings.global["FM_update-sell-tick"] = {
+				value = value + 1
+			}
+			return
+		elseif update_tick == value then
+			settings.global["FM_update-sell-tick"] = {
+				value = value + 1
+			}
+			return
+		end
+		script.on_nth_tick(update_sell_tick, nil)
+		update_sell_tick = value
 		script.on_nth_tick(value, check_buy_boxes)
 	end
 }
@@ -1792,6 +1847,7 @@ local function link_data()
 	open_box = mod_data.open_box
 	all_boxes = mod_data.all_boxes
 	active_forces = mod_data.active_forces
+	storages = mod_data.storages
 end
 
 local function update_global_data()
@@ -1805,6 +1861,7 @@ local function update_global_data()
 	mod_data.buy_prices = mod_data.buy_prices or {}
 	mod_data.embargoes = mod_data.embargoes or {}
 	mod_data.all_boxes = mod_data.all_boxes or {}
+	mod_data.storages = mod_data.storages or {}
 
 	link_data()
 
@@ -1833,6 +1890,7 @@ local function update_global_data()
 			buy_prices[index] = buy_prices[index] or {}
 			buy_boxes[index] = buy_boxes[index] or {}
 			embargoes[index] = embargoes[index] or {}
+			storages[index] = storages[index] or {}
 		end
 	end
 	local index = game.forces.player.index
@@ -1841,6 +1899,7 @@ local function update_global_data()
 	buy_prices[index] = buy_prices[index] or {}
 	buy_boxes[index] = buy_boxes[index] or {}
 	embargoes[index] = embargoes[index] or {}
+	storages[index] = storages[index] or {}
 end
 
 local function on_configuration_changed(event)
@@ -1918,6 +1977,7 @@ M.events = {
 
 M.on_nth_tick = {
 	[update_tick] = check_buy_boxes,
+	[update_sell_tick] = check_sell_boxes,
 	[CHECK_FORCES_TICK] = check_forces,
 	[CHECK_TEAMS_DATA_TICK] = check_teams_data
 }

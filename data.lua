@@ -6,19 +6,19 @@ data:extend({
 	{
 		type = "sprite",
 		name = "FM_change-price",
-		filename = "__free-market__/graphics/change-price.png",
+		filename = "__iFreeMarket__/graphics/change-price.png",
 		width = 32, height = 32,
 		flags = {"gui-icon"}
 	}, {
 		type = "sprite",
 		name = "FM_see-prices",
-		filename = "__free-market__/graphics/see-prices.png",
+		filename = "__iFreeMarket__/graphics/see-prices.png",
 		width = 32, height = 32,
 		flags = {"gui-icon"}
 	}, {
 		type = "sprite",
 		name = "FM_embargo",
-		filename = "__free-market__/graphics/embargo.png",
+		filename = "__iFreeMarket__/graphics/embargo.png",
 		width = 32, height = 32,
 		flags = {"gui-icon"}
 	}, {

@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - main
+      - infinite_version
 
 name: Publish
 jobs:
