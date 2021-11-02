@@ -1,9 +1,13 @@
 local dummy_forces_count = 7
-local repeat_count = 8
+local repeat_pull_count = 1
+local repeat_sell_count = 8
+local repeat_buy_count = 8
 local max_items = 200
 local position = {x=0, y=0}
-local count = 0
-local stack = {name = "", count = 200}
+local pull_box_count = 0
+local sell_box_count = 0
+local buy_box_count = 0
+local stack = {name = "", count = 10}
 local PROHIBIT_ITEMS_TYPES = {
 	["mining-tool"] = true
 }
@@ -14,6 +18,26 @@ local function place_dummy_trading_boxes(player)
 	local create_entity = surface.create_entity
 	local entity
 	local i = 0
+	position.y = 2
+	for item_name, item in pairs(game.item_prototypes) do
+		if not PROHIBIT_ITEMS_TYPES[item.type] then
+			i = i + 1
+			if i > max_items then
+				break
+			end
+			stack.name = item_name
+			for _=1, repeat_pull_count do
+				pull_box_count = pull_box_count + 1
+				position.x = pull_box_count
+				entity = create_entity{name="steel-chest", position=position, force=force}
+				remote.call("free-market", "set_pull_box_data", item_name, player, entity)
+				entity.insert(stack)
+			end
+		end
+	end
+
+	i = 0
+	position.y = -2
 	for item_name, item in pairs(game.item_prototypes) do
 		if not PROHIBIT_ITEMS_TYPES[item.type] then
 			i = i + 1
@@ -21,16 +45,30 @@ local function place_dummy_trading_boxes(player)
 				break
 			end
 			remote.call("free-market", "set_sell_price", item_name, force_index, 1)
-			remote.call("free-market", "set_buy_price", item_name, force_index, 1)
 			stack.name = item_name
-			for _=1, repeat_count do
-				count = count + 1
-				position.x = count
-				position.y = 0
+			for _=1, repeat_sell_count do
+				sell_box_count = sell_box_count + 1
+				position.x = sell_box_count
 				entity = create_entity{name="steel-chest", position=position, force=force}
 				remote.call("free-market", "set_sell_box_data", item_name, player, entity)
 				entity.insert(stack)
-				position.y = 1
+			end
+		end
+	end
+
+	i = 0
+	position.y = 6
+	for item_name, item in pairs(game.item_prototypes) do
+		if not PROHIBIT_ITEMS_TYPES[item.type] then
+			i = i + 1
+			if i > max_items then
+				break
+			end
+			remote.call("free-market", "set_buy_price", item_name, force_index, 1)
+			stack.name = item_name
+			for _=1, repeat_buy_count do
+				buy_box_count = buy_box_count + 1
+				position.x = buy_box_count
 				entity = create_entity{name="steel-chest", position=position, force=force}
 				remote.call("free-market", "set_buy_box_data", item_name, player, entity, 50)
 				-- entity.insert(stack)
@@ -53,7 +91,7 @@ script.on_event(defines.events.on_player_created, function(event)
 	end
 	game.print("This scenario isn't safe for multipalyer probably and it uses for testing \"Free market\".")
 	game.print("Created " .. dummy_forces_count .. " dummy forces and using " .. max_items .. " items.")
-	game.print("Created " .. count .. " sell boxes")
-	game.print("Created " .. count .. " buy boxes")
-	game.print("Created " .. 0 .. " pull boxes")
+	game.print("Created " .. sell_box_count .. " sell boxes")
+	game.print("Created " .. buy_box_count .. " buy boxes")
+	game.print("Created " .. pull_box_count .. " pull boxes")
 end)
