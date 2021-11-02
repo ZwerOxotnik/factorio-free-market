@@ -47,11 +47,11 @@
 Free market
 -----------
 
-Adds Free market. Works via any chest. Customizable, fast, plain.
+Adds Free market which works with any chest. Customizable, plain.
+Sell/buy items from other teams.
+You want more fair market with players than "Black Market"? You found what you were looking for.
 
-Use /prices to see and change prices, embargoes.
-
-Use EasyAPI (WIP) (/balance) to see your balance etc.
+UPS friendly+, it works with any mod.
 
 <p align="center">
   <a href="https://mods.factorio.com/mod/free-market/downloads"><strong>Download the mod&nbsp;&nbsp;▶</strong></a>
