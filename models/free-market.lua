@@ -1250,6 +1250,27 @@ local function set_sell_box_key_pressed(event)
 	set_sell_box_data(item.name, player, entity)
 end
 
+local function set_pull_box_key_pressed(event)
+	local player = game.get_player(event.player_index)
+	local entity = player.selected
+	if not entity.operable then return end
+	if not ALLOWED_TYPES[entity.type] then return end
+	if get_distance(player.position, entity.position) > 30 then return end
+
+	local box_data = all_boxes[entity.unit_number]
+	if box_data then
+		return
+	end
+
+	local item = entity.get_inventory(defines.inventory.chest)[1]
+	if not item.valid_for_read then
+		player.print({"multiplayer.no-address", {"item"}})
+		return
+	end
+
+	set_pull_box_data(item.name, player, entity)
+end
+
 local function set_buy_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
@@ -2253,6 +2274,9 @@ M.events = {
 	[defines.events.on_robot_mined_entity] = clear_box_data,
 	[defines.events.script_raised_destroy] = clear_box_data,
 	[defines.events.on_entity_died] = clear_box_data,
+	["FM_set-pull-box"] = function(event)
+		pcall(set_pull_box_key_pressed, event)
+	end,
 	["FM_set-sell-box"] = function(event)
 		pcall(set_sell_box_key_pressed, event)
 	end,
