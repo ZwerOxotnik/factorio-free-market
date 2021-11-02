@@ -1783,7 +1783,7 @@ local function check_pull_boxes()
 		local storage = storages[other_force_index]
 		for item_name, item_offers in pairs(_items_data) do
 			local count_in_storage = storage[item_name]
-			if count_in_storage > 0 then
+			if count_in_storage and count_in_storage > 0 then
 				stack["name"] = item_name
 				for i=1, #item_offers do
 					if count_in_storage <= 0 then
