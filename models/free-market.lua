@@ -640,15 +640,15 @@ local function open_prices_gui(player, item_name)
 	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
 	local content = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
 	content.style.padding = 12
-	local row = content.add{type = "table", name = "row", column_count = 7} -- TODO: change name
+	local item_row = content.add{type = "table", name = "item_row", column_count = 7}
 	-- row.style.horizontally_stretchable = true
 	-- row.style.column_alignments[4] = "right"
 	-- row.style.column_alignments[5] = "right"
 	-- row.style.column_alignments[6] = "right"
-	local item = row.add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item", elem_filters = ITEM_FILTERS}
+	local item = item_row.add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 	item.elem_value = item_name
-	row.add(LABEL).caption = {"free-market.buy-gui"}
-	local buy_textfield = row.add{type = "textfield", name = "buy_price", numeric = true, allow_decimal = false, allow_negative = false}
+	item_row.add(LABEL).caption = {"free-market.buy-gui"}
+	local buy_textfield = item_row.add{type = "textfield", name = "buy_price", numeric = true, allow_decimal = false, allow_negative = false}
 	buy_textfield.style.width = 70
 	if item_name then
 		local price = buy_prices[player.force.index][item_name]
@@ -656,14 +656,14 @@ local function open_prices_gui(player, item_name)
 			buy_textfield.text = tostring(price)
 		end
 	end
-	row.add{
+	item_row.add{
 		type = "sprite-button",
 		name = "FM_confirm_buy_price",
 		style = "item_and_count_select_confirm",
 		sprite = "utility/check_mark"
 	}
-	row.add(LABEL).caption = {"free-market.sell-gui"}
-	local sell_textfield = row.add{type = "textfield", name = "sell_price", numeric = true, allow_decimal = false, allow_negative = false}
+	item_row.add(LABEL).caption = {"free-market.sell-gui"}
+	local sell_textfield = item_row.add{type = "textfield", name = "sell_price", numeric = true, allow_decimal = false, allow_negative = false}
 	sell_textfield.style.width = 70
 	if item_name then
 		local price = sell_prices[player.force.index][item_name]
@@ -671,7 +671,7 @@ local function open_prices_gui(player, item_name)
 			sell_textfield.text = tostring(price)
 		end
 	end
-	row.add{
+	item_row.add{
 		type = "sprite-button",
 		name = "FM_confirm_sell_price",
 		style = "item_and_count_select_confirm",
@@ -725,7 +725,7 @@ local function open_price_list_gui(player)
 	content_flow.style.padding = 12
 
 	local team_row = content_flow.add(FLOW)
-	team_row.name = "row" -- TODO: change name
+	team_row.name = "team_row"
 	team_row.add(LABEL).caption = {'', {"team"}, {"colon"}}
 	local items = {}
 	local size = 0
@@ -1008,13 +1008,15 @@ local function create_left_relative_gui(player)
 	local frame = main_table.add{type = "frame", name = "content"}
 	frame.style.right_margin = -14
 	local shallow_frame = frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame"}
-	local table = shallow_frame.add{type = "table", column_count = 2}
+	local table = shallow_frame.add{type = "table", column_count = 3}
 	table.style.horizontal_spacing = 0
 	table.style.vertical_spacing = 0
 	table.add{type = "sprite-button", sprite = "FM_change-price", style="slot_button", name = "FM_change-price"}
 	table.add{type = "sprite-button", sprite = "FM_see-prices", style="slot_button", name = "FM_see-prices"}
 	table.add{type = "sprite-button", sprite = "FM_embargo", style="slot_button", name = "FM_embargo"}
+	table.add{type = "sprite-button", sprite = "item/wooden-chest", style = "slot_button", name = "FM_open_storage"} -- TODO: change the sprite
 	table.add{type = "sprite-button", sprite = "info", style = "slot_button", name = "FM_show_hint"}
+	table.add{type = "sprite-button", style = "slot_button"}
 end
 
 ---@param player LuaPlayer #LuaPlayer
@@ -1029,14 +1031,14 @@ local function check_buy_price(player, item_name)
 			prices_frame = player.gui.screen.FM_prices_frame
 		else
 			content_flow = prices_frame.shallow_frame.content_flow
-			content_flow.row.FM_prices_item.elem_value = item_name
+			content_flow.item_row.FM_prices_item.elem_value = item_name
 			local sell_price = sell_prices[force_index][item_name]
 			if sell_price then
-				content_flow.row.sell_price.text = tostring(sell_price)
+				content_flow.item_row.sell_price.text = tostring(sell_price)
 			end
 			update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 		end
-		content_flow.row.buy_price.focus()
+		content_flow.item_row.buy_price.focus()
 	end
 end
 
@@ -1052,14 +1054,14 @@ local function check_sell_price(player, item_name)
 			prices_frame = player.gui.screen.FM_prices_frame
 		else
 			content_flow = prices_frame.shallow_frame.content_flow
-			content_flow.row.FM_prices_item.elem_value = item_name
+			content_flow.item_row.FM_prices_item.elem_value = item_name
 			local buy_price = buy_prices[force_index][item_name]
 			if buy_price then
-				content_flow.row.buy_price.text = tostring(buy_price)
+				content_flow.item_row.buy_price.text = tostring(buy_price)
 			end
 			update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 		end
-		content_flow.row.sell_price.focus()
+		content_flow.item_row.sell_price.focus()
 	end
 end
 
@@ -1349,11 +1351,11 @@ local GUIS = {
 			open_prices_gui(player, item_name)
 		else
 			local content_flow = prices_frame.shallow_frame.content_flow
-			content_flow.row.FM_prices_item.elem_value = item_name
+			content_flow.item_row.FM_prices_item.elem_value = item_name
 			local sell_price = sell_prices[force_index][item_name]
-			content_flow.row.sell_price.text = tostring(sell_price or '')
+			content_flow.item_row.sell_price.text = tostring(sell_price or '')
 			local buy_price = buy_prices[force_index][item_name]
-			content_flow.row.buy_price.text = tostring(buy_price or '')
+			content_flow.item_row.buy_price.text = tostring(buy_price or '')
 			update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 		end
 	end,
@@ -1582,7 +1584,7 @@ local GUIS = {
 	end,
 	FM_refresh_prices_table = function(element, player)
 		local content_flow = element.parent.parent.shallow_frame.content_flow
-		local row = content_flow.row
+		local row = content_flow.item_row
 		local item_name = row.FM_prices_item.elem_value
 		if item_name == nil then return end
 
@@ -1700,14 +1702,14 @@ local GUIS = {
 							prices_frame = player.gui.screen.FM_prices_frame
 						else
 							content_flow = prices_frame.shallow_frame.content_flow
-							content_flow.row.FM_prices_item.elem_value = item_name
+							content_flow.item_row.FM_prices_item.elem_value = item_name
 							local sell_price = sell_prices[force_index][item_name]
 							if sell_price then
-								content_flow.row.sell_price.text = tostring(sell_price)
+								content_flow.item_row.sell_price.text = tostring(sell_price)
 							end
 							update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 						end
-						content_flow.row.buy_price.focus()
+						content_flow.item_row.buy_price.focus()
 					end
 				end
 			end
@@ -1776,7 +1778,7 @@ local GUIS = {
 		end
 
 		local content_flow = search_row.parent
-		local drop_down = content_flow.row.FM_force_price_list
+		local drop_down = content_flow.team_row.FM_force_price_list
 		local force = game.forces[drop_down.items[drop_down.selected_index]]
 		if force == nil then
 			return
