@@ -397,6 +397,19 @@ local function make_prices_header(table)
 	table.add(LABEL).caption = {"free-market.sell-header"}
 end
 
+local function make_storage_header(table)
+	local dummy
+	dummy = table.add(EMPTY_WIDGET)
+	dummy.style.horizontally_stretchable = true
+	dummy.style.minimal_width = 60
+	dummy = table.add(EMPTY_WIDGET)
+	dummy.style.horizontally_stretchable = true
+	dummy.style.minimal_width = 60
+
+	table.add(LABEL).caption = {"item"}
+	table.add(LABEL).caption = {"gui-logistic.count"}
+end
+
 ---@param table_element GuiElement #GuiElement
 local function make_price_list_header(table_element)
 	local dummy
@@ -700,6 +713,53 @@ local function open_prices_gui(player, item_name)
 	end
 	main_frame.force_auto_center()
 	return content
+end
+
+local function open_storage_gui(player)
+	local screen = player.gui.screen
+	if screen.FM_storage_frame then
+		screen.FM_storage_frame.destroy()
+		return
+	end
+	local main_frame = screen.add{type = "frame", name = "FM_storage_frame", direction = "vertical"}
+	main_frame.style.horizontally_stretchable = true
+	main_frame.style.maximal_height = 700
+	local flow = main_frame.add(TITLEBAR_FLOW)
+	flow.add{
+		type = "label",
+		style = "frame_title",
+		caption = {"free-market.price-list"},
+		ignored_by_interaction = true
+	}
+	flow.add(DRAG_HANDLER).drag_target = main_frame
+	flow.add(CLOSE_BUTTON)
+	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
+	local content_flow = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
+	content_flow.style.padding = 12
+
+	local scroll_pane = content_flow.add{
+		type = "scroll-pane",
+		name = "scroll-pane",
+		horizontal_scroll_policy = "never"
+	}
+	scroll_pane.style.padding = 12
+	local storage_table = scroll_pane.add{type = "table", name = "storage_table", column_count = 2}
+	storage_table.style.horizontal_spacing = 16
+	storage_table.style.vertical_spacing = 8
+	storage_table.style.top_margin = -16
+	storage_table.style.column_alignments[1] = "center"
+	storage_table.style.column_alignments[2] = "center"
+	storage_table.draw_horizontal_lines = true
+	storage_table.draw_vertical_lines = true
+	make_storage_header(storage_table)
+
+	local add = storage_table.add
+	for item_name, count in pairs(storages[player.force.index]) do
+		add(SPRITE_BUTTON).sprite = "item/" .. item_name
+		add(LABEL).caption = tostring(count)
+	end
+
+	main_frame.force_auto_center()
 end
 
 local function open_price_list_gui(player)
@@ -1011,9 +1071,9 @@ local function create_left_relative_gui(player)
 	local table = shallow_frame.add{type = "table", column_count = 3}
 	table.style.horizontal_spacing = 0
 	table.style.vertical_spacing = 0
-	table.add{type = "sprite-button", sprite = "FM_change-price", style="slot_button", name = "FM_change-price"}
-	table.add{type = "sprite-button", sprite = "FM_see-prices", style="slot_button", name = "FM_see-prices"}
-	table.add{type = "sprite-button", sprite = "FM_embargo", style="slot_button", name = "FM_embargo"}
+	table.add{type = "sprite-button", sprite = "FM_change-price", style="slot_button", name = "FM_open_price"}
+	table.add{type = "sprite-button", sprite = "FM_see-prices", style="slot_button", name = "FM_open_price_list"}
+	table.add{type = "sprite-button", sprite = "FM_embargo", style="slot_button", name = "FM_open_embargo"}
 	table.add{type = "sprite-button", sprite = "item/wooden-chest", style = "slot_button", name = "FM_open_storage"} -- TODO: change the sprite
 	table.add{type = "sprite-button", sprite = "info", style = "slot_button", name = "FM_show_hint"}
 	table.add{type = "sprite-button", style = "slot_button"}
@@ -1639,7 +1699,7 @@ local GUIS = {
 			local box_data = all_boxes[entity.unit_number]
 			if box_data then
 				local box_type = box_data[3]
-				if box_type == SELL_TYPE then
+				if box_type == PULL_TYPE then
 					open_pull_box_gui(player, false, entity)
 				elseif box_type == BUY_TYPE then
 					player.print({"free-market.this-is-buy-box"})
@@ -1748,14 +1808,17 @@ local GUIS = {
 		end
 		update_embargo_table(table_element, player)
 	end,
-	["FM_change-price"] = function(element, player)
+	["FM_open_price"] = function(element, player)
 		open_prices_gui(player)
 	end,
-	["FM_see-prices"] = function(element, player)
+	["FM_open_price_list"] = function(element, player)
 		open_price_list_gui(player)
 	end,
-	["FM_embargo"] = function(element, player)
+	["FM_open_embargo"] = function(element, player)
 		open_embargo_gui(player)
+	end,
+	["FM_open_storage"] = function(element, player)
+		open_storage_gui(player)
 	end,
 	["FM_show_hint"] = function(element, player)
 		player.print({"free-market.hint"})
