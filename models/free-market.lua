@@ -730,7 +730,7 @@ local function open_storage_gui(player)
 	flow.add{
 		type = "label",
 		style = "frame_title",
-		caption = {"free-market.price-list"},
+		caption = {"free-market.storage"},
 		ignored_by_interaction = true
 	}
 	flow.add(DRAG_HANDLER).drag_target = main_frame
