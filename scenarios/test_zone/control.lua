@@ -3,15 +3,15 @@ local repeat_pull_count = 1
 local repeat_sell_count = 8
 local repeat_buy_count = 8
 local max_items = 200
-local position = {x=0, y=0}
-local pull_box_count = 0
-local sell_box_count = 0
-local buy_box_count = 0
-local stack = {name = "", count = 10}
 local PROHIBIT_ITEMS_TYPES = {
 	["mining-tool"] = true
 }
 local function place_dummy_trading_boxes(player)
+	local stack = {name = "", count = 10}
+	local position = {x=0, y=0}
+	local pull_box_count = global.pull_box_count
+	local sell_box_count = global.sell_box_count
+	local buy_box_count  = global.buy_box_count
 	local force = player.force
 	local force_index = force.index
 	local surface = player.surface
@@ -79,6 +79,10 @@ end
 
 script.on_event(defines.events.on_player_created, function(event)
 	if event.player_index ~= 1 then return end
+	global.pull_box_count = 0
+	global.sell_box_count = 0
+	global.buy_box_count = 0
+
 	local player = game.get_player(1)
 	for i=1, dummy_forces_count do
 		local new_force = game.create_force("dummy_team" .. i)
@@ -89,7 +93,11 @@ script.on_event(defines.events.on_player_created, function(event)
 	if max_items > #game.item_prototypes then
 		max_items = #game.item_prototypes
 	end
-	game.print("This scenario isn't safe for multipalyer probably and it uses for testing \"Free market\".")
+
+	local pull_box_count = global.pull_box_count
+	local sell_box_count = global.sell_box_count
+	local buy_box_count  = global.buy_box_count
+	game.print("This scenario uses for testing \"Free market\".")
 	game.print("Created " .. dummy_forces_count .. " dummy forces and using " .. max_items .. " items.")
 	game.print("Created " .. sell_box_count .. " sell boxes")
 	game.print("Created " .. buy_box_count .. " buy boxes")
