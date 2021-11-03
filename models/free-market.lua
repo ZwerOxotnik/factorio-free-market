@@ -1189,6 +1189,13 @@ local function on_force_created(event)
 end
 
 local function check_teams_data()
+	for _, storage in pairs(storages) do
+		for item_name, count in pairs(storage) do
+			if count == 0 then
+				storage[item_name] = nil
+			end
+		end
+	end
 	for _, items_data in pairs(pull_boxes) do
 		for item_name, entities in pairs(items_data) do
 			if next(entities) == nil then
