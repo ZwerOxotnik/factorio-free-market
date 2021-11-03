@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.20.1
+Date: 2021-11-03
+  Bugfixes:
+    - Fixed typos
+    - Fixed data of mod items for storage and pull boxes
+  Changes:
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
 Version: 0.20.0
 Date: 2021-11-03
   Features:
@@ -9,4 +17,4 @@ Date: 2021-11-03
     - Changed the test scenario
     - Refactored
   Notes:
-    - Previous version: https://mods.factorio.com/mod/free-market
+    - Less cheaty version: https://mods.factorio.com/mod/free-market

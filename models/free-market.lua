@@ -281,12 +281,13 @@ local function set_buy_box_data(item_name, player, entity, count)
 end
 
 local function clear_invalid_prices(prices)
+	local item_prototypes = game.item_prototypes
+	local forces = game.forces
 	for index, forces_data in pairs(prices) do
-		if game.forces[index] == nil then
+		if forces[index] == nil then
 			sell_prices[index] = nil
 			buy_prices[index] = nil
 		else
-			local item_prototypes = game.item_prototypes
 			for item_name in pairs(forces_data) do
 				if item_prototypes[item_name] == nil then
 					forces_data[item_name] = nil
@@ -296,9 +297,35 @@ local function clear_invalid_prices(prices)
 	end
 end
 
-local function clear_invalid_sell_boxes_data()
-	for index, data in pairs(sell_boxes) do
-		if game.forces[index] == nil then
+local function clear_invalid_storage_data()
+	local item_prototypes = game.item_prototypes
+	local forces = game.forces
+	for index, data in pairs(pull_boxes) do
+		if forces[index] == nil then
+			pull_boxes[index] = nil
+			sell_boxes[index] = nil
+			buy_boxes[index] = nil
+			embargoes[index] = nil
+			sell_prices[index] = nil
+			buy_prices[index] = nil
+			storages[index] = nil
+		else
+			for item_name, count in pairs(data) do
+				if item_prototypes[item_name] == nil then
+					data[item_name] = nil
+				elseif count == 0 then
+					data[item_name] = nil
+				end
+			end
+		end
+	end
+end
+
+local function clear_invalid_pull_boxes_data()
+	local item_prototypes = game.item_prototypes
+	local forces = game.forces
+	for index, data in pairs(pull_boxes) do
+		if forces[index] == nil then
 			pull_boxes[index] = nil
 			sell_boxes[index] = nil
 			buy_boxes[index] = nil
@@ -308,7 +335,38 @@ local function clear_invalid_sell_boxes_data()
 			storages[index] = nil
 		else
 			for item_name, entities in pairs(data) do
-				if game.item_prototypes[item_name] == nil then
+				if item_prototypes[item_name] == nil then
+					data[item_name] = nil
+				else
+					for i=#entities, 1, -1 do
+						if entities[i].valid == false then
+							tremove(entities, i)
+						end
+					end
+					if #entities == 0 then
+						data[item_name] = nil
+					end
+				end
+			end
+		end
+	end
+end
+
+local function clear_invalid_sell_boxes_data()
+	local item_prototypes = game.item_prototypes
+	local forces = game.forces
+	for index, data in pairs(sell_boxes) do
+		if forces[index] == nil then
+			pull_boxes[index] = nil
+			sell_boxes[index] = nil
+			buy_boxes[index] = nil
+			embargoes[index] = nil
+			sell_prices[index] = nil
+			buy_prices[index] = nil
+			storages[index] = nil
+		else
+			for item_name, entities in pairs(data) do
+				if item_prototypes[item_name] == nil then
 					data[item_name] = nil
 				else
 					for i=#entities, 1, -1 do
@@ -326,8 +384,8 @@ local function clear_invalid_sell_boxes_data()
 end
 
 local function clear_invalid_buy_boxes_data()
-	local forces = game.forces
 	local item_prototypes = game.item_prototypes
+	local forces = game.forces
 	for index, data in pairs(buy_boxes) do
 		if forces[index] == nil then
 			buy_boxes[index] = nil
@@ -358,6 +416,8 @@ local function clear_invalid_buy_boxes_data()
 end
 
 local function clear_invalid_entities()
+	clear_invalid_storage_data()
+	clear_invalid_pull_boxes_data()
 	clear_invalid_sell_boxes_data()
 	clear_invalid_buy_boxes_data()
 
