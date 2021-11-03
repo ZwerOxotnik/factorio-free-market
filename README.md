@@ -44,8 +44,8 @@
   align="right"
 /> -->
 
-Free market
------------
+Free market (infinite version)
+------------------------------
 
 Adds Free market which works with any chest. Customizable, plain.\
 Sell/buy items from other teams, store and transfer items without restrictions.\
