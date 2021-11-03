@@ -54,7 +54,7 @@ You want more fair market with players than "Black Market"? You found what you w
 UPS friendly+, it works with any mod.
 
 <p align="center">
-  <a href="https://mods.factorio.com/mod/free-market/downloads"><strong>Download the mod&nbsp;&nbsp;▶</strong></a>
+  <a href="https://mods.factorio.com/mod/iFreeMarket"><strong>Download the mod&nbsp;&nbsp;▶</strong></a>
 </p>
 
 ‼️ Important Links (Translations, Discord Support)
