@@ -18,5 +18,6 @@ Returns tables of commands without functions as command "settings". All paramete
 return {
 	embargo = {},
 	prices = {},
+	storage = {},
 	price_list = {name = "price-list"}
 }

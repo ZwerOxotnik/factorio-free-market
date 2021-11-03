@@ -2177,6 +2177,12 @@ local function price_list_command(cmd)
 	open_price_list_gui(player)
 end
 
+local function storage_command(cmd)
+	local player = game.get_player(cmd.player_index)
+	if not (player and player.valid) then return end
+	open_storage_gui(player)
+end
+
 --#endregion
 
 
@@ -2367,7 +2373,8 @@ M.on_nth_tick = {
 M.commands = {
 	embargo = embargo_command,
 	prices = prices_command,
-	price_list = price_list_command
+	price_list = price_list_command,
+	storage = storage_command
 }
 
 
