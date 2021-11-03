@@ -2286,16 +2286,13 @@ end
 local function on_configuration_changed(event)
 	update_global_data()
 
-	local mod_changes = event.mod_changes["free-market"]
-	if not (mod_changes and mod_changes.old_version) then return end
+	-- local mod_changes = event.mod_changes["iFreeMarket"]
+	-- if not (mod_changes and mod_changes.old_version) then return end
 
-	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
+	-- local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
-	if version < 0.13 then
-		game.print({'', {"mod-name.free-market"}, {"colon"}, " [WARNING] this version doesn't migrate old data, please use older version <0.13.0"}, RED_COLOR)
-	elseif version < 0.14 then
-		game.print({'', {"mod-name.free-market"}, {"colon"}, " [WARNING] this version doesn't migrate old data, please use older version <0.14.0"}, RED_COLOR)
-	end
+	-- if version < 0.13 then
+	-- end
 end
 
 M.on_load = function ()
