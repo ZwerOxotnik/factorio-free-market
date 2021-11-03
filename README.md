@@ -47,11 +47,12 @@
 Free market
 -----------
 
-Adds Free market which works with any chest. Customizable, plain.
-Sell/buy items from other teams.
+Adds Free market which works with any chest. Customizable, plain.\
+Sell/buy items from other teams, store and transfer items without restrictions.\
 You want more fair market with players than "Black Market"? You found what you were looking for.
 
-UPS friendly+, it works with any mod.
+Has much better performance than previous version and works with any mod.
+Less cheaty version: https://mods.factorio.com/mod/free-market
 
 <p align="center">
   <a href="https://mods.factorio.com/mod/iFreeMarket"><strong>Download the mod&nbsp;&nbsp;▶</strong></a>
