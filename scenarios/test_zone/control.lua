@@ -75,6 +75,10 @@ local function place_dummy_trading_boxes(player)
 			end
 		end
 	end
+
+	global.pull_box_count = pull_box_count
+	global.sell_box_count = sell_box_count
+	global.buy_box_count = buy_box_count
 end
 
 script.on_event(defines.events.on_player_created, function(event)
