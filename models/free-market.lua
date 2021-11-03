@@ -460,11 +460,12 @@ local function update_prices_table(player, item_name, table_element)
 		end
 	end
 
+	local add = table_element.add
 	for _, data in pairs(result) do
 		if data.buy_price or data.sell_price then
-			table_element.add(LABEL).caption = data.name
-			table_element.add(LABEL).caption = (data.buy_price or '')
-			table_element.add(LABEL).caption = (data.sell_price or '')
+			add(LABEL).caption = data.name
+			add(LABEL).caption = (data.buy_price or '')
+			add(LABEL).caption = (data.sell_price or '')
 		end
 	end
 end
@@ -483,17 +484,18 @@ local function update_price_list_table(force, scroll_pane)
 	local f_buy_prices = buy_prices[force_index] or {}
 	local f_sell_prices = sell_prices[force_index] or {}
 
+	local add = price_list_table.add
 	for item_name, buy_price in pairs(f_buy_prices) do
-		price_list_table.add(SPRITE_BUTTON).sprite = "item/" .. item_name
-		price_list_table.add(LABEL).caption = buy_price
-		price_list_table.add(LABEL).caption = (f_sell_prices[item_name] or '')
+		add(SPRITE_BUTTON).sprite = "item/" .. item_name
+		add(LABEL).caption = buy_price
+		add(LABEL).caption = (f_sell_prices[item_name] or '')
 	end
 
 	for item_name, sell_price in pairs(f_sell_prices) do
 		if f_buy_prices[item_name] == nil then
-			price_list_table.add(SPRITE_BUTTON).sprite = "item/" .. item_name
-			price_list_table.add(EMPTY_WIDGET)
-			price_list_table.add(LABEL).caption = sell_price
+			add(SPRITE_BUTTON).sprite = "item/" .. item_name
+			add(EMPTY_WIDGET)
+			add(LABEL).caption = sell_price
 		end
 	end
 end
