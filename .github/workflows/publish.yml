@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - infinite_version
+      - infinite_storage
 
 name: Publish
 jobs:

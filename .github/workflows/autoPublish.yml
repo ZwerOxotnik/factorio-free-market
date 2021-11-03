@@ -5,7 +5,7 @@ on:
     paths:
       - 'info.json' # Triggers only if the mod info file is updated
     branches:
-      - infinite_version
+      - infinite_storage
 
 jobs:
   build:
