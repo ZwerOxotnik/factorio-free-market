@@ -44,7 +44,7 @@
   align="right"
 /> -->
 
-Free market (infinite version)
+Free market + infinite storage
 ------------------------------
 
 Adds Free market which works with any chest. Customizable, plain.\
@@ -69,7 +69,7 @@ If you want to download from this source, then use commands below (requires [git
 
 ```bash
 git clone --recurse-submodules -j8 https://github.com/ZwerOxotnik/factorio-free-market free-market
-cd free-market
+cd iFreeMarket
 ```
 
 [Contributing](/CONTRIBUTING.md)
