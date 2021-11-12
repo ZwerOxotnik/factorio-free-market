@@ -68,7 +68,7 @@ Less cheaty version: https://mods.factorio.com/mod/free-market
 If you want to download from this source, then use commands below (requires [git]).
 
 ```bash
-git clone --recurse-submodules -j8 https://github.com/ZwerOxotnik/factorio-free-market free-market
+git clone -b infinite_storage https://github.com/ZwerOxotnik/factorio-free-market iFreeMarket
 cd iFreeMarket
 ```
 
