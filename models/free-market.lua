@@ -46,6 +46,7 @@ local draw_text = rendering.draw_text
 local get_render_target = rendering.get_target
 local is_render_valid = rendering.is_valid
 local rendering_destroy = rendering.destroy
+local print_to_rcon = rcon.print
 local PULL_TYPE = 3
 local SELL_TYPE = 2
 local BUY_TYPE = 1
@@ -2276,7 +2277,31 @@ local function add_remote_interface()
 		end,
 		set_buy_price = function(item_name, force_index, price)
 			buy_prices[force_index][item_name] = price
-		end
+		end,
+		get_pull_boxes    = function() return pull_boxes end,
+		get_sell_boxes    = function() return sell_boxes end,
+		get_buy_boxes     = function() return buy_boxes end,
+		get_embargoes     = function() return embargoes end,
+		get_sell_prices   = function() return sell_prices end,
+		get_buy_prices    = function() return buy_prices end,
+		get_open_box      = function() return open_box end,
+		get_all_boxes     = function() return all_boxes end,
+		get_active_forces = function() return active_forces end,
+		get_storages      = function() return storages end,
+	})
+	remote.remove_interface("free-market_rcon") -- For safety
+	remote.add_interface("free-market_rcon", {
+		get_mod_data      = function() print_to_rcon(game.table_to_json(mod_data)) end,
+		get_pull_boxes    = function() print_to_rcon(game.table_to_json(pull_boxes)) end,
+		get_sell_boxes    = function() print_to_rcon(game.table_to_json(sell_boxes)) end,
+		get_buy_boxes     = function() print_to_rcon(game.table_to_json(buy_boxes)) end,
+		get_embargoes     = function() print_to_rcon(game.table_to_json(embargoes)) end,
+		get_sell_prices   = function() print_to_rcon(game.table_to_json(sell_prices)) end,
+		get_buy_prices    = function() print_to_rcon(game.table_to_json(buy_prices)) end,
+		get_open_box      = function() print_to_rcon(game.table_to_json(open_box)) end,
+		get_all_boxes     = function() print_to_rcon(game.table_to_json(all_boxes)) end,
+		get_active_forces = function() print_to_rcon(game.table_to_json(active_forces)) end,
+		get_storages      = function() print_to_rcon(game.table_to_json(storages)) end,
 	})
 end
 

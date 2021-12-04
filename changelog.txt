@@ -1,4 +1,11 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.20.3
+Date: 2021-12-04
+  Features:
+    - Added remote interface: "free-market_rcon" for rcon
+  Changes:
+    - Added functions in remote interfaces to get specific mod data (not done yet though)
+---------------------------------------------------------------------------------------------------
 Version: 0.20.2
 Date: 2021-11-17
   Changes:
