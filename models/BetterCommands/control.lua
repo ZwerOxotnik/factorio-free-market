@@ -8,8 +8,8 @@ local M = {}
 local all_commands = {} -- commands from other modules
 
 local MAX_INPUT_LENGTH = 500 -- set any number
-local CONST_COMMANDS = require("__iFreeMarket__/const-commands")
-local SWITCHABLE_COMMANDS = require("__iFreeMarket__/switchable-commands")
+local CONST_COMMANDS = require("__free-market__/const-commands")
+local SWITCHABLE_COMMANDS = require("__free-market__/switchable-commands")
 
 
 local find = string.find
