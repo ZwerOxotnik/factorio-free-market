@@ -2069,7 +2069,7 @@ M.on_nth_tick = {
 M.commands = {
 	embargo = embargo_command,
 	prices = prices_command,
-	price_list = price_list_command,
+	price_list = price_list_command
 }
 
 
