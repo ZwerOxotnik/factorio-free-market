@@ -733,6 +733,14 @@ local function open_embargo_gui(player)
 end
 
 ---@param player LuaPlayer #LuaPlayer
+local function destroy_force_configuration(player)
+	local element = player.gui.screen.FM_force_configuration
+	if element then
+		element.destroy()
+	end
+end
+
+---@param player LuaPlayer #LuaPlayer
 local function open_force_configuration(player)
 	local screen = player.gui.screen
 	if screen.FM_force_configuration then
@@ -2192,6 +2200,7 @@ local function on_player_left_game(event)
 	clear_boxes_gui(player)
 	destroy_prices_gui(player)
 	destroy_price_list_gui(player)
+	destroy_force_configuration(player)
 end
 
 local mod_settings = {
