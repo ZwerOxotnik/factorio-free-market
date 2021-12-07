@@ -1,5 +1,4 @@
 local dummy_forces_count = 7
-local repeat_pull_count = 1
 local repeat_sell_count = 8
 local repeat_buy_count = 8
 local max_items = 200
@@ -9,7 +8,6 @@ local PROHIBIT_ITEMS_TYPES = {
 local function place_dummy_trading_boxes(player)
 	local stack = {name = "", count = 10}
 	local position = {x=0, y=0}
-	local pull_box_count = global.pull_box_count
 	local sell_box_count = global.sell_box_count
 	local buy_box_count  = global.buy_box_count
 	local force = player.force
@@ -18,25 +16,6 @@ local function place_dummy_trading_boxes(player)
 	local create_entity = surface.create_entity
 	local entity
 	local i = 0
-	position.y = 2
-	for item_name, item in pairs(game.item_prototypes) do
-		if not PROHIBIT_ITEMS_TYPES[item.type] then
-			i = i + 1
-			if i > max_items then
-				break
-			end
-			stack.name = item_name
-			for _=1, repeat_pull_count do
-				pull_box_count = pull_box_count + 1
-				position.x = pull_box_count
-				entity = create_entity{name="steel-chest", position=position, force=force}
-				remote.call("free-market", "set_pull_box_data", item_name, player, entity)
-				entity.insert(stack)
-			end
-		end
-	end
-
-	i = 0
 	position.y = -2
 	for item_name, item in pairs(game.item_prototypes) do
 		if not PROHIBIT_ITEMS_TYPES[item.type] then
@@ -76,14 +55,12 @@ local function place_dummy_trading_boxes(player)
 		end
 	end
 
-	global.pull_box_count = pull_box_count
 	global.sell_box_count = sell_box_count
 	global.buy_box_count = buy_box_count
 end
 
 script.on_event(defines.events.on_player_created, function(event)
 	if event.player_index ~= 1 then return end
-	global.pull_box_count = 0
 	global.sell_box_count = 0
 	global.buy_box_count = 0
 
@@ -98,12 +75,10 @@ script.on_event(defines.events.on_player_created, function(event)
 		max_items = #game.item_prototypes
 	end
 
-	local pull_box_count = global.pull_box_count
 	local sell_box_count = global.sell_box_count
 	local buy_box_count  = global.buy_box_count
 	game.print("This scenario uses for testing \"Free market\".")
 	game.print("Created " .. dummy_forces_count .. " dummy forces and using " .. max_items .. " items.")
 	game.print("Created " .. sell_box_count .. " sell boxes")
 	game.print("Created " .. buy_box_count .. " buy boxes")
-	game.print("Created " .. pull_box_count .. " pull boxes")
 end)
