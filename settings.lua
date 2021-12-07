@@ -7,5 +7,6 @@ data:extend({
 	{type = "int-setting", name = "FM_maximal-price", setting_type = "runtime-global", default_value = 1e9, minimal_value = 1, maximal_value = 1e19},
 	{type = "int-setting", name = "FM_skip_offline_team_chance", setting_type = "runtime-global", default_value = 0, minimal_value = 0, maximal_value = 100},
 	{type = "bool-setting", name = "FM_enable-auto-embargo", setting_type = "runtime-global", default_value = true},
-	{type = "bool-setting", name = "FM_is-public-titles", setting_type = "runtime-global", default_value = true}
+	{type = "bool-setting", name = "FM_is-public-titles", setting_type = "runtime-global", default_value = true},
+	{type = "bool-setting", name = "FM_is_reset_public", setting_type = "runtime-global", default_value = true}
 })

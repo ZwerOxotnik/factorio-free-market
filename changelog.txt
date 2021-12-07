@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.22.0
+Date: 2021-12-07
+  Features:
+    - Added team configuration with resetting of data
+  Changes:
+    - Improved info icon
+    - Changed localization
+---------------------------------------------------------------------------------------------------
 Version: 0.21.0
 Date: 2021-12-07
   Changes:

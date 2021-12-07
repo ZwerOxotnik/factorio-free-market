@@ -114,6 +114,9 @@ local skip_offline_team_chance = settings.global["FM_skip_offline_team_chance"].
 
 ---@type boolean
 local is_public_titles = settings.global["FM_is-public-titles"].value
+
+---@type boolean
+local is_reset_public = settings.global["FM_is_reset_public"].value
 --#endregion
 
 
@@ -284,6 +287,42 @@ local function set_buy_box_data(item_name, player, entity, count)
 	local id = draw_text(text_data)
 	-- (it's kind of messy data. Perhaps, there's another way)
 	all_boxes[entity.unit_number] = {entity, id, BUY_TYPE, items, item_name}
+end
+
+---@param force_index number
+local function reset_buy_boxes(force_index)
+	for _, forces_data in pairs(buy_boxes[force_index]) do
+		for key, entities_data in pairs(forces_data) do
+			local unit_number = entities_data[1].unit_number
+			rendering_destroy(all_boxes[unit_number][2])
+			all_boxes[unit_number] = nil
+		end
+	end
+	buy_boxes[force_index] = {}
+end
+
+---@param force_index number
+local function reset_sell_boxes(force_index)
+	for _, entities_data in pairs(sell_boxes[force_index]) do
+		for i=1, #entities_data do
+			local unit_number = entities_data[i].unit_number
+			rendering_destroy(all_boxes[unit_number][2])
+			all_boxes[unit_number] = nil
+		end
+	end
+	sell_boxes[force_index] = {}
+end
+
+---@param force_index number
+local function reset_pull_boxes(force_index)
+	for _, entities_data in pairs(pull_boxes[force_index]) do
+		for i=1, #entities_data do
+			local unit_number = entities_data[i].unit_number
+			rendering_destroy(all_boxes[unit_number][2])
+			all_boxes[unit_number] = nil
+		end
+	end
+	pull_boxes[force_index] = {}
 end
 
 local function clear_invalid_prices(prices)
@@ -694,6 +733,53 @@ local function open_embargo_gui(player)
 end
 
 ---@param player LuaPlayer #LuaPlayer
+local function open_force_configuration(player)
+	local screen = player.gui.screen
+	if screen.FM_force_configuration then
+		screen.FM_force_configuration.destroy()
+		return
+	end
+	local main_frame = screen.add{type = "frame", name = "FM_force_configuration", direction = "vertical"}
+	main_frame.style.horizontally_stretchable = true
+	local flow = main_frame.add(TITLEBAR_FLOW)
+	flow.add{
+		type = "label",
+		style = "frame_title",
+		caption = {"free-market.team-configuration"},
+		ignored_by_interaction = true
+	}
+	flow.add(DRAG_HANDLER).drag_target = main_frame
+	-- flow.add{
+	-- 	type = "sprite-button",
+	-- 	style = "frame_action_button",
+	-- 	sprite = "refresh_white_icon",
+	-- 	name = "FM_refresh_prices_table"
+	-- }
+	flow.add(CLOSE_BUTTON)
+	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
+	local content = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
+	content.style.padding = 12
+
+	local reset_caption = {'', {"free-market.reset-gui"}, ' ', {"colon"}}
+	local reset_prices_row = content.add(FLOW)
+	reset_prices_row.name = "reset_prices_row"
+	reset_prices_row.add(LABEL).caption = reset_caption
+	reset_prices_row.add{type = "button", caption = {"free-market.reset-buy-prices"} , name = "FM_reset_buy_prices"}
+	reset_prices_row.add{type = "button", caption = {"free-market.reset-sell-prices"}, name = "FM_reset_sell_prices"}
+	reset_prices_row.add{type = "button", caption = {"free-market.reset-all-prices"} , name = "FM_reset_all_prices"}
+
+	local reset_boxes_row = content.add(FLOW)
+	reset_boxes_row.name = "reset_boxes_row"
+	reset_boxes_row.add(LABEL).caption = reset_caption
+	reset_boxes_row.add{type = "button", caption = {"free-market.reset-buy-requests"},  name = "FM_reset_buy_boxes"}
+	reset_boxes_row.add{type = "button", caption = {"free-market.reset-sell-offers"},   name = "FM_reset_sell_boxes"}
+	reset_boxes_row.add{type = "button", caption = {"free-market.reset-pull-requests"}, name = "FM_reset_pull_boxes"}
+	reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}
+
+	main_frame.force_auto_center()
+end
+
+---@param player LuaPlayer #LuaPlayer
 ---@param item_name? string
 local function open_prices_gui(player, item_name)
 	local screen = player.gui.screen
@@ -1051,8 +1137,15 @@ local function create_left_relative_gui(player)
 	table.add{type = "sprite-button", sprite = "FM_see-prices", style="slot_button", name = "FM_open_price_list"}
 	table.add{type = "sprite-button", sprite = "FM_embargo", style="slot_button", name = "FM_open_embargo"}
 	table.add{type = "sprite-button", sprite = "item/wooden-chest", style = "slot_button", name = "FM_open_storage"} -- TODO: change the sprite
-	table.add{type = "sprite-button", sprite = "info", style = "slot_button", name = "FM_show_hint"}
-	table.add{type = "sprite-button", style = "slot_button"}
+	table.add{type = "sprite-button", sprite = "virtual-signal/signal-info", style = "slot_button", name = "FM_show_hint"}
+	table.add{
+		type = "sprite-button",
+		sprite = "utility/side_menu_menu_icon",
+		hovered_sprite = "utility/side_menu_menu_hover_icon",
+		clicked_sprite = "utility/side_menu_menu_hover_icon",
+		style = "slot_button",
+		name = "FM_open_force_configuration"
+	}
 end
 
 ---@param player LuaPlayer #LuaPlayer
@@ -1765,6 +1858,62 @@ local GUIS = {
 			open_box[player.index] = entity
 		end
 	end,
+	FM_reset_buy_prices = function(element, player)
+		if is_reset_public or player.admin then
+			local force_index = player.force.index
+			buy_prices[force_index] = {}
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
+	FM_reset_sell_prices = function(element, player)
+		if is_reset_public or player.admin then
+			local force_index = player.force.index
+			sell_prices[force_index] = {}
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
+	FM_reset_all_prices = function(element, player)
+		if is_reset_public or player.admin then
+			local force_index = player.force.index
+			sell_prices[force_index] = {}
+			buy_prices[force_index] = {}
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
+	FM_reset_buy_boxes = function(element, player)
+		if is_reset_public or player.admin then
+			reset_buy_boxes(player.force.index)
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
+	FM_reset_sell_boxes = function(element, player)
+		if is_reset_public or player.admin then
+			reset_sell_boxes(player.force.index)
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
+	FM_reset_pull_boxes = function(element, player)
+		if is_reset_public or player.admin then
+			reset_pull_boxes(player.force.index)
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
+	FM_reset_all_boxes = function(element, player)
+		if is_reset_public or player.admin then
+			local force_index = player.force.index
+			reset_buy_boxes(force_index)
+			reset_sell_boxes(force_index)
+			reset_pull_boxes(force_index)
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
 	FM_declare_embargo = function(element, player)
 		local table_element = element.parent.parent
 		local forces_list = table_element.forces_list
@@ -1797,19 +1946,22 @@ local GUIS = {
 		end
 		update_embargo_table(table_element, player)
 	end,
-	["FM_open_price"] = function(element, player)
+	FM_open_force_configuration = function(element, player)
+		open_force_configuration(player)
+	end,
+	FM_open_price = function(element, player)
 		open_prices_gui(player)
 	end,
-	["FM_open_price_list"] = function(element, player)
+	FM_open_price_list = function(element, player)
 		open_price_list_gui(player)
 	end,
-	["FM_open_embargo"] = function(element, player)
+	FM_open_embargo = function(element, player)
 		open_embargo_gui(player)
 	end,
-	["FM_open_storage"] = function(element, player)
+	FM_open_storage = function(element, player)
 		open_storage_gui(player)
 	end,
-	["FM_show_hint"] = function(element, player)
+	FM_show_hint = function(element, player)
 		player.print({"free-market.hint"})
 	end,
 	FM_hide_left_buttons = function(element, player)
@@ -2045,6 +2197,7 @@ end
 local mod_settings = {
 	["FM_enable-auto-embargo"] = function(value) is_auto_embargo = value end,
 	["FM_is-public-titles"] = function(value) is_public_titles = value end,
+	["FM_is_reset_public"] = function(value) is_reset_public = value end,
 	["FM_money-treshold"] = function(value) money_treshold = value end,
 	["FM_minimal-price"] = function(value) minimal_price = value end,
 	["FM_maximal-price"] = function(value) maximal_price = value end,
@@ -2304,6 +2457,11 @@ local function on_configuration_changed(event)
 	if version < 0.21 then
 		for _, player in pairs(game.players) do
 			create_top_relative_gui(player)
+		end
+	end
+	if version < 0.22 then
+		for _, player in pairs(game.players) do
+			create_left_relative_gui(player)
 		end
 	end
 end
