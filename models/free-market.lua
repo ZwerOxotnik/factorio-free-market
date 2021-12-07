@@ -79,6 +79,12 @@ local ITEM_FILTERS = {
 	{filter = "selection-tool", invert = true, mode = "and"},
 	{filter = "tool", invert = true, mode = "and"}
 }
+local CHECK_BUTTON = {
+	type = "sprite-button",
+	style = "item_and_count_select_confirm",
+	sprite = "utility/check_mark"
+}
+local boxes_anchor = {gui = defines.relative_gui_type.container_gui, position = defines.relative_gui_position.top}
 --#endregion
 
 
@@ -152,8 +158,7 @@ local function remove_certain_pull_box(entity, item_name)
 	local f_pull_boxes = pull_boxes[entity.force.index]
 	local entities = f_pull_boxes[item_name]
 	for i = 1, #entities do
-		local buy_box = entities[i]
-		if buy_box[1] == entity then
+		if entities[i] == entity then
 			tremove(entities, i)
 			if #entities == 0 then
 				f_pull_boxes[item_name] = nil
@@ -732,12 +737,7 @@ local function open_prices_gui(player, item_name)
 			buy_textfield.text = tostring(price)
 		end
 	end
-	item_row.add{
-		type = "sprite-button",
-		name = "FM_confirm_buy_price",
-		style = "item_and_count_select_confirm",
-		sprite = "utility/check_mark"
-	}
+	item_row.add(CHECK_BUTTON).name = "FM_confirm_buy_price"
 	item_row.add(LABEL).caption = {"free-market.sell-gui"}
 	local sell_textfield = item_row.add{type = "textfield", name = "sell_price", numeric = true, allow_decimal = false, allow_negative = false}
 	sell_textfield.style.width = 70
@@ -747,12 +747,7 @@ local function open_prices_gui(player, item_name)
 			sell_textfield.text = tostring(price)
 		end
 	end
-	item_row.add{
-		type = "sprite-button",
-		name = "FM_confirm_sell_price",
-		style = "item_and_count_select_confirm",
-		sprite = "utility/check_mark"
-	}
+	item_row.add(CHECK_BUTTON).name = "FM_confirm_sell_price"
 	local prices_frame = content.add{type = "frame", name = "other_prices_frame", style = "deep_frame_in_shallow_frame", direction = "vertical"}
 	local scroll_pane = prices_frame.add{
 		type = "scroll-pane",
@@ -920,39 +915,18 @@ end
 ---@param is_new boolean# Is new buy box?
 ---@param entity? LuaEntity #LuaEntity # The buy box when is_new = true
 local function open_buy_box_gui(player, is_new, entity)
-	local screen = player.gui.screen
-	if screen.FM_buy_box_frame then
-		screen.FM_buy_box_frame.destroy()
+	local box_operations = player.gui.relative.FM_boxes_frame.content.main_flow.box_operations
+	if box_operations.buy_content then
+		box_operations.clear()
 		return
 	end
-	if screen.FM_sell_box_frame then
-		screen.FM_sell_box_frame.destroy()
-	end
-	if screen.FM_pull_box_frame then
-		screen.FM_pull_box_frame.destroy()
-	end
-	local main_frame = screen.add{type = "frame", name = "FM_buy_box_frame", direction = "vertical"}
-	local flow = main_frame.add(TITLEBAR_FLOW)
-	flow.add{
-		type = "label",
-		style = "frame_title",
-		caption = {"free-market.buy-request-gui"},
-		ignored_by_interaction = true
-	}
-	flow.add(DRAG_HANDLER).drag_target = main_frame
-	flow.add(CLOSE_BUTTON)
-	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
-	local row = shallow_frame.add{type = "table", name = "content_row", column_count = 4}
-	row.style.padding = 12
+	box_operations.clear()
+	local row = box_operations.add{type = "table", name = "buy_content", column_count = 4}
 	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 	row.add{type = "label", caption = {'', {"free-market.count-gui"}, {"colon"}}}
 	local count_element = row.add{type = "textfield", name = "count", numeric = true, allow_decimal = false, allow_negative = false}
 	count_element.style.width = 70
-	local confirm_button = row.add{
-		type = "sprite-button",
-		style = "item_and_count_select_confirm",
-		sprite = "utility/check_mark"
-	}
+	local confirm_button = row.add(CHECK_BUTTON)
 	if is_new then
 		confirm_button.name = "FM_confirm_buy_box"
 	else
@@ -969,20 +943,10 @@ local function open_buy_box_gui(player, is_new, entity)
 		local item_name = box_data[5]
 		FM_item.elem_value = item_name
 	end
-	main_frame.force_auto_center()
 end
 
-local function destroy_boxes_gui(player)
-	local screen = player.gui.screen
-	if screen.FM_sell_box_frame then
-		screen.FM_sell_box_frame.destroy()
-	end
-	if screen.FM_buy_box_frame then
-		screen.FM_buy_box_frame.destroy()
-	end
-	if screen.FM_pull_box_frame then
-		screen.FM_pull_box_frame.destroy()
-	end
+local function clear_boxes_gui(player)
+	player.gui.relative.FM_boxes_frame.content.main_flow.box_operations.clear()
 	open_box[player.index] = nil
 end
 
@@ -990,73 +954,45 @@ end
 ---@param is_new boolean # Is new sell box?
 ---@param entity? LuaEntity #LuaEntity # The sell box when is_new = true
 local function open_sell_box_gui(player, is_new, entity)
-	local screen = player.gui.screen
-	if screen.FM_sell_box_frame then
-		screen.FM_sell_box_frame.destroy()
+	local box_operations = player.gui.relative.FM_boxes_frame.content.main_flow.box_operations
+	if box_operations.sell_content then
+		box_operations.clear()
 		return
 	end
-	if screen.FM_buy_box_frame then
-		screen.FM_buy_box_frame.destroy()
-	end
-	if screen.FM_pull_box_frame then
-		screen.FM_pull_box_frame.destroy()
-	end
-	local main_frame = screen.add{type = "frame", name = "FM_sell_box_frame", direction = "vertical"}
-	main_frame.style.minimal_width = 210
-	local flow = main_frame.add(TITLEBAR_FLOW)
-	flow.add{
-		type = "label",
-		style = "frame_title",
-		caption = {"free-market.sell-offer-gui"},
-		ignored_by_interaction = true
-	}
-	flow.add(DRAG_HANDLER).drag_target = main_frame
-	flow.add(CLOSE_BUTTON)
-	local shallow_frame = main_frame.add{type = "frame", style = "inside_shallow_frame", direction = "vertical"}
-	local row = shallow_frame.add{type = "table", column_count = 2}
-	row.style.padding = 12
+	box_operations.clear()
+	local row = box_operations.add{type = "table", name = "sell_content", column_count = 2}
 	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
-	local confirm_button = row.add{
-		type = "sprite-button",
-		style = "item_and_count_select_confirm",
-		sprite = "utility/check_mark"
-	}
+	local confirm_button = row.add(CHECK_BUTTON)
 	if is_new then
 		confirm_button.name = "FM_confirm_sell_box"
 	else
 		confirm_button.name = "FM_change_sell_box"
 		FM_item.elem_value = all_boxes[entity.unit_number][5]
 	end
-	main_frame.force_auto_center()
-end
-
----@param index number
-local function remove_index_among_embargoes(index)
-	embargoes[index] = nil
-	for _, data in pairs(embargoes) do
-		data[index] = nil
-	end
 end
 
 local BOLD_FONT_COLOR = {255, 230, 192}
-local top_anchor = {gui = defines.relative_gui_type.container_gui, position = defines.relative_gui_position.top}
 local function create_top_relative_gui(player)
 	local relative = player.gui.relative
 	if relative.FM_boxes_frame then
 		relative.FM_boxes_frame.destroy()
 	end
-	local main_frame = relative.add{type = "frame", name = "FM_boxes_frame", anchor = top_anchor}
+	local main_frame = relative.add{type = "frame", name = "FM_boxes_frame", anchor = boxes_anchor}
 	main_frame.style.vertical_align = "center"
 	main_frame.style.horizontally_stretchable = false
 	main_frame.style.bottom_margin = -14
 	local frame = main_frame.add{type = "frame", name = "content", style = "inside_shallow_frame"}
-	local buy_button = frame.add{type = "button", style="slot_button", name = "FM_set_buy_box", caption = {"free-market.buy-gui"}}
+	local main_flow = frame.add{type = "flow", name = "main_flow", direction = "vertical"}
+	main_flow.style.vertical_spacing = 0
+	main_flow.add(FLOW).name = "box_operations"
+	local flow = main_flow.add(FLOW)
+	local buy_button = flow.add{type = "button", style="slot_button", name = "FM_set_buy_box", caption = {"free-market.buy-gui"}}
 	buy_button.style.font_color = BOLD_FONT_COLOR
 	buy_button.style.right_margin = -6
-	local sell_button = frame.add{type = "button", style="slot_button", name = "FM_set_sell_box", caption = {"free-market.sell-gui"}}
+	local sell_button = flow.add{type = "button", style="slot_button", name = "FM_set_sell_box", caption = {"free-market.sell-gui"}}
 	sell_button.style.font_color = BOLD_FONT_COLOR
 	sell_button.style.right_margin = -6
-	local pull_button = frame.add{type = "button", style="slot_button", name = "FM_set_pull_box", caption = {"free-market.pull-gui"}}
+	local pull_button = flow.add{type = "button", style="slot_button", name = "FM_set_pull_box", caption = {"free-market.pull-gui"}}
 	pull_button.style.font_color = BOLD_FONT_COLOR
 end
 
@@ -1064,44 +1000,21 @@ end
 ---@param is_new boolean # Is new pull box?
 ---@param entity? LuaEntity #LuaEntity # The sell box when is_new = true
 local function open_pull_box_gui(player, is_new, entity)
-	local screen = player.gui.screen
-	if screen.FM_pull_box_frame then
-		screen.FM_pull_box_frame.destroy()
+	local box_operations = player.gui.relative.FM_boxes_frame.content.main_flow.box_operations
+	if box_operations.pull_content then
+		box_operations.clear()
 		return
 	end
-	if screen.FM_buy_box_frame then
-		screen.FM_buy_box_frame.destroy()
-	end
-	if screen.FM_sell_box_frame then
-		screen.FM_sell_box_frame.destroy()
-	end
-	local main_frame = screen.add{type = "frame", name = "FM_pull_box_frame", direction = "vertical"}
-	main_frame.style.minimal_width = 210
-	local flow = main_frame.add(TITLEBAR_FLOW)
-	flow.add{
-		type = "label",
-		style = "frame_title",
-		caption = {"free-market.pull-request-gui"},
-		ignored_by_interaction = true
-	}
-	flow.add(DRAG_HANDLER).drag_target = main_frame
-	flow.add(CLOSE_BUTTON)
-	local shallow_frame = main_frame.add{type = "frame", style = "inside_shallow_frame", direction = "vertical"}
-	local row = shallow_frame.add{type = "table", column_count = 2}
-	row.style.padding = 12
+	box_operations.clear()
+	local row = box_operations.add{type = "table", name = "pull_content", column_count = 2}
 	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
-	local confirm_button = row.add{
-		type = "sprite-button",
-		style = "item_and_count_select_confirm",
-		sprite = "utility/check_mark"
-	}
+	local confirm_button = row.add(CHECK_BUTTON)
 	if is_new then
 		confirm_button.name = "FM_confirm_pull_box"
 	else
 		confirm_button.name = "FM_change_pull_box"
 		FM_item.elem_value = all_boxes[entity.unit_number][5]
 	end
-	main_frame.force_auto_center()
 end
 
 ---@param index number
@@ -1205,15 +1118,15 @@ local function clear_box_data(event)
 		for i = 1, #entities_data do
 			local buy_box = entities_data[i]
 			if buy_box[1] == entity then
-				tremove(box_data[4], i)
+				tremove(entities_data, i)
 				break
 			end
 		end
 	else -- SELL_TYPE, PULL_TYPE
-		local entities = box_data[4]
-		for i = 1, #entities do
-			if entities[i] == entity then
-				tremove(box_data[4], i)
+		local entities_data = box_data[4]
+		for i = 1, #entities_data do
+			if entities_data[i] == entity then
+				tremove(entities_data, i)
 				break
 			end
 		end
@@ -1233,7 +1146,7 @@ local function on_player_joined_game(event)
 	local player_index = event.player_index
 	open_box[player_index] = nil
 	local player = game.get_player(player_index)
-	destroy_boxes_gui(player)
+	clear_boxes_gui(player)
 	destroy_prices_gui(player)
 	destroy_price_list_gui(player)
 end
@@ -1525,7 +1438,8 @@ local GUIS = {
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
 		open_box[player_index] = nil
-		player.gui.screen.FM_buy_box_frame.destroy()
+		local box_operations = element.parent.parent
+		box_operations.clear()
 	end,
 	FM_confirm_sell_box = function(element, player)
 		local item_name = element.parent.FM_item.elem_value
@@ -1544,7 +1458,8 @@ local GUIS = {
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
 		open_box[player_index] = nil
-		player.gui.screen.FM_sell_box_frame.destroy()
+		local box_operations = element.parent.parent
+		box_operations.clear()
 	end,
 	FM_confirm_pull_box = function(element, player)
 		local item_name = element.parent.FM_item.elem_value
@@ -1562,7 +1477,8 @@ local GUIS = {
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
 		open_box[player_index] = nil
-		player.gui.screen.FM_pull_box_frame.destroy()
+		local box_operations = element.parent.parent
+		box_operations.clear()
 	end,
 	FM_change_sell_box = function(element, player)
 		local parent = element.parent
@@ -1594,7 +1510,8 @@ local GUIS = {
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
 		open_box[player_index] = nil
-		player.gui.screen.FM_sell_box_frame.destroy()
+		local box_operations = element.parent.parent
+		box_operations.clear()
 	end,
 	FM_change_pull_box = function(element, player)
 		local parent = element.parent
@@ -1626,7 +1543,8 @@ local GUIS = {
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
 		open_box[player_index] = nil
-		player.gui.screen.FM_pull_box_frame.destroy()
+		local box_operations = element.parent.parent
+		box_operations.clear()
 	end,
 	FM_change_buy_box = function(element, player)
 		local parent = element.parent
@@ -1663,7 +1581,8 @@ local GUIS = {
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
 		open_box[player_index] = nil
-		player.gui.screen.FM_buy_box_frame.destroy()
+		local box_operations = element.parent.parent
+		box_operations.clear()
 	end,
 	FM_confirm_sell_price = function(element, player)
 		local parent = element.parent
@@ -1817,10 +1736,10 @@ local GUIS = {
 					open_buy_box_gui(player, true)
 				else
 					open_buy_box_gui(player, true)
-					local content_row = player.gui.screen.FM_buy_box_frame.shallow_frame.content_row
+					local buy_content = player.gui.relative.FM_boxes_frame.content.main_flow.box_operations.buy_content
 					local item_name = item.name
-					content_row.FM_item.elem_value = item_name
-					content_row.count.text = tostring(game.item_prototypes[item_name].stack_size)
+					buy_content.FM_item.elem_value = item_name
+					buy_content.count.text = tostring(game.item_prototypes[item_name].stack_size)
 
 					-- TODO: refactor
 					local force_index = player.force.index
@@ -2097,7 +2016,7 @@ end
 -- TODO: update prices
 local function on_player_changed_force(event)
 	local player = game.get_player(event.player_index)
-	destroy_boxes_gui(player)
+	clear_boxes_gui(player)
 
 	local index = player.force.index
 	if sell_boxes[index] == nil then
@@ -2113,12 +2032,12 @@ end
 
 local function on_player_changed_surface(event)
 	local player = game.get_player(event.player_index)
-	destroy_boxes_gui(player)
+	clear_boxes_gui(player)
 end
 
 local function on_player_left_game(event)
 	local player = game.get_player(event.player_index)
-	destroy_boxes_gui(player)
+	clear_boxes_gui(player)
 	destroy_prices_gui(player)
 	destroy_price_list_gui(player)
 end
@@ -2377,13 +2296,16 @@ end
 local function on_configuration_changed(event)
 	update_global_data()
 
-	-- local mod_changes = event.mod_changes["iFreeMarket"]
-	-- if not (mod_changes and mod_changes.old_version) then return end
+	local mod_changes = event.mod_changes["iFreeMarket"]
+	if not (mod_changes and mod_changes.old_version) then return end
 
-	-- local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
+	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
-	-- if version < 0.13 then
-	-- end
+	if version < 0.21 then
+		for _, player in pairs(game.players) do
+			create_top_relative_gui(player)
+		end
+	end
 end
 
 M.on_load = function ()
