@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - infinite_storage
+      - main
 
 name: Lint
 jobs:
