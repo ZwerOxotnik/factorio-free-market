@@ -14,8 +14,8 @@ Date: 2021-12-07
   Notes:
     - Translations: https://crowdin.com/project/factorio-mods-localization (thank you for contributions, I really appreciate it)
     - Version with infinite storage: https://mods.factorio.com/mod/iFreeMarket
-    - WARNING: this version doesn't migrate some data (it's fully safe to use in the case, but you may try)
-    - If you used old version, then you better to create new map to avoid bugs with "old" chests
+    - WARNING: this version doesn't migrate some data (it's not fully safe to use in the case, but you may try)
+    - If your map used old version, then you better to create new map to avoid bugs with "old" chests
 ---------------------------------------------------------------------------------------------------
 Version: 0.16.7
 Date: 2021-11-02
