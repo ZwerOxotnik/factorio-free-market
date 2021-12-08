@@ -1,18 +1,17 @@
 ﻿---------------------------------------------------------------------------------------------------
-Version: 0.23.0
+Version: 0.23.1
 Date: 2021-12-08
   Features:
+    - If another team doesn't have anything to sell, then other teams won't see its prices
     - Added global function "print_force_data" which supports LuaForce and LuaPlayer
-    - If another team doesn't have anything to sell, then you won't see its prices
   Changes:
     - Changed structures of data for prices and boxes
-    - Chnanged "free-market" interface
+    - Optimized again
+    - Changed "free-market" interface
     - Removed "free-market_rcon" interface, so use:
     -   /sc __iFreeMarket__ getRconData("name of data")
     -   /sc __iFreeMarket__ getRconForceData("name of data", LuaForce)
     -   /sc __iFreeMarket__ getRconForceDataByIndex("name of data", index)
-  Notes:
-    - This is a experimental version, do not use it to play with it.
 ---------------------------------------------------------------------------------------------------
 Version: 0.22.1
 Date: 2021-12-07
