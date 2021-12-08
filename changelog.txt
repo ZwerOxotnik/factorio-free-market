@@ -68,3 +68,363 @@ Date: 2021-11-03
     - Refactored
   Notes:
     - Less cheaty version: https://mods.factorio.com/mod/free-market
+---------------------------------------------------------------------------------------------------
+Version: 0.16.7
+Date: 2021-11-02
+  Features:
+    - Changed description and dependencies
+---------------------------------------------------------------------------------------------------
+Version: 0.16.6
+Date: 2021-11-01
+  Features:
+    - Expanded the mod remote interface
+    - Added a scenario for testing
+---------------------------------------------------------------------------------------------------
+Version: 0.16.5
+Date: 2021-11-01
+  Bugfixes:
+    - Doesn't show some unnecessary items when a player setting a buy request or a sell offer
+---------------------------------------------------------------------------------------------------
+Version: 0.16.4
+Date: 2021-11-01
+  Changes:
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.16.3
+Date: 2021-10-31
+  Changes:
+    - Optimized slightly
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.16.2
+Date: 2021-10-24
+  Changes:
+    - Added Czech translation (thanks to @eifel (Eifel87) on crowdin)
+  Notes:
+    - Translations: https://crowdin.com/project/factorio-mods-localization (thank you for contributions, I really appreciate it)
+---------------------------------------------------------------------------------------------------
+Version: 0.16.1
+Date: 2021-10-23
+  Changes:
+    - Doesn't show some unnecessary items for trading (not fully works)
+  Notes:
+    - Important message for people who have 2 forces (teams) only: Both forces have to have 1 buy offer at least. Otherwise, this mod will ignore trading.
+---------------------------------------------------------------------------------------------------
+Version: 0.16.0
+Date: 2021-10-21
+  Features:
+    - Players can see profits in the production tab (press "P" button)
+---------------------------------------------------------------------------------------------------
+Version: 0.15.7
+Date: 2021-10-17
+  Changes:
+    - Added French translation (thanks to @Drilzxx_ (Kévin) on crowdin)
+  Notes:
+    - Translations: https://crowdin.com/project/factorio-mods-localization (thank you for contributions, I really appreciate it)
+---------------------------------------------------------------------------------------------------
+Version: 0.15.6
+Date: 2021-10-16
+  Bugfixes:
+    - Fixed crash when a player set count as a blank in a buy request
+---------------------------------------------------------------------------------------------------
+Version: 0.15.5
+Date: 2021-10-12
+  Changes:
+    - Slightly changed tick events
+    - Optimized (mod removes unnecessary data every ~20 minutes)
+---------------------------------------------------------------------------------------------------
+Version: 0.15.4
+Date: 2021-10-12
+  Changes:
+    - Slightly improved check of teams (works better on public servers)
+  Notes:
+    - Important message for people who have 2 forces (teams) only: Both forces have to have 1 buy offer at least. Otherwise, this mod will ignore trading.
+---------------------------------------------------------------------------------------------------
+Version: 0.15.3
+Date: 2021-10-11
+  Bugfixes:
+    - Fixed crush
+---------------------------------------------------------------------------------------------------
+Version: 0.15.2
+Date: 2021-10-10
+  Features:
+    - Added chance of ignoring of offline teams (admins can change it the map settings)
+    - Changed check of teams slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.15.1
+Date: 2021-10-09
+  Changes:
+    - Refactored code of price list
+---------------------------------------------------------------------------------------------------
+Version: 0.15.0
+Date: 2021-10-09
+  Features:
+    - Added search in price list
+  Changes:
+    - Changed style of table in the price list (I'll do it again)
+    - Refactored some code
+---------------------------------------------------------------------------------------------------
+Version: 0.14.6
+Date: 2021-10-09
+  Changes:
+    - Optimized slightly
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.14.5
+Date: 2021-10-09
+  Changes:
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.14.4
+Date: 2021-10-09
+  Changes:
+    - Refactored slightly
+  Notes:
+    - Something is off (check with v0.14.2)
+---------------------------------------------------------------------------------------------------
+Version: 0.14.3
+Date: 2021-10-09
+  Changes:
+    - Optimized slightly
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.14.2
+Date: 2021-10-08
+  Changes:
+    - Optimized slightly
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.14.1
+Date: 2021-10-08
+  Changes:
+    - Optimized slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.14.0
+Date: 2021-10-06
+  Changes:
+    - Optimized some events
+    - Refactored
+  Notes:
+    - [WARNING] this version doesn't migrate old data, please use older version <0.14.0 if your save had been the mod already
+---------------------------------------------------------------------------------------------------
+Version: 0.13.0
+Date: 2021-10-05
+  Changes:
+    - Optimized deletion of entities
+    - Refactored slightly
+  Notes:
+    - [WARNING] this version doesn't migrate old data, please use older version <0.13.0 if your save had been the mod already
+---------------------------------------------------------------------------------------------------
+Version: 0.12.5
+Date: 2021-10-03
+  Changes:
+    - Optimized on_gui_click event slightly
+    - Added German translation (thanks to @Spielen01231 (TheFakescribtx2) on crowdin)
+  Notes:
+    - Translations: https://crowdin.com/project/factorio-mods-localization (thank you for contributions, I really appreciate it)
+---------------------------------------------------------------------------------------------------
+Version: 0.12.4
+Date: 2021-09-28
+  Changes:
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.12.3
+Date: 2021-09-27
+  Features:
+    - Simplified interations by hotkeys
+---------------------------------------------------------------------------------------------------
+Version: 0.12.2
+Date: 2021-09-26
+  Bugfixes:
+    - Fixed check of buy boxes (bug from v0.12.0)
+---------------------------------------------------------------------------------------------------
+Version: 0.12.1
+Date: 2021-09-26
+  Changes:
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.12.0
+Date: 2021-09-26
+  Features:
+    - Simplified interations
+    - Players can see all prices of selected item in the price list by click
+  Notes:
+    - Refactored some code
+---------------------------------------------------------------------------------------------------
+Version: 0.11.1
+Date: 2021-09-24
+  Bugfixes:
+    - Fixed check of prototypes (bug from v0.11.0)
+    - Fixed Russian localization (bug from v0.11.0)
+---------------------------------------------------------------------------------------------------
+Version: 0.11.0
+Date: 2021-09-24
+  Features:
+    - Added 4th button to show hints
+---------------------------------------------------------------------------------------------------
+Version: 0.10.7
+Date: 2021-09-23
+  Bugfixes:
+    - Fixed check of invalid entities on some events
+---------------------------------------------------------------------------------------------------
+Version: 0.10.6
+Date: 2021-09-22
+  Bugfixes:
+    - Fixed crush during merging of forces
+---------------------------------------------------------------------------------------------------
+Version: 0.10.5
+Date: 2021-09-14
+  Bugfixes:
+    - Fixed GUI for singleplayer
+---------------------------------------------------------------------------------------------------
+Version: 0.10.4
+Date: 2021-09-12
+  Bugfixes:
+    - Fixed Russian translation
+---------------------------------------------------------------------------------------------------
+Version: 0.10.3
+Date: 2021-09-10
+  Bugfixes:
+    - Improved interactions with not operable chests
+---------------------------------------------------------------------------------------------------
+Version: 0.10.2
+Date: 2021-09-09
+  Bugfixes:
+    - Fixed init
+---------------------------------------------------------------------------------------------------
+Version: 0.10.1
+Date: 2021-09-08
+  Bugfixes:
+    - Fixed desync
+---------------------------------------------------------------------------------------------------
+Version: 0.10.0
+Date: 2021-09-08
+  Features:
+    - Added new UI
+  Notes:
+    - see-prices.png from https://www.svgrepo.com/svg/77065/price-tag
+    - change-price.png from https://www.svgrepo.com/svg/96982/price-tag
+    - embargo.png is modified version of https://www.svgrepo.com/svg/97012/price-tag
+---------------------------------------------------------------------------------------------------
+Version: 0.9.5
+Date: 2021-09-07
+  Changes:
+    - Improved stability
+---------------------------------------------------------------------------------------------------
+Version: 0.9.4
+Date: 2021-09-06
+  Changes:
+    - Improved algorithm (doesn't waste time on inactive forces anymore)
+---------------------------------------------------------------------------------------------------
+Version: 0.9.3
+Date: 2021-09-05
+  Features:
+    - Added /embargo command
+  Changes:
+    - Changed gui of prices
+---------------------------------------------------------------------------------------------------
+Version: 0.9.2
+Date: 2021-09-04
+  Bugfixes:
+    - Fixed description of commands
+---------------------------------------------------------------------------------------------------
+Version: 0.9.1
+Date: 2021-09-04
+  Changes:
+    - Changed GUI style for tables
+---------------------------------------------------------------------------------------------------
+Version: 0.9.0
+Date: 2021-09-04
+  Bugfixes:
+    - Fixed data for embargo and missing items
+---------------------------------------------------------------------------------------------------
+Version: 0.8.4
+Date: 2021-09-03
+  Changes:
+    - Slight changes
+---------------------------------------------------------------------------------------------------
+Version: 0.8.3
+Date: 2021-09-03
+  Changes:
+    - Changed purchase algorithm (check only 1 team each Nth tick)
+    - Changed price list
+  Bugfixes:
+    - Fixed buying of expensive items
+---------------------------------------------------------------------------------------------------
+Version: 0.8.1
+Date: 2021-09-03
+  Features:
+    - Added /price-list command to show all prices of selected team
+---------------------------------------------------------------------------------------------------
+Version: 0.8.0
+Date: 2021-09-03
+  Features:
+    - Added support of logistic containers
+---------------------------------------------------------------------------------------------------
+Version: 0.8.0
+Date: 2021-09-03
+  Features:
+    - Added support of logistic containers
+    - Added hotkeys to set sell offers and set buy requests fast
+  Changes:
+    - Changed text style
+---------------------------------------------------------------------------------------------------
+Version: 0.7.8
+Date: 2021-09-02
+  Bugfixes:
+    - Fixed crush during trading
+---------------------------------------------------------------------------------------------------
+Version: 0.7.7
+Date: 2021-09-02
+  Bugfixes:
+    - Fixed trading
+---------------------------------------------------------------------------------------------------
+Version: 0.7.6
+Date: 2021-09-02
+  Changes:
+    - Changed visibility of forces
+---------------------------------------------------------------------------------------------------
+Version: 0.7.5
+Date: 2021-09-02
+  Bugfixes:
+    - Fixed settings of embargoes
+---------------------------------------------------------------------------------------------------
+Version: 0.7.4
+Date: 2021-09-02
+  Bugfixes:
+    - Fixed crush during buying
+---------------------------------------------------------------------------------------------------
+Version: 0.7.3
+Date: 2021-09-02
+  Bugfixes:
+    - Fixed access to some data
+---------------------------------------------------------------------------------------------------
+Version: 0.7.2
+Date: 2021-09-01
+  Bugfixes:
+    - Fixed GUI of prices
+---------------------------------------------------------------------------------------------------
+Version: 0.7.1
+Date: 2021-08-31
+  Bugfixes:
+    - Fixed data during on_surface_deleted, on_surface_cleared, on_chunk_deleted events
+---------------------------------------------------------------------------------------------------
+Version: 0.7.0
+Date: 2021-08-31
+  Changes:
+    - Changed buttons
+---------------------------------------------------------------------------------------------------
+Version: 0.6.2
+Date: 2021-08-31
+  Changes:
+    - Add money UI
+---------------------------------------------------------------------------------------------------
+Version: 0.6.1
+Date: 2021-08-30
+  Bugfixes:
+    - Fixed data and HUD during merging of forces
+---------------------------------------------------------------------------------------------------
+Version: 0.6.0
+Date: 2021-08-29
+  Notes:
+    - First public release for 1.1
