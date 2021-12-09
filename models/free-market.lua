@@ -164,7 +164,7 @@ local is_reset_public = settings.global["FM_is_reset_public"].value
 --#region Global functions
 
 ---@param target  LuaForce|LuaPlayer # From whom the data?
----@param getter? LuaForce|LuaPlayer # Print to whom?
+---@param getter? LuaForce|LuaPlayer # Print to whom? (game by default)
 function print_force_data(target, getter)
 	if getter then
 		if not getter.valid then
@@ -945,25 +945,31 @@ local function open_force_configuration(player)
 
 	if is_reset_public or is_player_admin then
 		if is_player_admin then
-
 			content.add(LABEL).caption = {'', "Attention", {"colon"}, "reset is public"}
 		end
 		local reset_caption = {'', {"free-market.reset-gui"}, {"colon"}}
 		local reset_prices_row = content.add(FLOW)
 		reset_prices_row.name = "reset_prices_row"
 		reset_prices_row.add(LABEL).caption = reset_caption
-		reset_prices_row.add{type = "button", caption = {"free-market.reset-buy-prices"} , name = "FM_reset_buy_prices"}
-		reset_prices_row.add{type = "button", caption = {"free-market.reset-sell-prices"}, name = "FM_reset_sell_prices"}
-		reset_prices_row.add{type = "button", caption = {"free-market.reset-all-prices"} , name = "FM_reset_all_prices"}
+		reset_prices_row.add{type = "button", caption = {"free-market.reset-buy-prices"} , name = "FM_reset_buy_prices"}.style.minimal_width = 10
+		reset_prices_row.add{type = "button", caption = {"free-market.reset-sell-prices"}, name = "FM_reset_sell_prices"}.style.minimal_width = 10
+		reset_prices_row.add{type = "button", caption = {"free-market.reset-all-prices"} , name = "FM_reset_all_prices"}.style.minimal_width = 10
 
 		local reset_boxes_row = content.add(FLOW)
 		reset_boxes_row.name = "reset_boxes_row"
 		reset_boxes_row.add(LABEL).caption = reset_caption
-		reset_boxes_row.add{type = "button", caption = {"free-market.reset-buy-requests"},  name = "FM_reset_buy_boxes"}
-		reset_boxes_row.add{type = "button", caption = {"free-market.reset-sell-offers"},   name = "FM_reset_sell_boxes"}
-		reset_boxes_row.add{type = "button", caption = {"free-market.reset-pull-requests"}, name = "FM_reset_pull_boxes"}
-		reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}
+		reset_boxes_row.add{type = "button", caption = {"free-market.reset-buy-requests"},  name = "FM_reset_buy_boxes"}.style.minimal_width = 10
+		reset_boxes_row.add{type = "button", caption = {"free-market.reset-sell-offers"},   name = "FM_reset_sell_boxes"}.style.minimal_width = 10
+		reset_boxes_row.add{type = "button", caption = {"free-market.reset-pull-requests"}, name = "FM_reset_pull_boxes"}.style.minimal_width = 10
+		reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}.style.minimal_width = 10
 	end
+
+	local label = content.add(LABEL)
+	label.caption = {'', {"gui.credits"}, {"colon"}}
+	label.style.font = "heading-1"
+	content.add(LABEL).caption = {'', "Translators", {"colon"}, ' ', "Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik"}
+	content.add(LABEL).caption = {'', "Supporters", {"colon"}, ' ', "Eerrikki"}
+	content.add(LABEL).caption = {'', {"gui-other-settings.developer"}, {"colon"}, ' ', "ZwerOxotnik"}
 
 	main_frame.force_auto_center()
 end
