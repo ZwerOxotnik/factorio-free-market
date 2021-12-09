@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.23.2
+Date: 2021-12-09
+  Changes:
+    - Changed and improved print_force_data(target, getter)
+    - Improved team configuration for admins
+  Bugfixes:
+    - Fixed missing science packs when a player selecting an item
+---------------------------------------------------------------------------------------------------
 Version: 0.23.1
 Date: 2021-12-08
   Features:
