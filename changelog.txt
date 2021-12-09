@@ -1,26 +1,97 @@
 ﻿---------------------------------------------------------------------------------------------------
-Version: 0.17.1
-Date: 2021-12-07
-  Bugfixes:
-    - Fixed test zone
+Version: 0.24.1
+Date: 2021-12-09
+  Changes:
+    - Changed credits
 ---------------------------------------------------------------------------------------------------
-Version: 0.17.0
+Version: 0.24.0
+Date: 2021-12-09
+  Features:
+    - Added new tools for mass-selection and mass-removing and shortucts
+  Changes:
+    - Added a link to team configuration gui
+---------------------------------------------------------------------------------------------------
+Version: 0.23.3
+Date: 2021-12-09
+  Changes:
+    - Changed team configuration gui and added credits
+---------------------------------------------------------------------------------------------------
+Version: 0.23.2
+Date: 2021-12-09
+  Changes:
+    - Changed and improved print_force_data(target, getter)
+    - Improved team configuration for admins
+  Bugfixes:
+    - Fixed missing science packs when a player selecting an item
+---------------------------------------------------------------------------------------------------
+Version: 0.23.1
+Date: 2021-12-08
+  Features:
+    - If another team doesn't have anything to sell, then other teams won't see its prices
+    - Added global function "print_force_data" which supports LuaForce and LuaPlayer
+  Changes:
+    - Changed structures of data for prices and boxes
+    - Optimized again
+    - Changed "free-market" interface
+    - Removed "free-market_rcon" interface, so use:
+    -   /sc __iFreeMarket__ getRconData("name of data")
+    -   /sc __iFreeMarket__ getRconForceData("name of data", LuaForce)
+    -   /sc __iFreeMarket__ getRconForceDataByIndex("name of data", force index)
+---------------------------------------------------------------------------------------------------
+Version: 0.22.1
+Date: 2021-12-07
+  Changes:
+    - The mod don't store gui of configuration anymore
+---------------------------------------------------------------------------------------------------
+Version: 0.22.0
 Date: 2021-12-07
   Features:
     - Added team configuration with resetting of data
-    - Added remote interface: "free-market_rcon" for rcon
   Changes:
     - Improved info icon
+    - Changed localization
+---------------------------------------------------------------------------------------------------
+Version: 0.21.0
+Date: 2021-12-07
+  Changes:
     - Changed box gui
-    - Optimized greatly
-    - Changed the test scenario
-    - Refactored
+    - Refactored slightly
+  Bugfixes:
+    - Fixed deletion of pull boxes
+---------------------------------------------------------------------------------------------------
+Version: 0.20.3
+Date: 2021-12-04
+  Features:
+    - Added remote interface: "free-market_rcon" for rcon
+  Changes:
+    - Added functions in remote interfaces to get specific mod data (not done yet though)
+---------------------------------------------------------------------------------------------------
+Version: 0.20.2
+Date: 2021-11-17
+  Changes:
     - Added Polish translation (thanks to @Felix_Manning (Felix Manning) on crowdin)
   Notes:
     - Translations: https://crowdin.com/project/factorio-mods-localization (thank you for contributions, I really appreciate it)
-    - Version with infinite storage: https://mods.factorio.com/mod/iFreeMarket
-    - WARNING: this version doesn't migrate some data (it's not fully safe to use in the case, but you may try)
-    - If your map used old version, then you better to create new map to avoid bugs with "old" chests
+---------------------------------------------------------------------------------------------------
+Version: 0.20.1
+Date: 2021-11-03
+  Bugfixes:
+    - Fixed typos
+    - Fixed data of mod items for storage and pull boxes
+  Changes:
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
+Version: 0.20.0
+Date: 2021-11-03
+  Features:
+    - Added pull chest
+    - New system of storing (global store)
+  Changes:
+    - Optimized greatly
+    - Changed the test scenario
+    - Refactored
+  Notes:
+    - Less cheaty version: https://mods.factorio.com/mod/free-market
 ---------------------------------------------------------------------------------------------------
 Version: 0.16.7
 Date: 2021-11-02
