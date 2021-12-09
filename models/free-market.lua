@@ -87,6 +87,7 @@ local SELL_TYPE = 2
 local BUY_TYPE = 1
 local CHECK_FORCES_TICK = 60 * 60 * 1.5
 local CHECK_TEAMS_DATA_TICK = 60 * 60 * 25
+local chest_inventory_type = defines.inventory.chest
 local EMPTY_TABLE = {}
 local WHITE_COLOR = {1, 1, 1}
 local RED_COLOR = {1, 0, 0}
@@ -355,7 +356,8 @@ end
 ---@param player LuaPlayer #LuaPlayer
 ---@param entity LuaEntity #LuaEntity
 local function set_sell_box_data(item_name, player, entity)
-	local force_index = player.force.index
+	local player_force = player.force
+	local force_index = player_force.index
 	local f_sell_boxes = sell_boxes[force_index]
 	if f_sell_boxes[item_name] == nil then
 		local f_inactive_sell_prices = inactive_sell_prices[force_index]
@@ -381,7 +383,7 @@ local function set_sell_box_data(item_name, player, entity)
 		scale = 0.7,
 	}
 	if is_public_titles == false then
-		text_data.forces = {player.force}
+		text_data.forces = {player_force}
 	end
 	---@type number
 	local id = draw_text(text_data)
@@ -394,7 +396,9 @@ end
 ---@param player LuaPlayer #LuaPlayer
 ---@param entity LuaEntity #LuaEntity
 local function set_pull_box_data(item_name, player, entity)
-	local force_pull_boxes = pull_boxes[player.force.index]
+	local player_force = player.force
+	local force_index = player_force.index
+	local force_pull_boxes = pull_boxes[force_index]
 	force_pull_boxes[item_name] = force_pull_boxes[item_name] or {}
 	local items = force_pull_boxes[item_name]
 	items[#items+1] = entity
@@ -411,7 +415,7 @@ local function set_pull_box_data(item_name, player, entity)
 		scale = 0.7,
 	}
 	if is_public_titles == false then
-		text_data.forces = {player.force}
+		text_data.forces = {player_force}
 	end
 	---@type number
 	local id = draw_text(text_data)
@@ -427,7 +431,8 @@ end
 local function set_buy_box_data(item_name, player, entity, count)
 	count = count or game.item_prototypes[item_name].stack_size
 
-	local force_index = player.force.index
+	local player_force = player.force
+	local force_index = player_force.index
 	local f_buy_boxes = buy_boxes[force_index]
 	if f_buy_boxes[item_name] == nil then
 		local f_inactive_buy_prices = inactive_buy_prices[force_index]
@@ -453,7 +458,7 @@ local function set_buy_box_data(item_name, player, entity, count)
 		scale = 0.7,
 	}
 	if is_public_titles == false then
-		text_data.forces = {player.force}
+		text_data.forces = {player_force}
 	end
 	---@type number
 	local id = draw_text(text_data)
@@ -905,9 +910,9 @@ end
 
 ---@param player LuaPlayer #LuaPlayer
 local function destroy_force_configuration(player)
-	local element = player.gui.screen.FM_force_configuration
-	if element then
-		element.destroy()
+	local frame = player.gui.screen.FM_force_configuration
+	if frame then
+		frame.destroy()
 	end
 end
 
@@ -964,6 +969,11 @@ local function open_force_configuration(player)
 		reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}.style.minimal_width = 10
 	end
 
+	local translations_row = content.add(FLOW)
+	translations_row.add(LABEL).caption = {'', "Translations", {"colon"}}
+	local link = translations_row.add({type = "textfield", text = "https://crowdin.com/project/factorio-mods-localization"})
+	link.style.horizontally_stretchable = true
+	link.style.width = 320
 	local label = content.add(LABEL)
 	label.caption = {'', {"gui.credits"}, {"colon"}}
 	label.style.font = "heading-1"
@@ -1387,11 +1397,11 @@ end
 --#region Functions of events
 
 local function clear_box_data(event)
-	if all_boxes[event.entity.unit_number] == nil then return end
-
 	local entity = event.entity
 	local unit_number = entity.unit_number
 	local box_data = all_boxes[unit_number]
+	if box_data == nil then return end
+
 	local box_type = box_data[3]
 	if box_type == BUY_TYPE then
 		remove_certain_buy_box(entity, box_data[5])
@@ -1401,6 +1411,74 @@ local function clear_box_data(event)
 		remove_certain_pull_box(entity, box_data[5])
 	end
 	-- rendering_destroy(box_data[2])
+
+	all_boxes[unit_number] = nil
+end
+
+---@param entity LuaEntity
+local function clear_box_data_by_entity(entity)
+	local unit_number = entity.unit_number
+	local box_data = all_boxes[unit_number]
+	if box_data == nil then return end
+
+	local box_type = box_data[3]
+	if box_type == BUY_TYPE then
+		remove_certain_buy_box(entity, box_data[5])
+	elseif box_type == SELL_TYPE then
+		remove_certain_sell_box(entity, box_data[5])
+	elseif box_type == PULL_TYPE then
+		remove_certain_pull_box(entity, box_data[5])
+	end
+	rendering_destroy(box_data[2])
+
+	all_boxes[unit_number] = nil
+	return true
+end
+
+---@param entity LuaEntity
+local function remove_buy_box(entity)
+	local unit_number = entity.unit_number
+	local box_data = all_boxes[unit_number]
+	if box_data == nil then return end
+
+	if box_data[3] == BUY_TYPE then
+		remove_certain_buy_box(entity, box_data[5])
+	else
+		return
+	end
+	rendering_destroy(box_data[2])
+
+	all_boxes[unit_number] = nil
+end
+
+---@param entity LuaEntity
+local function remove_sell_box(entity)
+	local unit_number = entity.unit_number
+	local box_data = all_boxes[unit_number]
+	if box_data == nil then return end
+
+	if box_data[3] == SELL_TYPE then
+		remove_certain_buy_box(entity, box_data[5])
+	else
+		return
+	end
+	rendering_destroy(box_data[2])
+
+	all_boxes[unit_number] = nil
+end
+
+---@param entity LuaEntity
+local function remove_pull_box(entity)
+	local unit_number = entity.unit_number
+	local box_data = all_boxes[unit_number]
+	if box_data == nil then return end
+
+	if box_data[3] == PULL_TYPE then
+		remove_certain_buy_box(entity, box_data[5])
+	else
+		return
+	end
+	rendering_destroy(box_data[2])
 
 	all_boxes[unit_number] = nil
 end
@@ -1542,7 +1620,7 @@ local function set_sell_box_key_pressed(event)
 	local entity = player.selected
 	if not entity.operable then return end
 	if not ALLOWED_TYPES[entity.type] then return end
-	if get_distance(player.position, entity.position) > 30 then return end
+	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
 
 	local box_data = all_boxes[entity.unit_number]
 	if box_data then
@@ -1556,7 +1634,7 @@ local function set_sell_box_key_pressed(event)
 		return
 	end
 
-	local item = entity.get_inventory(defines.inventory.chest)[1]
+	local item = entity.get_inventory(chest_inventory_type)[1]
 	if not item.valid_for_read then
 		player.print({"multiplayer.no-address", {"item"}})
 		return
@@ -1570,14 +1648,14 @@ local function set_pull_box_key_pressed(event)
 	local entity = player.selected
 	if not entity.operable then return end
 	if not ALLOWED_TYPES[entity.type] then return end
-	if get_distance(player.position, entity.position) > 30 then return end
+	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
 
 	local box_data = all_boxes[entity.unit_number]
 	if box_data then
 		return
 	end
 
-	local item = entity.get_inventory(defines.inventory.chest)[1]
+	local item = entity.get_inventory(chest_inventory_type)[1]
 	if not item.valid_for_read then
 		player.print({"multiplayer.no-address", {"item"}})
 		return
@@ -1605,7 +1683,7 @@ local function set_buy_box_key_pressed(event)
 		return
 	end
 
-	local item = entity.get_inventory(defines.inventory.chest)[1]
+	local item = entity.get_inventory(chest_inventory_type)[1]
 	if not item.valid_for_read then
 		player.print({"multiplayer.no-address", {"item"}})
 		return
@@ -1694,7 +1772,7 @@ local GUIS = {
 		local player_index = player.index
 		local entity = open_box[player_index]
 		if entity then
-			local inventory_size = #entity.get_inventory(defines.inventory.chest)
+			local inventory_size = #entity.get_inventory(chest_inventory_type)
 			local max_count = game.item_prototypes[item_name].stack_size * inventory_size
 			if count > max_count then
 				player.print({"gui-map-generator.invalid-value-for-field", count, 1, max_count})
@@ -1955,7 +2033,7 @@ local GUIS = {
 					return
 				end
 			else
-				local item = entity.get_inventory(defines.inventory.chest)[1]
+				local item = entity.get_inventory(chest_inventory_type)[1]
 				if not item.valid_for_read then
 					open_sell_box_gui(player, true)
 				else
@@ -1989,7 +2067,7 @@ local GUIS = {
 					return
 				end
 			else
-				local item = entity.get_inventory(defines.inventory.chest)[1]
+				local item = entity.get_inventory(chest_inventory_type)[1]
 				if not item.valid_for_read then
 					open_pull_box_gui(player, true)
 				else
@@ -2022,7 +2100,7 @@ local GUIS = {
 					return
 				end
 			else
-				local item = entity.get_inventory(defines.inventory.chest)[1]
+				local item = entity.get_inventory(chest_inventory_type)[1]
 				if not item.valid_for_read then
 					open_buy_box_gui(player, true)
 				else
@@ -2393,6 +2471,62 @@ local function on_player_left_game(event)
 	destroy_force_configuration(player)
 end
 
+
+local SELECT_TOOLS = {
+	FM_set_pull_boxes_tool = set_pull_box_data,
+	FM_set_sell_boxes_tool = set_sell_box_data,
+	FM_set_buy_boxes_tool = set_buy_box_data
+}
+local function on_player_selected_area(event)
+	local tool_name = event.item
+	local func = SELECT_TOOLS[tool_name]
+	if func then
+		local entities = event.entities
+		local player = game.get_player(event.player_index)
+		for i=1, #entities do
+			local entity = entities[i]
+			if all_boxes[entity.unit_number] == nil then
+				local item = entity.get_inventory(chest_inventory_type)[1]
+				if not item.valid_for_read then
+					func(item.name, player, entity)
+				end
+			end
+		end
+	elseif tool_name == "FM_remove_boxes_tool" then
+		local entities = event.entities
+		local player = game.get_player(event.player_index)
+		local count = 0
+		for i=1, #entities do
+			local is_deleted = clear_box_data_by_entity(entities[i])
+			if is_deleted then
+				count = count + 1
+			end
+		end
+		if count > 0 then
+			player.print({'', {"gui-migrated-content.removed-entity"}, {"colon"}, ' ', count})
+		end
+	end
+end
+
+
+local ALT_SELECT_TOOLS = {
+	FM_set_pull_boxes_tool = remove_pull_box,
+	FM_set_sell_boxes_tool = remove_sell_box,
+	FM_set_buy_boxes_tool = remove_buy_box
+}
+local function on_player_alt_selected_area(event)
+	local func = ALT_SELECT_TOOLS[event.item]
+	if func then
+		local entities = event.entities
+		if #entities > 0 then
+			for i=1, #entities do
+				func(entities[i])
+			end
+		end
+	end
+end
+
+
 local mod_settings = {
 	["FM_enable-auto-embargo"] = function(value) is_auto_embargo = value end,
 	["FM_is-public-titles"] = function(value) is_public_titles = value end,
@@ -2727,6 +2861,8 @@ M.events = {
 			pcall(on_force_cease_fire_changed, event)
 		end
 	end,
+	[defines.events.on_player_selected_area] = on_player_selected_area,
+	[defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
 	[defines.events.on_player_mined_entity] = clear_box_data,
 	[defines.events.on_robot_mined_entity] = clear_box_data,
 	[defines.events.script_raised_destroy] = clear_box_data,
