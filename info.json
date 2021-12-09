@@ -1,19 +1,19 @@
 {
-	"name": "iFreeMarket",
-	"version": "0.24.1",
+	"name": "free-market",
+	"version": "0.17.1",
 	"factorio_version": "1.1",
 	"title": "Free market",
 	"author": "ZwerOxotnik",
 	"contact": "zweroxotnik@gmail.com, Discord:ZwerOxotnik#7117",
 	"homepage": "reddit.com/r/ZwerOxotnik/",
-	"description": "See locale/*",
+	"description": "See locale/* ",
 	"dependencies": [
 		"zk-lib >= 0.9.0",
 		"EasyAPI >= 0.3.8",
 		"money-UI",
 		"flib",
 		"base",
-		"! free-market",
+		"! iFreeMarket",
 		"(?) diplomacy"
 	]
 }

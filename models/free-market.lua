@@ -61,14 +61,7 @@ local all_boxes
 ---@type table<number, number>
 local active_forces
 
----@class storages
---- {force index = {[item name] = count}}
----@type table<number, table<string, number>>
-local storages
-
 --#endregion
-
-
 --#region Constants
 local tostring, tonumber, pcall = tostring, tonumber, pcall
 local floor = math.floor
@@ -82,7 +75,6 @@ local get_render_target = rendering.get_target
 local is_render_valid = rendering.is_valid
 local rendering_destroy = rendering.destroy
 local print_to_rcon = rcon.print
-local PULL_TYPE = 3
 local SELL_TYPE = 2
 local BUY_TYPE = 1
 local CHECK_FORCES_TICK = 60 * 60 * 1.5
@@ -98,7 +90,6 @@ local FLOW = {type = "flow"}
 local SPRITE_BUTTON = {type = "sprite-button"}
 local BUYING_TEXT = {"free-market.buying"}
 local SELLING_TEXT = {"free-market.selling"}
-local PULLING_TEXT = {"free-market.pulling"}
 local EMPTY_WIDGET = {type = "empty-widget"}
 local ALLOWED_TYPES = {["container"] = true, ["logistic-container"] = true}
 local TITLEBAR_FLOW = {type = "flow", style = "flib_titlebar_flow"}
@@ -132,12 +123,6 @@ local boxes_anchor = {gui = defines.relative_gui_type.container_gui, position = 
 --#region Settings
 ---@type number
 local update_buy_tick = settings.global["FM_update-tick"].value
-
----@type number
-local update_sell_tick = settings.global["FM_update-sell-tick"].value
-
----@type number
-local update_pull_tick = settings.global["FM_update-pull-tick"].value
 
 ---@type boolean
 local is_auto_embargo = settings.global["FM_enable-auto-embargo"].value
@@ -501,19 +486,6 @@ local function reset_sell_boxes(force_index)
 	sell_prices[force_index] = {}
 end
 
---TODO: improve for inactive boxes
----@param force_index number
-local function reset_pull_boxes(force_index)
-	for _, entities_data in pairs(pull_boxes[force_index]) do
-		for i=1, #entities_data do
-			local unit_number = entities_data[i].unit_number
-			rendering_destroy(all_boxes[unit_number][2])
-			all_boxes[unit_number] = nil
-		end
-	end
-	pull_boxes[force_index] = {}
-end
-
 local function clear_invalid_prices(prices)
 	local item_prototypes = game.item_prototypes
 	local forces = game.forces
@@ -628,6 +600,7 @@ local function clear_invalid_buy_boxes_data(_data)
 	end
 end
 
+
 local function clear_invalid_entities()
 	clear_invalid_storage_data()
 	clear_invalid_pull_boxes_data()
@@ -671,19 +644,6 @@ local function make_prices_header(table)
 	table.add(LABEL).caption = {"team-name"}
 	table.add(LABEL).caption = {"free-market.buy-header"}
 	table.add(LABEL).caption = {"free-market.sell-header"}
-end
-
-local function make_storage_header(table)
-	local dummy
-	dummy = table.add(EMPTY_WIDGET)
-	dummy.style.horizontally_stretchable = true
-	dummy.style.minimal_width = 60
-	dummy = table.add(EMPTY_WIDGET)
-	dummy.style.horizontally_stretchable = true
-	dummy.style.minimal_width = 60
-
-	table.add(LABEL).caption = {"item"}
-	table.add(LABEL).caption = {"gui-logistic.count"}
 end
 
 ---@param table_element GuiElement #GuiElement
@@ -1074,49 +1034,6 @@ local function open_prices_gui(player, item_name)
 	return content
 end
 
-local function open_storage_gui(player)
-	local screen = player.gui.screen
-	if screen.FM_storage_frame then
-		screen.FM_storage_frame.destroy()
-		return
-	end
-	local main_frame = screen.add{type = "frame", name = "FM_storage_frame", direction = "vertical"}
-	main_frame.style.horizontally_stretchable = true
-	main_frame.style.maximal_height = 700
-	local flow = main_frame.add(TITLEBAR_FLOW)
-	flow.add{
-		type = "label",
-		style = "frame_title",
-		caption = {"free-market.storage"},
-		ignored_by_interaction = true
-	}
-	flow.add(DRAG_HANDLER).drag_target = main_frame
-	flow.add(CLOSE_BUTTON)
-	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
-	local content_flow = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
-	content_flow.style.padding = 12
-
-	local scroll_pane = content_flow.add(SCROLL_PANE)
-	scroll_pane.style.padding = 12
-	local storage_table = scroll_pane.add{type = "table", name = "storage_table", column_count = 2}
-	storage_table.style.horizontal_spacing = 16
-	storage_table.style.vertical_spacing = 8
-	storage_table.style.top_margin = -16
-	storage_table.style.column_alignments[1] = "center"
-	storage_table.style.column_alignments[2] = "center"
-	storage_table.draw_horizontal_lines = true
-	storage_table.draw_vertical_lines = true
-	make_storage_header(storage_table)
-
-	local add = storage_table.add
-	for item_name, count in pairs(storages[player.force.index]) do
-		add(SPRITE_BUTTON).sprite = "item/" .. item_name
-		add(LABEL).caption = tostring(count)
-	end
-
-	main_frame.force_auto_center()
-end
-
 local function open_price_list_gui(player)
 	local screen = player.gui.screen
 	if screen.FM_price_list_frame then
@@ -1285,29 +1202,6 @@ local function create_top_relative_gui(player)
 	local sell_button = flow.add{type = "button", style="slot_button", name = "FM_set_sell_box", caption = {"free-market.sell-gui"}}
 	sell_button.style.font_color = BOLD_FONT_COLOR
 	sell_button.style.right_margin = -6
-	local pull_button = flow.add{type = "button", style="slot_button", name = "FM_set_pull_box", caption = {"free-market.pull-gui"}}
-	pull_button.style.font_color = BOLD_FONT_COLOR
-end
-
----@param player LuaPlayer #LuaPlayer
----@param is_new boolean # Is new pull box?
----@param entity? LuaEntity #LuaEntity # The sell box when is_new = true
-local function open_pull_box_gui(player, is_new, entity)
-	local box_operations = player.gui.relative.FM_boxes_frame.content.main_flow.box_operations
-	if box_operations.pull_content then
-		box_operations.clear()
-		return
-	end
-	box_operations.clear()
-	local row = box_operations.add{type = "table", name = "pull_content", column_count = 2}
-	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
-	local confirm_button = row.add(CHECK_BUTTON)
-	if is_new then
-		confirm_button.name = "FM_confirm_pull_box"
-	else
-		confirm_button.name = "FM_change_pull_box"
-		FM_item.elem_value = all_boxes[entity.unit_number][5]
-	end
 end
 
 ---@param index number
@@ -1343,7 +1237,7 @@ local function create_left_relative_gui(player)
 	table.add{type = "sprite-button", sprite = "FM_change-price", style="slot_button", name = "FM_open_price"}
 	table.add{type = "sprite-button", sprite = "FM_see-prices", style="slot_button", name = "FM_open_price_list"}
 	table.add{type = "sprite-button", sprite = "FM_embargo", style="slot_button", name = "FM_open_embargo"}
-	table.add{type = "sprite-button", sprite = "item/wooden-chest", style = "slot_button", name = "FM_open_storage"} -- TODO: change the sprite
+	table.add{type = "sprite-button", style = "slot_button"}
 	table.add{type = "sprite-button", sprite = "virtual-signal/signal-info", style = "slot_button", name = "FM_show_hint"}
 	table.add{
 		type = "sprite-button",
@@ -1417,8 +1311,6 @@ local function clear_box_data(event)
 		remove_certain_buy_box(entity, box_data[5])
 	elseif box_type == SELL_TYPE then
 		remove_certain_sell_box(entity, box_data[5])
-	elseif box_type == PULL_TYPE then
-		remove_certain_pull_box(entity, box_data[5])
 	end
 	-- rendering_destroy(box_data[2])
 
@@ -1436,8 +1328,6 @@ local function clear_box_data_by_entity(entity)
 		remove_certain_buy_box(entity, box_data[5])
 	elseif box_type == SELL_TYPE then
 		remove_certain_sell_box(entity, box_data[5])
-	elseif box_type == PULL_TYPE then
-		remove_certain_pull_box(entity, box_data[5])
 	end
 	rendering_destroy(box_data[2])
 
@@ -1511,30 +1401,14 @@ end
 
 local function on_force_created(event)
 	local index = event.force.index
-	pull_boxes[index] = {}
 	sell_boxes[index] = {}
 	buy_boxes[index] = {}
 	embargoes[index] = {}
 	sell_prices[index] = {}
 	buy_prices[index] = {}
-	storages[index] = {}
 end
 
 local function check_teams_data()
-	for _, storage in pairs(storages) do
-		for item_name, count in pairs(storage) do
-			if count == 0 then
-				storage[item_name] = nil
-			end
-		end
-	end
-	for _, items_data in pairs(pull_boxes) do
-		for item_name, entities in pairs(items_data) do
-			if next(entities) == nil then
-				items_data[item_name] = nil
-			end
-		end
-	end
 	for _, items_data in pairs(sell_boxes) do
 		for item_name, entities in pairs(items_data) do
 			if next(entities) == nil then
@@ -1592,14 +1466,9 @@ local function on_forces_merging(event)
 	local source_index = source.index
 	sell_prices[source_index] = nil
 	buy_prices[source_index] = nil
-	pull_boxes[source_index] = nil
 	sell_boxes[source_index] = nil
 	buy_boxes[source_index] = nil
 	remove_index_among_embargoes(source_index)
-
-	local destination_index = event.destination.index
-	storages[destination_index] = storages[destination_index] + storages[source_index]
-	storages[source_index] = nil
 
 	local ids = rendering.get_all_ids()
 	for i = 1, #ids do
@@ -1651,27 +1520,6 @@ local function set_sell_box_key_pressed(event)
 	end
 
 	set_sell_box_data(item.name, player, entity)
-end
-
-local function set_pull_box_key_pressed(event)
-	local player = game.get_player(event.player_index)
-	local entity = player.selected
-	if not entity.operable then return end
-	if not ALLOWED_TYPES[entity.type] then return end
-	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
-
-	local box_data = all_boxes[entity.unit_number]
-	if box_data then
-		return
-	end
-
-	local item = entity.get_inventory(chest_inventory_type)[1]
-	if not item.valid_for_read then
-		player.print({"multiplayer.no-address", {"item"}})
-		return
-	end
-
-	set_pull_box_data(item.name, player, entity)
 end
 
 local function set_buy_box_key_pressed(event)
@@ -1819,25 +1667,6 @@ local GUIS = {
 		local box_operations = element.parent.parent
 		box_operations.clear()
 	end,
-	FM_confirm_pull_box = function(element, player)
-		local item_name = element.parent.FM_item.elem_value
-		if not item_name then
-			player.print({"multiplayer.no-address", {"item"}})
-			return
-		end
-
-		local player_index = player.index
-
-		local entity = open_box[player_index]
-		if entity then
-			set_pull_box_data(item_name, player, entity)
-		else
-			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
-		end
-		open_box[player_index] = nil
-		local box_operations = element.parent.parent
-		box_operations.clear()
-	end,
 	FM_change_sell_box = function(element, player)
 		local parent = element.parent
 		local player_index = player.index
@@ -1860,39 +1689,6 @@ local GUIS = {
 				end
 			else
 				remove_certain_sell_box(entity, prev_item_name)
-				local unit_number = entity.unit_number
-				rendering_destroy(all_boxes[unit_number][2])
-				all_boxes[unit_number] = nil
-			end
-		else
-			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
-		end
-		open_box[player_index] = nil
-		local box_operations = element.parent.parent
-		box_operations.clear()
-	end,
-	FM_change_pull_box = function(element, player)
-		local parent = element.parent
-		local player_index = player.index
-		local entity = open_box[player_index]
-		local item_name = parent.FM_item.elem_value
-		if entity then
-			local box_data = all_boxes[entity.unit_number]
-			local prev_item_name = box_data[5]
-			if item_name then
-				if box_data and box_data[3] == PULL_TYPE then
-					remove_certain_pull_box(entity, prev_item_name)
-					local force_pull_boxes = pull_boxes[player.force.index]
-					force_pull_boxes[item_name] = force_pull_boxes[item_name] or {}
-					local entities = force_pull_boxes[item_name]
-					entities[#entities+1] = entity
-					box_data[4] = entities
-					box_data[5] = item_name
-				else
-					player.print({"gui-train.invalid"})
-				end
-			else
-				remove_certain_pull_box(entity, prev_item_name)
 				local unit_number = entity.unit_number
 				rendering_destroy(all_boxes[unit_number][2])
 				all_boxes[unit_number] = nil
@@ -2038,9 +1834,6 @@ local GUIS = {
 				elseif box_type == BUY_TYPE then
 					player.print({"free-market.this-is-buy-box"})
 					return
-				elseif box_type == PULL_TYPE then
-					player.print({"free-market.this-is-pull-box"})
-					return
 				end
 			else
 				local item = entity.get_inventory(chest_inventory_type)[1]
@@ -2050,39 +1843,6 @@ local GUIS = {
 					local item_name = item.name
 					set_sell_box_data(item_name, player, entity)
 					check_sell_price(player, item_name)
-				end
-			end
-			open_box[player.index] = entity
-		end
-	end,
-	FM_set_pull_box = function(element, player)
-		local entity = player.opened
-
-		if ALLOWED_TYPES[entity.type] then
-			if player.force ~= entity.force then
-				player.print({"free-market.you-cant-change"})
-				return
-			end
-
-			local box_data = all_boxes[entity.unit_number]
-			if box_data then
-				local box_type = box_data[3]
-				if box_type == PULL_TYPE then
-					open_pull_box_gui(player, false, entity)
-				elseif box_type == BUY_TYPE then
-					player.print({"free-market.this-is-buy-box"})
-					return
-				elseif box_type == SELL_TYPE then
-					player.print({"free-market.this-is-sell-box"})
-					return
-				end
-			else
-				local item = entity.get_inventory(chest_inventory_type)[1]
-				if not item.valid_for_read then
-					open_pull_box_gui(player, true)
-				else
-					local item_name = item.name
-					set_pull_box_data(item_name, player, entity)
 				end
 			end
 			open_box[player.index] = entity
@@ -2104,9 +1864,6 @@ local GUIS = {
 					open_buy_box_gui(player, false, entity)
 				elseif box_type == SELL_TYPE then
 					player.print({"free-market.this-is-sell-box"})
-					return
-				elseif box_type == PULL_TYPE then
-					player.print({"free-market.this-is-pull-box"})
 					return
 				end
 			else
@@ -2190,19 +1947,11 @@ local GUIS = {
 			player.print({"command-output.parameters-require-admin"})
 		end
 	end,
-	FM_reset_pull_boxes = function(element, player)
-		if is_reset_public or player.admin then
-			reset_pull_boxes(player.force.index)
-		else
-			player.print({"command-output.parameters-require-admin"})
-		end
-	end,
 	FM_reset_all_boxes = function(element, player)
 		if is_reset_public or player.admin then
 			local force_index = player.force.index
 			reset_buy_boxes(force_index)
 			reset_sell_boxes(force_index)
-			reset_pull_boxes(force_index)
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end
@@ -2250,9 +1999,6 @@ local GUIS = {
 	end,
 	FM_open_embargo = function(element, player)
 		open_embargo_gui(player)
-	end,
-	FM_open_storage = function(element, player)
-		open_storage_gui(player)
 	end,
 	FM_show_hint = function(element, player)
 		player.print({"free-market.hint"})
@@ -2304,43 +2050,6 @@ local function on_gui_click(event)
 	if f then f(event.element, game.get_player(event.player_index)) end
 end
 
-local function check_pull_boxes()
-	local stack = {name = "", count = 0}
-	for other_force_index, _items_data in pairs(pull_boxes) do
-		local storage = storages[other_force_index]
-		for item_name, item_offers in pairs(_items_data) do
-			local count_in_storage = storage[item_name]
-			if count_in_storage and count_in_storage > 0 then
-				stack["name"] = item_name
-				for i=1, #item_offers do
-					if count_in_storage <= 0 then
-						break
-					end
-					stack["count"] = count_in_storage
-					count_in_storage = count_in_storage - item_offers[i].insert(stack)
-				end
-				storage[item_name] = count_in_storage
-			end
-		end
-	end
-end
-
-local function check_sell_boxes()
-	local stack = {name = "", count = 1000000}
-	for other_force_index, _items_data in pairs(sell_boxes) do
-		local storage = storages[other_force_index]
-		for item_name, item_offers in pairs(_items_data) do
-			stack["name"] = item_name
-			local sum = 0
-			for i=1, #item_offers do
-				sum = sum + item_offers[i].remove_item(stack)
-			end
-			if sum > 0 then
-				storage[item_name] = (storage[item_name] or 0) + sum
-			end
-		end
-	end
-end
 
 local function check_buy_boxes()
 	local last_checked_index = mod_data.last_checked_index
@@ -2374,7 +2083,7 @@ local function check_buy_boxes()
 	local buyer_money = forces_money_copy[buyer_index]
 	if buyer_money and buyer_money > money_treshold then
 		local stack = {name = "", count = 0}
-		local stack_count = 0 -- for optimization
+		local stack_count = 0 -- for micro-optimization
 		local payment = 0
 		local f_buy_prices = buy_prices[buyer_index]
 		for item_name, entities in pairs(items_data) do
@@ -2405,27 +2114,32 @@ local function check_buy_boxes()
 						if need_count <= 0 then
 							goto skip_buy
 						end
+						stack["count"] = need_count
 						stack_count = need_count
-						for other_force_index, storage in pairs(storages) do
+						for other_force_index, _items_data in pairs(sell_boxes) do
 							if buyer_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][buyer_index] then
 								local sell_price = sell_prices[other_force_index][item_name]
 								if sell_price and buy_price >= sell_price then
-									local count_in_storage = storage[item_name]
-									if count_in_storage then
-										if count_in_storage > stack_count then
-											storage[item_name] = count_in_storage - stack_count
-											stack_count = 0
-											payment = need_count * sell_price
-											buyer_money = buyer_money - payment
-											forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
-											goto fulfilled_needs
-										else
-											stack_count = stack_count - count_in_storage
-											storage[item_name] = 0
-											payment = (need_count - stack_count) * sell_price
-											buyer_money = buyer_money - payment
-											forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
+									local item_offers = _items_data[item_name]
+									if item_offers then
+										for j=1, #item_offers do
+											local sell_box = item_offers[j]
+											local removed_count = sell_box.remove_item(stack)
+											if removed_count > 0 then
+												stack_count = stack_count - removed_count
+												if stack_count <= 0 then
+													payment = need_count * sell_price
+													buyer_money = buyer_money - payment
+													forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
+													goto fulfilled_needs
+												else
+													stack["count"] = stack_count
+												end
+											end
 										end
+										payment = (need_count - stack_count) * sell_price
+										buyer_money = buyer_money - payment
+										forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
 									end
 								end
 							end
@@ -2556,71 +2270,9 @@ local mod_settings = {
 				value = value + 1
 			}
 			return
-		elseif update_pull_tick == value then
-			settings.global["FM_update-tick"] = {
-				value = value + 1
-			}
-			return
-		elseif update_sell_tick == value then
-			settings.global["FM_update-tick"] = {
-				value = value + 1
-			}
-			return
 		end
-		script.on_nth_tick(update_buy_tick, nil)
-		update_buy_tick = value
-		script.on_nth_tick(value, check_buy_boxes)
-	end,
-	["FM_update-sell-tick"] = function(value)
-		if CHECK_FORCES_TICK == value then
-			settings.global["FM_update-sell-tick"] = {
-				value = value + 1
-			}
-			return
-		elseif CHECK_TEAMS_DATA_TICK == value then
-			settings.global["FM_update-sell-tick"] = {
-				value = value + 1
-			}
-			return
-		elseif update_pull_tick == value then
-			settings.global["FM_update-sell-tick"] = {
-				value = value + 1
-			}
-			return
-		elseif update_buy_tick == value then
-			settings.global["FM_update-sell-tick"] = {
-				value = value + 1
-			}
-			return
-		end
-		script.on_nth_tick(update_sell_tick, nil)
-		update_sell_tick = value
-		script.on_nth_tick(value, check_buy_boxes)
-	end,
-	["FM_update-pull-tick"] = function(value)
-		if CHECK_FORCES_TICK == value then
-			settings.global["FM_update-pull-tick"] = {
-				value = value + 1
-			}
-			return
-		elseif CHECK_TEAMS_DATA_TICK == value then
-			settings.global["FM_update-pull-tick"] = {
-				value = value + 1
-			}
-			return
-		elseif update_sell_tick == value then
-			settings.global["FM_update-pull-tick"] = {
-				value = value + 1
-			}
-			return
-		elseif update_buy_tick == value then
-			settings.global["FM_update-pull-tick"] = {
-				value = value + 1
-			}
-			return
-		end
-		script.on_nth_tick(update_pull_tick, nil)
-		update_pull_tick = value
+		script.on_nth_tick(update_tick, nil)
+		update_tick = value
 		script.on_nth_tick(value, check_buy_boxes)
 	end
 }
@@ -2653,12 +2305,6 @@ local function price_list_command(cmd)
 	open_price_list_gui(player)
 end
 
-local function storage_command(cmd)
-	local player = game.get_player(cmd.player_index)
-	if not (player and player.valid) then return end
-	open_storage_gui(player)
-end
-
 --#endregion
 
 
@@ -2681,10 +2327,8 @@ local function add_remote_interface()
 	remote.add_interface("free-market", {
 		get_mod_data = function() return mod_data end,
 		change_count_in_buy_box_data = change_count_in_buy_box_data,
-		remove_certain_pull_box = remove_certain_pull_box,
 		remove_certain_sell_box = remove_certain_sell_box,
 		remove_certain_buy_box = remove_certain_buy_box,
-		set_pull_box_data = set_pull_box_data,
 		set_sell_box_data = set_sell_box_data,
 		set_buy_box_data = set_buy_box_data,
 		set_sell_price = function(item_name, force_index, price)
@@ -2726,7 +2370,6 @@ local function add_remote_interface()
 		get_open_box      = function() return open_box end,
 		get_all_boxes     = function() return all_boxes end,
 		get_active_forces = function() return active_forces end,
-		get_storages      = function() return storages end,
 	})
 end
 
@@ -2746,7 +2389,6 @@ local function link_data()
 	open_box = mod_data.open_box
 	all_boxes = mod_data.all_boxes
 	active_forces = mod_data.active_forces
-	storages = mod_data.storages
 end
 
 local function update_global_data()
@@ -2765,7 +2407,6 @@ local function update_global_data()
 	mod_data.buy_prices = mod_data.buy_prices or {}
 	mod_data.embargoes = mod_data.embargoes or {}
 	mod_data.all_boxes = mod_data.all_boxes or {}
-	mod_data.storages = mod_data.storages or {}
 
 	link_data()
 
@@ -2800,26 +2441,20 @@ end
 local function on_configuration_changed(event)
 	update_global_data()
 
-	local mod_changes = event.mod_changes["iFreeMarket"]
+	local mod_changes = event.mod_changes["free-market"]
 	if not (mod_changes and mod_changes.old_version) then return end
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
-	if version < 0.23 then
-		for _, force in pairs(game.forces) do
-			local index = force.index
-			if sell_boxes[index] then
-				init_force_data(index)
-			end
-		end
+	if version < 0.13 then
+		game.print({'', {"mod-name.free-market"}, {"colon"}, " [WARNING] this version doesn't migrate old data, please use older version <0.13.0"}, RED_COLOR)
+	elseif version < 0.14 then
+		game.print({'', {"mod-name.free-market"}, {"colon"}, " [WARNING] this version doesn't migrate old data, please use older version <0.14.0"}, RED_COLOR)
 	end
-	if version < 0.21 then
+	if version < 0.17 then
+		game.print({'', {"mod-name.free-market"}, {"colon"}, " [WARNING] this version doesn't migrate some old data (you may experience some bugs with existing chests), please use older version <0.17.0"}, RED_COLOR)
 		for _, player in pairs(game.players) do
 			create_top_relative_gui(player)
-		end
-	end
-	if version < 0.22 then
-		for _, player in pairs(game.players) do
 			create_left_relative_gui(player)
 		end
 	end
@@ -2877,9 +2512,6 @@ M.events = {
 	[defines.events.on_robot_mined_entity] = clear_box_data,
 	[defines.events.script_raised_destroy] = clear_box_data,
 	[defines.events.on_entity_died] = clear_box_data,
-	["FM_set-pull-box"] = function(event)
-		pcall(set_pull_box_key_pressed, event)
-	end,
 	["FM_set-sell-box"] = function(event)
 		pcall(set_sell_box_key_pressed, event)
 	end,
@@ -2890,8 +2522,6 @@ M.events = {
 
 M.on_nth_tick = {
 	[update_buy_tick] = check_buy_boxes,
-	[update_sell_tick] = check_sell_boxes,
-	[update_pull_tick] = check_pull_boxes,
 	[CHECK_FORCES_TICK] = check_forces,
 	[CHECK_TEAMS_DATA_TICK] = check_teams_data
 }
@@ -2899,8 +2529,7 @@ M.on_nth_tick = {
 M.commands = {
 	embargo = embargo_command,
 	prices = prices_command,
-	price_list = price_list_command,
-	storage = storage_command
+	price_list = price_list_command
 }
 
 
