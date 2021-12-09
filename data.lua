@@ -1,4 +1,5 @@
 require("prototypes/styles")
+require("prototypes/tools")
 
 data:extend({
 	{type = "custom-input", name = "FM_set-sell-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
@@ -32,3 +33,4 @@ data:extend({
     stack_size = 100000
   },
 })
+
