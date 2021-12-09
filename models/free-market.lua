@@ -117,8 +117,7 @@ local CLOSE_BUTTON = {
 }
 local ITEM_FILTERS = {
 	{filter = "type", type = "blueprint-book", invert = true, mode = "and"},
-	{filter = "selection-tool", invert = true, mode = "and"},
-	{filter = "tool", invert = true, mode = "and"}
+	{filter = "selection-tool", invert = true, mode = "and"}
 }
 local CHECK_BUTTON = {
 	type = "sprite-button",
@@ -164,14 +163,19 @@ local is_reset_public = settings.global["FM_is_reset_public"].value
 
 --#region Global functions
 
----@param target LuaForce|LuaPlayer
-function print_force_data(target)
-	if not target.valid then
-		log("Invalid object")
-		return
+---@param target  LuaForce|LuaPlayer # From whom the data?
+---@param getter? LuaForce|LuaPlayer # Print to whom?
+function print_force_data(target, getter)
+	if getter then
+		if not getter.valid then
+			log("Invalid object")
+			return
+		end
+	else
+		getter = game
 	end
 
-	local index, print_to_target
+	local index
 	local object_name = target.object_name
 	if object_name == "LuaPlayer" then
 		index = target.force.index
@@ -182,7 +186,7 @@ function print_force_data(target)
 		return
 	end
 
-	print_to_target = target.print
+	local print_to_target = getter.print
 	print_to_target("Inactive sell prices:" .. serpent.line(inactive_sell_prices[index]))
 	print_to_target("Inactive buy prices:" .. serpent.line(inactive_buy_prices[index]))
 	print_to_target("Inactive sell boxes:" .. serpent.line(inactive_sell_boxes[index]))
@@ -914,6 +918,9 @@ local function open_force_configuration(player)
 		screen.FM_force_configuration.destroy()
 		return
 	end
+
+	local is_player_admin = player.admin
+
 	local main_frame = screen.add{type = "frame", name = "FM_force_configuration", direction = "vertical"}
 	main_frame.style.horizontally_stretchable = true
 	local flow = main_frame.add(TITLEBAR_FLOW)
@@ -924,32 +931,39 @@ local function open_force_configuration(player)
 		ignored_by_interaction = true
 	}
 	flow.add(DRAG_HANDLER).drag_target = main_frame
-	-- flow.add{
-	-- 	type = "sprite-button",
-	-- 	style = "frame_action_button",
-	-- 	sprite = "refresh_white_icon",
-	-- 	name = "FM_refresh_prices_table"
-	-- }
 	flow.add(CLOSE_BUTTON)
 	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
 	local content = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
 	content.style.padding = 12
 
-	local reset_caption = {'', {"free-market.reset-gui"}, ' ', {"colon"}}
-	local reset_prices_row = content.add(FLOW)
-	reset_prices_row.name = "reset_prices_row"
-	reset_prices_row.add(LABEL).caption = reset_caption
-	reset_prices_row.add{type = "button", caption = {"free-market.reset-buy-prices"} , name = "FM_reset_buy_prices"}
-	reset_prices_row.add{type = "button", caption = {"free-market.reset-sell-prices"}, name = "FM_reset_sell_prices"}
-	reset_prices_row.add{type = "button", caption = {"free-market.reset-all-prices"} , name = "FM_reset_all_prices"}
+	if is_player_admin then
+		local admin_row = content.add(FLOW)
+		admin_row.name = "admin_row"
+		admin_row.add(LABEL).caption = {'', {"gui-multiplayer-lobby.allow-commands-admins-only"}, {"colon"}}
+		admin_row.add{type = "button", caption = {"free-market.print-force-data-button"}, name = "FM_print_force_data"}
+	end
 
-	local reset_boxes_row = content.add(FLOW)
-	reset_boxes_row.name = "reset_boxes_row"
-	reset_boxes_row.add(LABEL).caption = reset_caption
-	reset_boxes_row.add{type = "button", caption = {"free-market.reset-buy-requests"},  name = "FM_reset_buy_boxes"}
-	reset_boxes_row.add{type = "button", caption = {"free-market.reset-sell-offers"},   name = "FM_reset_sell_boxes"}
-	reset_boxes_row.add{type = "button", caption = {"free-market.reset-pull-requests"}, name = "FM_reset_pull_boxes"}
-	reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}
+	if is_reset_public or is_player_admin then
+		if is_player_admin then
+
+			content.add(LABEL).caption = {'', "Attention", {"colon"}, "reset is public"}
+		end
+		local reset_caption = {'', {"free-market.reset-gui"}, {"colon"}}
+		local reset_prices_row = content.add(FLOW)
+		reset_prices_row.name = "reset_prices_row"
+		reset_prices_row.add(LABEL).caption = reset_caption
+		reset_prices_row.add{type = "button", caption = {"free-market.reset-buy-prices"} , name = "FM_reset_buy_prices"}
+		reset_prices_row.add{type = "button", caption = {"free-market.reset-sell-prices"}, name = "FM_reset_sell_prices"}
+		reset_prices_row.add{type = "button", caption = {"free-market.reset-all-prices"} , name = "FM_reset_all_prices"}
+
+		local reset_boxes_row = content.add(FLOW)
+		reset_boxes_row.name = "reset_boxes_row"
+		reset_boxes_row.add(LABEL).caption = reset_caption
+		reset_boxes_row.add{type = "button", caption = {"free-market.reset-buy-requests"},  name = "FM_reset_buy_boxes"}
+		reset_boxes_row.add{type = "button", caption = {"free-market.reset-sell-offers"},   name = "FM_reset_sell_boxes"}
+		reset_boxes_row.add{type = "button", caption = {"free-market.reset-pull-requests"}, name = "FM_reset_pull_boxes"}
+		reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}
+	end
 
 	main_frame.force_auto_center()
 end
@@ -2034,6 +2048,13 @@ local GUIS = {
 				end
 			end
 			open_box[player.index] = entity
+		end
+	end,
+	FM_print_force_data = function(element, player)
+		if player.admin then
+			print_force_data(player.force, player)
+		else
+			player.print({"command-output.parameters-require-admin"})
 		end
 	end,
 	FM_reset_buy_prices = function(element, player)
