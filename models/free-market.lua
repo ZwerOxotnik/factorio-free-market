@@ -975,7 +975,6 @@ local function open_force_configuration(player)
 	local translations_row = content.add(FLOW)
 	translations_row.add(LABEL).caption = {'', "Translations", {"colon"}}
 	local link = translations_row.add({type = "textfield", text = "https://crowdin.com/project/factorio-mods-localization"})
-	link.read_only = true
 	link.style.horizontally_stretchable = true
 	link.style.width = 320
 	content.add(LABEL).caption = {'', "Translators", {"colon"}, ' ', "Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik"}
@@ -2497,7 +2496,7 @@ local function on_player_selected_area(event)
 			local entity = entities[i]
 			if all_boxes[entity.unit_number] == nil then
 				local item = entity.get_inventory(chest_inventory_type)[1]
-				if not item.valid_for_read then
+				if item.valid_for_read then
 					func(item.name, player, entity)
 				end
 			end
