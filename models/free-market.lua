@@ -44,11 +44,6 @@ local inactive_sell_boxes
 ---@type table<number, table>
 local inactive_buy_boxes
 
---- {force index = {[item name] = {LuaEntity}}}
----@class pull_boxes
----@type table<number, table<string, table<number, LuaEntity>>>
-local pull_boxes
-
 ---@class open_box
 ---@type table<number, table>
 local open_box
@@ -179,11 +174,9 @@ function print_force_data(target, getter)
 	print_to_target("Inactive buy boxes:" .. serpent.line(inactive_buy_boxes[index]))
 	print_to_target("Sell prices:" .. serpent.line(sell_prices[index]))
 	print_to_target("Buy prices:" .. serpent.line(buy_prices[index]))
-	print_to_target("Pull boxes:" .. serpent.line(pull_boxes[index]))
 	print_to_target("Sell boxes:" .. serpent.line(sell_boxes[index]))
 	print_to_target("Buy boxes:" .. serpent.line(buy_boxes[index]))
 	print_to_target("Embargoes:" .. serpent.line(embargoes[index]))
-	print_to_target("Storage:" .. serpent.line(storages[index]))
 end
 
 --#endregion
@@ -220,11 +213,9 @@ local function clear_force_data(index)
 	inactive_buy_boxes[index] = nil
 	sell_prices[index] = nil
 	buy_prices[index] = nil
-	pull_boxes[index] = nil
 	sell_boxes[index] = nil
 	buy_boxes[index] = nil
 	embargoes[index] = nil
-	storages[index] = nil
 end
 
 ---@param index number
@@ -235,11 +226,9 @@ local function init_force_data(index)
 	inactive_buy_boxes[index] = inactive_buy_boxes[index] or {}
 	sell_prices[index] = sell_prices[index] or {}
 	buy_prices[index] = buy_prices[index] or {}
-	pull_boxes[index] = pull_boxes[index] or {}
 	sell_boxes[index] = sell_boxes[index] or {}
 	buy_boxes[index] = buy_boxes[index] or {}
 	embargoes[index] = embargoes[index] or {}
-	storages[index] = storages[index] or {}
 end
 
 ---@param entity LuaEntity #LuaEntity
@@ -283,23 +272,6 @@ local function remove_certain_buy_box(entity, item_name)
 					inactive_buy_prices[force_index][item_name] = buy_price
 					f_buy_prices[item_name] = nil
 				end
-			end
-			return
-		end
-	end
-end
-
----@param entity LuaEntity #LuaEntity
----@param item_name string
-local function remove_certain_pull_box(entity, item_name)
-	local force_index = entity.force.index
-	local f_pull_boxes = pull_boxes[force_index]
-	local entities = f_pull_boxes[item_name]
-	for i = 1, #entities do
-		if entities[i] == entity then
-			tremove(entities, i)
-			if #entities == 0 then
-				f_pull_boxes[item_name] = nil
 			end
 			return
 		end
@@ -375,38 +347,6 @@ local function set_sell_box_data(item_name, player, entity)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
 	all_boxes[entity.unit_number] = {entity, id, SELL_TYPE, items, item_name}
-end
-
----@param item_name string
----@param player LuaPlayer #LuaPlayer
----@param entity LuaEntity #LuaEntity
-local function set_pull_box_data(item_name, player, entity)
-	local player_force = player.force
-	local force_index = player_force.index
-	local force_pull_boxes = pull_boxes[force_index]
-	force_pull_boxes[item_name] = force_pull_boxes[item_name] or {}
-	local items = force_pull_boxes[item_name]
-	items[#items+1] = entity
-	local text_data = {
-		text = PULLING_TEXT,
-		vertical_alignment = "middle",
-		surface = player.surface,
-		scale_with_zoom = false,
-		only_in_alt_mode = true,
-		alignment = "center",
-		color = WHITE_COLOR,
-		target = entity,
-		target_offset = TEXT_OFFSET,
-		scale = 0.7,
-	}
-	if is_public_titles == false then
-		text_data.forces = {player_force}
-	end
-	---@type number
-	local id = draw_text(text_data)
-
-	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, PULL_TYPE, items, item_name}
 end
 
 ---@param item_name string
@@ -505,47 +445,6 @@ local function clear_invalid_prices(prices)
 	end
 end
 
-local function clear_invalid_storage_data()
-	local item_prototypes = game.item_prototypes
-	local forces = game.forces
-	for index, data in pairs(pull_boxes) do
-		if forces[index] == nil then
-			clear_force_data(index)
-		else
-			for item_name, count in pairs(data) do
-				if item_prototypes[item_name] == nil or count == 0 then
-					data[item_name] = nil
-				end
-			end
-		end
-	end
-end
-
-local function clear_invalid_pull_boxes_data()
-	local item_prototypes = game.item_prototypes
-	local forces = game.forces
-	for index, data in pairs(pull_boxes) do
-		if forces[index] == nil then
-			clear_force_data(index)
-		else
-			for item_name, entities in pairs(data) do
-				if item_prototypes[item_name] == nil then
-					data[item_name] = nil
-				else
-					for i=#entities, 1, -1 do
-						if entities[i].valid == false then
-							tremove(entities, i)
-						end
-					end
-					if #entities == 0 then
-						data[item_name] = nil
-					end
-				end
-			end
-		end
-	end
-end
-
 ---@param _data sell_boxes|inactive_sell_boxes
 local function clear_invalid_sell_boxes_data(_data)
 	local item_prototypes = game.item_prototypes
@@ -602,8 +501,6 @@ end
 
 
 local function clear_invalid_entities()
-	clear_invalid_storage_data()
-	clear_invalid_pull_boxes_data()
 	clear_invalid_sell_boxes_data(sell_boxes)
 	clear_invalid_sell_boxes_data(inactive_sell_boxes)
 	clear_invalid_buy_boxes_data(buy_boxes)
@@ -925,7 +822,6 @@ local function open_force_configuration(player)
 		reset_boxes_row.add(LABEL).caption = reset_caption
 		reset_boxes_row.add{type = "button", caption = {"free-market.reset-buy-requests"},  name = "FM_reset_buy_boxes"}.style.minimal_width = 10
 		reset_boxes_row.add{type = "button", caption = {"free-market.reset-sell-offers"},   name = "FM_reset_sell_boxes"}.style.minimal_width = 10
-		reset_boxes_row.add{type = "button", caption = {"free-market.reset-pull-requests"}, name = "FM_reset_pull_boxes"}.style.minimal_width = 10
 		reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}.style.minimal_width = 10
 	end
 
@@ -935,7 +831,6 @@ local function open_force_configuration(player)
 	local translations_row = content.add(FLOW)
 	translations_row.add(LABEL).caption = {'', "Translations", {"colon"}}
 	local link = translations_row.add({type = "textfield", text = "https://crowdin.com/project/factorio-mods-localization"})
-	link.read_only = true
 	link.style.horizontally_stretchable = true
 	link.style.width = 320
 	content.add(LABEL).caption = {'', "Translators", {"colon"}, ' ', "Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik"}
@@ -1358,22 +1253,6 @@ local function remove_sell_box(entity)
 	if box_data == nil then return end
 
 	if box_data[3] == SELL_TYPE then
-		remove_certain_buy_box(entity, box_data[5])
-	else
-		return
-	end
-	rendering_destroy(box_data[2])
-
-	all_boxes[unit_number] = nil
-end
-
----@param entity LuaEntity
-local function remove_pull_box(entity)
-	local unit_number = entity.unit_number
-	local box_data = all_boxes[unit_number]
-	if box_data == nil then return end
-
-	if box_data[3] == PULL_TYPE then
 		remove_certain_buy_box(entity, box_data[5])
 	else
 		return
@@ -2197,7 +2076,6 @@ end
 
 
 local SELECT_TOOLS = {
-	FM_set_pull_boxes_tool = set_pull_box_data,
 	FM_set_sell_boxes_tool = set_sell_box_data,
 	FM_set_buy_boxes_tool = set_buy_box_data
 }
@@ -2211,7 +2089,7 @@ local function on_player_selected_area(event)
 			local entity = entities[i]
 			if all_boxes[entity.unit_number] == nil then
 				local item = entity.get_inventory(chest_inventory_type)[1]
-				if not item.valid_for_read then
+				if item.valid_for_read then
 					func(item.name, player, entity)
 				end
 			end
@@ -2234,7 +2112,6 @@ end
 
 
 local ALT_SELECT_TOOLS = {
-	FM_set_pull_boxes_tool = remove_pull_box,
 	FM_set_sell_boxes_tool = remove_sell_box,
 	FM_set_buy_boxes_tool = remove_buy_box
 }
@@ -2361,7 +2238,6 @@ local function add_remote_interface()
 		get_inactive_buy_prices  = function() return inactive_buy_prices end,
 		get_inactive_sell_boxes  = function() return inactive_sell_boxes end,
 		get_inactive_buy_boxes   = function() return inactive_buy_boxes end,
-		get_pull_boxes    = function() return pull_boxes end,
 		get_sell_boxes    = function() return sell_boxes end,
 		get_buy_boxes     = function() return buy_boxes end,
 		get_sell_prices   = function() return sell_prices end,
@@ -2375,7 +2251,6 @@ end
 
 local function link_data()
 	mod_data = global.free_market
-	pull_boxes = mod_data.pull_boxes
 	inactive_sell_boxes = mod_data.inactive_sell_boxes
 	inactive_buy_boxes = mod_data.inactive_buy_boxes
 	sell_boxes = mod_data.sell_boxes
@@ -2398,7 +2273,6 @@ local function update_global_data()
 	mod_data.active_forces = mod_data.active_forces or {}
 	mod_data.inactive_sell_boxes = mod_data.inactive_sell_boxes or {}
 	mod_data.inactive_buy_boxes = mod_data.inactive_buy_boxes or {}
-	mod_data.pull_boxes = mod_data.pull_boxes or {}
 	mod_data.sell_boxes = mod_data.sell_boxes or {}
 	mod_data.buy_boxes = mod_data.buy_boxes or {}
 	mod_data.inactive_sell_prices = mod_data.inactive_sell_prices or {}
@@ -2446,6 +2320,14 @@ local function on_configuration_changed(event)
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
+	if version < 0.18 then
+		for _, force in pairs(game.forces) do
+			local index = force.index
+			if sell_boxes[index] then
+				init_force_data(index)
+			end
+		end
+	end
 	if version < 0.13 then
 		game.print({'', {"mod-name.free-market"}, {"colon"}, " [WARNING] this version doesn't migrate old data, please use older version <0.13.0"}, RED_COLOR)
 	elseif version < 0.14 then
@@ -2486,7 +2368,8 @@ M.events = {
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
-		pcall(on_gui_click, event)
+		on_gui_click(event)
+		-- pcall(on_gui_click, event)
 	end,
 	[defines.events.on_player_left_game] = function(event)
 		pcall(on_player_left_game, event)

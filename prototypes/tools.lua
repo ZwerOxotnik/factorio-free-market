@@ -20,7 +20,7 @@ local function create_FM_select_tool(name, style, hotkey_name)
 		{
 			type = "selection-tool",
 			name = name,
-			icon = "__iFreeMarket__/graphics/change-price.png",
+			icon = "__free-market__/graphics/change-price.png",
 			icon_size = 32,
 			order = order,
 			flags = flags,
@@ -45,7 +45,7 @@ local function create_FM_select_tool(name, style, hotkey_name)
 			associated_control_input = hotkey_name,
 			item_to_spawn = name,
 			icon = {
-				filename = "__iFreeMarket__/graphics/change-price.png",
+				filename = "__free-market__/graphics/change-price.png",
 				priority = "extra-high-no-scale",
 				size = 32,
 				flags = {"gui-icon"}
@@ -57,7 +57,6 @@ local function create_FM_select_tool(name, style, hotkey_name)
 	})
 end
 
-create_FM_select_tool("FM_set_pull_boxes_tool", "green", "FM_get-pull-box-selection-tool")
 create_FM_select_tool("FM_set_sell_boxes_tool", "green", "FM_get-sell-box-selection-tool")
 create_FM_select_tool("FM_set_buy_boxes_tool", "green", "FM_get-buy-box-selection-tool")
 create_FM_select_tool("FM_remove_boxes_tool", "red", "FM_get-remove-boxes-selection-tool")
