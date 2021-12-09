@@ -1,4 +1,11 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.24.0
+Date: 2021-12-09
+  Features:
+    - Added new tools for mass-selection and mass-removing and shortucts
+  Changes:
+    - Added a link to team configuration gui
+---------------------------------------------------------------------------------------------------
 Version: 0.23.3
 Date: 2021-12-09
   Changes:
