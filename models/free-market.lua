@@ -969,17 +969,27 @@ local function open_force_configuration(player)
 		reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}.style.minimal_width = 10
 	end
 
-	local translations_row = content.add(FLOW)
-	translations_row.add(LABEL).caption = {'', "Translations", {"colon"}}
-	local link = translations_row.add({type = "textfield", text = "https://crowdin.com/project/factorio-mods-localization"})
-	link.style.horizontally_stretchable = true
-	link.style.width = 320
 	local label = content.add(LABEL)
 	label.caption = {'', {"gui.credits"}, {"colon"}}
 	label.style.font = "heading-1"
+	local translations_row = content.add(FLOW)
+	translations_row.add(LABEL).caption = {'', "Translations", {"colon"}}
+	local link = translations_row.add({type = "textfield", text = "https://crowdin.com/project/factorio-mods-localization"})
+	link.read_only = true
+	link.style.horizontally_stretchable = true
+	link.style.width = 320
 	content.add(LABEL).caption = {'', "Translators", {"colon"}, ' ', "Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik"}
 	content.add(LABEL).caption = {'', "Supporters", {"colon"}, ' ', "Eerrikki"}
 	content.add(LABEL).caption = {'', {"gui-other-settings.developer"}, {"colon"}, ' ', "ZwerOxotnik"}
+	local text_box = content.add({type = "text-box"})
+	text_box.read_only = true
+	text_box.text = "see-prices.png from https://www.svgrepo.com/svg/77065/price-tag\n" ..
+	"change-price.png from https://www.svgrepo.com/svg/96982/price-tag\n" ..
+	"embargo.png is modified version of https://www.svgrepo.com/svg/97012/price-tag"
+	text_box.style.maximal_width = 0
+	text_box.style.height = 70
+	text_box.style.horizontally_stretchable = true -- it works weird
+	text_box.style.vertically_stretchable = true -- it works weird
 
 	main_frame.force_auto_center()
 end
