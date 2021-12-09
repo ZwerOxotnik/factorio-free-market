@@ -1,4 +1,23 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.18.0
+Date: 2021-12-09
+  Features:
+    - Added new tools for mass-selection and mass-removing and shortucts
+    - If another team doesn't have anything to sell, then other teams won't see its prices
+    - Added global function "print_force_data" which supports LuaForce and LuaPlayer
+  Changes:
+    - Changed team configuration gui and added credits
+    - Improved team configuration for admins
+    - Changed structures of data for prices and boxes
+    - Optimized again
+    - Changed "free-market" interface
+    - Removed "free-market_rcon" interface, so use:
+    -   /sc __iFreeMarket__ getRconData("name of data")
+    -   /sc __iFreeMarket__ getRconForceData("name of data", LuaForce)
+    -   /sc __iFreeMarket__ getRconForceDataByIndex("name of data", force index)
+  Bugfixes:
+    - Fixed missing science packs when a player selecting an item
+---------------------------------------------------------------------------------------------------
 Version: 0.17.1
 Date: 2021-12-07
   Bugfixes:
