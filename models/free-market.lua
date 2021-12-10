@@ -2368,8 +2368,7 @@ M.events = {
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
-		on_gui_click(event)
-		-- pcall(on_gui_click, event)
+		pcall(on_gui_click, event)
 	end,
 	[defines.events.on_player_left_game] = function(event)
 		pcall(on_player_left_game, event)
