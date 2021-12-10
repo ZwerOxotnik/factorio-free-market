@@ -1446,8 +1446,8 @@ local function on_gui_elem_changed(event)
 
 	local player = game.get_player(event.player_index)
 	local force_index = player.force.index
-	parent.sell_price.text = tostring(sell_prices[force_index][item_name] or '')
-	parent.buy_price.text = tostring(buy_prices[force_index][item_name] or '')
+	parent.sell_price.text = tostring(sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name] or '')
+	parent.buy_price.text = tostring(buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name] or '')
 	update_prices_table(player, item_name, parent.parent.other_prices_frame["scroll-pane"].prices_table)
 end
 
@@ -1692,8 +1692,8 @@ local GUIS = {
 		if item_name == nil then return end
 
 		local force_index = player.force.index
-		row.buy_price.text = tostring(buy_prices[force_index][item_name] or '')
-		row.sell_price.text = tostring(sell_prices[force_index][item_name] or '')
+		row.buy_price.text = tostring(buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name] or '')
+		row.sell_price.text = tostring(sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name] or '')
 		update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 	end,
 	FM_set_sell_box = function(element, player)
