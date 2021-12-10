@@ -2303,6 +2303,11 @@ local function on_gui_click(event)
 	if f then f(event.element, game.get_player(event.player_index)) end
 end
 
+local function on_gui_closed(event)
+	if not ALLOWED_TYPES[event.entity.type] then return end
+	game.get_player(event.player_index).gui.relative.FM_boxes_frame.content.main_flow.box_operations.clear()
+end
+
 local function check_pull_boxes()
 	local stack = {name = "", count = 0}
 	for other_force_index, _items_data in pairs(pull_boxes) do
@@ -2851,6 +2856,9 @@ M.events = {
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
 		pcall(on_gui_click, event)
+	end,
+	[defines.events.on_gui_closed] = function(event)
+		pcall(on_gui_closed, event)
 	end,
 	[defines.events.on_player_left_game] = function(event)
 		pcall(on_player_left_game, event)
