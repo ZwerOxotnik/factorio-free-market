@@ -1,7 +1,14 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.24.6
+Date: 2021-12-11
+  Features:
+    - Added auto-limit of stacks on sell chests and on pull chests
+  Changes:
+    - Changed default max storage threshold to 500
+---------------------------------------------------------------------------------------------------
 Version: 0.24.5
 Date: 2021-12-11
-  Bugfixes:
+  Features:
     - Added a setting for max storage threshold
 ---------------------------------------------------------------------------------------------------
 Version: 0.24.4

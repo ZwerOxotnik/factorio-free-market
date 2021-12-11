@@ -54,6 +54,11 @@ local pull_boxes
 local open_box
 
 ---@class all_boxes
+---@field [1] LuaEntity
+---@field [2] number # id
+---@field [3] number # box_type
+---@field [4] table # items data of box
+---@field [5] string # item name
 ---@type table<number, table>
 local all_boxes
 
@@ -390,6 +395,7 @@ local function set_sell_box_data(item_name, player, entity)
 	end
 	---@type number
 	local id = draw_text(text_data)
+	entity.get_inventory(chest_inventory_type).set_bar(2)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
 	all_boxes[entity.unit_number] = {entity, id, SELL_TYPE, items, item_name}
@@ -422,6 +428,7 @@ local function set_pull_box_data(item_name, player, entity)
 	end
 	---@type number
 	local id = draw_text(text_data)
+	entity.get_inventory(chest_inventory_type).set_bar(2)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
 	all_boxes[entity.unit_number] = {entity, id, PULL_TYPE, items, item_name}
@@ -2347,7 +2354,7 @@ local function check_sell_boxes()
 					sum = sum + item_offers[i].remove_item(stack)
 				end
 				if sum > 0 then
-					storage[item_name] = (count or 0) + sum
+					storage[item_name] = count + sum
 				end
 			end
 		end
