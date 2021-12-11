@@ -154,6 +154,9 @@ local maximal_price = settings.global["FM_maximal-price"].value
 ---@type number
 local skip_offline_team_chance = settings.global["FM_skip_offline_team_chance"].value
 
+---@type number
+local max_storage_threshold = settings.global["FM_max_storage_threshold"].value
+
 ---@type boolean
 local is_public_titles = settings.global["FM_is-public-titles"].value
 
@@ -2330,17 +2333,22 @@ local function check_pull_boxes()
 end
 
 local function check_sell_boxes()
-	local stack = {name = "", count = 1000000}
+	local stack = {name = "", count = 0}
 	for other_force_index, _items_data in pairs(sell_boxes) do
 		local storage = storages[other_force_index]
 		for item_name, item_offers in pairs(_items_data) do
-			stack["name"] = item_name
-			local sum = 0
-			for i=1, #item_offers do
-				sum = sum + item_offers[i].remove_item(stack)
-			end
-			if sum > 0 then
-				storage[item_name] = (storage[item_name] or 0) + sum
+			local count = storage[item_name] or 0
+			local max_count = max_storage_threshold - count
+			if max_count > 0 then
+				stack["count"] = max_count
+				stack["name"] = item_name
+				local sum = 0
+				for i=1, #item_offers do
+					sum = sum + item_offers[i].remove_item(stack)
+				end
+				if sum > 0 then
+					storage[item_name] = (count or 0) + sum
+				end
 			end
 		end
 	end
@@ -2549,6 +2557,7 @@ local mod_settings = {
 	["FM_minimal-price"] = function(value) minimal_price = value end,
 	["FM_maximal-price"] = function(value) maximal_price = value end,
 	["FM_skip_offline_team_chance"] = function(value) skip_offline_team_chance = value end,
+	["FM_max_storage_threshold"] = function(value) max_storage_threshold = value end,
 	["FM_update-tick"] = function(value)
 		if CHECK_FORCES_TICK == value then
 			settings.global["FM_update-tick"] = {
