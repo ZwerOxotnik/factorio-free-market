@@ -1,4 +1,13 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.24.7
+Date: 2021-12-12
+  Changes:
+    - Added Chinese Simplified translation (thanks to @zszzlzm (刘泽民) on crowdin)
+  Notes:
+    - Translations: https://crowdin.com/project/factorio-mods-localization (thank you for contributions, I really appreciate it)
+  Bugfixes:
+    - Fixed selling of items when a team doesn't have sell boxes
+---------------------------------------------------------------------------------------------------
 Version: 0.24.6
 Date: 2021-12-11
   Features:
