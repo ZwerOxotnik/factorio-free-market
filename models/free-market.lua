@@ -276,11 +276,14 @@ local function remove_certain_sell_box(entity, item_name)
 			tremove(entities, i)
 			if #entities == 0 then
 				f_sell_boxes[item_name] = nil
-				local f_sell_prices = sell_prices[force_index]
-				local sell_price = f_sell_prices[item_name]
-				if sell_price then
-					inactive_sell_prices[force_index][item_name] = sell_price
-					f_sell_prices[item_name] = nil
+				local quantity_stored = storages[force_index][item_name]
+				if quantity_stored == nil or quantity_stored <= 0 then
+					local f_sell_prices = sell_prices[force_index]
+					local sell_price = f_sell_prices[item_name]
+					if sell_price then
+						inactive_sell_prices[force_index][item_name] = sell_price
+						f_sell_prices[item_name] = nil
+					end
 				end
 			end
 			return
