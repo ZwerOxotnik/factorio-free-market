@@ -66,6 +66,7 @@ local find = string.find
 local sub = string.sub
 local call = remote.call
 local draw_text = rendering.draw_text
+local draw_sprite = rendering.draw_sprite
 local get_render_target = rendering.get_target
 local is_render_valid = rendering.is_valid
 local rendering_destroy = rendering.destroy
@@ -2078,6 +2079,25 @@ local function on_player_left_game(event)
 	destroy_force_configuration(player)
 end
 
+local SPRITE_OFFSET = {0, -0.25}
+local function on_selected_entity_changed(event)
+	local entity = event.last_entity
+	if not ALLOWED_TYPES[entity.type] then return end
+	local player = game.get_player(event.player_index)
+	if entity.force ~= player.force then return end
+
+	local item_name = all_boxes[entity.unit_number][5]
+	draw_sprite{
+		sprite = "item." .. item_name,
+		target = entity,
+		surface = entity.surface,
+		players = {player},
+		time_to_live = 120,
+		x_scale = 0.9,
+		target_offset = SPRITE_OFFSET
+	}
+end
+
 
 local SELECT_TOOLS = {
 	FM_set_sell_boxes_tool = set_sell_box_data,
@@ -2379,6 +2399,9 @@ M.events = {
 	end,
 	[defines.events.on_player_left_game] = function(event)
 		pcall(on_player_left_game, event)
+	end,
+	[defines.events.on_selected_entity_changed] = function(event)
+		pcall(on_selected_entity_changed, event)
 	end,
 	[defines.events.on_player_removed] = delete_player_data,
 	[defines.events.on_force_created] = on_force_created,
