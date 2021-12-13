@@ -1,13 +1,20 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.26.2
+Date: 2021-12-13
+  Changes:
+    - Changed en locale slightly
+  Bugfixes:
+    - Fixed minimum and maximum values of settings
+---------------------------------------------------------------------------------------------------
 Version: 0.26.1
 Date: 2021-12-13
   Features:
-    - Added customizable column count for sell/buy price notification (see player settings)
+    - Added customizable column count for price notification (see player settings)
   Changes:
     - Improved stability of data
-    - Changed maximal, minimal values for player settings
+    - Improved price notification
   Bugfixes:
-    - Made a workaround for player settings (values have no limits, Factorio bug)
+    - Made a workaround for player settings
   Notes:
     - Refactored slightly
 ---------------------------------------------------------------------------------------------------

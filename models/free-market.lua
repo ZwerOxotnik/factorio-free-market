@@ -2879,72 +2879,10 @@ local mod_settings = {
 		script.on_nth_tick(value, check_buy_boxes)
 	end
 }
-
-local player_settings = {
-	["FM_sell_notification_column_count"] = function(setting, event, player)
-		if value > 10 then
-			value = 10
-		elseif value < 1 then
-			value = 1
-		else
-			return
-		end
-
-		player.mod_settings[event.setting] = {
-			value = value
-		}
-	end,
-	["FM_buy_notification_column_count"] = function(value, event, player)
-		if value > 10 then
-			value = 10
-		elseif value < 1 then
-			value = 1
-		else
-			return
-		end
-
-		player.mod_settings[event.setting] = {
-			value = value
-		}
-	end,
-	["FM_sell_notification_size"] = function(value, event, player)
-		if value > 40 then
-			value = 40
-		elseif value < 1 then
-			value = 1
-		else
-			return
-		end
-
-		player.mod_settings[event.setting] = {
-			value = value
-		}
-	end,
-	["FM_buy_notification_size"] = function(value, event, player)
-		if value > 40 then
-			value = 40
-		elseif value < 1 then
-			value = 1
-		else
-			return
-		end
-
-		player.mod_settings[event.setting] = {
-			value = value
-		}
-	end,
-}
 local function on_runtime_mod_setting_changed(event)
-	if event.setting_type == "runtime-global" then
-		local f = mod_settings[event.setting]
-		if f then f(settings.global[event.setting].value) end
-	else -- Fix for a Factorio bug
-		if event.player_index then
-			local f = player_settings[event.setting]
-			local player = game.get_player(event.player_index)
-			if f then f(player.mod_settings[event.setting].value, event, player) end
-		end
-	end
+	-- if event.setting_type ~= "runtime-global" then return ned
+	local f = mod_settings[event.setting]
+	if f then f(settings.global[event.setting].value) end
 end
 
 --#endregion
