@@ -9,5 +9,7 @@ data:extend({
 	{type = "int-setting", name = "FM_max_storage_threshold", setting_type = "runtime-global", default_value = 500, minimal_value = 1, maximal_value = 1e19},
 	{type = "bool-setting", name = "FM_enable-auto-embargo", setting_type = "runtime-global", default_value = true},
 	{type = "bool-setting", name = "FM_is-public-titles", setting_type = "runtime-global", default_value = true},
-	{type = "bool-setting", name = "FM_is_reset_public", setting_type = "runtime-global", default_value = true}
+	{type = "bool-setting", name = "FM_is_reset_public", setting_type = "runtime-global", default_value = true},
+	{type = "int-setting", name = "FM_sell_notification_size", setting_type = "runtime-per-user", default_value = 6, minimal_value = 1, maximal_value = 15},
+	{type = "int-setting", name = "FM_buy_notification_size",  setting_type = "runtime-per-user", default_value = 6, minimal_value = 1, maximal_value = 15},
 })

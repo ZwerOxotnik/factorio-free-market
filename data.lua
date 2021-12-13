@@ -1,4 +1,4 @@
-require("prototypes/styles")
+require("prototypes/style")
 require("prototypes/tools")
 
 data:extend({
@@ -6,6 +6,12 @@ data:extend({
 	{type = "custom-input", name = "FM_set-sell-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-buy-box" , key_sequence = "mouse-wheel-right", consuming = "game-only"},
 	{
+		type = "sprite",
+		name = "FM_price",
+		filename = "__iFreeMarket__/graphics/price.png",
+		width = 32, height = 32,
+		flags = {"gui-icon"}
+	}, {
 		type = "sprite",
 		name = "FM_change-price",
 		filename = "__iFreeMarket__/graphics/change-price.png",

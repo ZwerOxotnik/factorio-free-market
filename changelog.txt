@@ -1,4 +1,13 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.26.0
+Date: 2021-12-13
+  Features:
+    - Added price notification with settings
+  Bugfixes:
+    - Fixed crush with auto-settings of chest when the player already opened the settings for the chest
+    - Fixed localization of settings
+    - Fixed data of forces
+---------------------------------------------------------------------------------------------------
 Version: 0.25.1
 Date: 2021-12-13
   Bugfixes:

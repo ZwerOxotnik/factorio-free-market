@@ -106,9 +106,14 @@ local BUYING_TEXT = {"free-market.buying"}
 local SELLING_TEXT = {"free-market.selling"}
 local PULLING_TEXT = {"free-market.pulling"}
 local EMPTY_WIDGET = {type = "empty-widget"}
+local PRICE_LABEL = {type = "label", style = "FM_price_label"}
+local POST_PRICE_LABEL = {type = "label", style = "FM_price_label", caption = '$'}
+local PRICE_FRAME = {type = "frame", style = "FM_price_frame"}
+local SELL_PRICE_BUTTON = {type = "sprite-button", style = "slot_button", name = "FM_open_sell_price"} -- TODO: change the style
+local BUY_PRICE_BUTTON = {type = "sprite-button", style = "slot_button", name = "FM_open_buy_price"} -- TODO: change the style
 local ALLOWED_TYPES = {["container"] = true, ["logistic-container"] = true}
-local TITLEBAR_FLOW = {type = "flow", style = "flib_titlebar_flow"}
-local DRAG_HANDLER = {type = "empty-widget", style = "flib_dialog_footer_drag_handle"}
+local TITLEBAR_FLOW = {type = "flow", style = "flib_titlebar_flow", name = "titlebar"}
+local DRAG_HANDLER = {type = "empty-widget", style = "flib_dialog_footer_drag_handle", name = "drag_handler"}
 local SCROLL_PANE = {
 	type = "scroll-pane",
 	name = "scroll-pane",
@@ -845,6 +850,7 @@ local function update_price_list_by_buy_filter(force, scroll_pane, text_filter)
 	end
 end
 
+---@param player LuaPlayer #LuaPlayer
 local function destroy_prices_gui(player)
 	local screen = player.gui.screen
 	if screen.FM_prices_frame then
@@ -852,6 +858,7 @@ local function destroy_prices_gui(player)
 	end
 end
 
+---@param player LuaPlayer #LuaPlayer
 local function destroy_price_list_gui(player)
 	local screen = player.gui.screen
 	if screen.FM_price_list_frame then
@@ -859,6 +866,8 @@ local function destroy_price_list_gui(player)
 	end
 end
 
+---@param embargo_table LuaElement #LuaElement
+---@param player LuaPlayer #LuaPlayer
 local function update_embargo_table(embargo_table, player)
 	embargo_table.clear()
 
@@ -891,6 +900,156 @@ local function update_embargo_table(embargo_table, player)
 	embargo_list.style.height = 200
 end
 
+---@param prices_table LuaElement #LuaElement
+---@param player LuaPlayer #LuaPlayer
+---@param item_name string
+---@param force_index number
+local function add_item_in_sell_prices(prices_table, player, item_name, price, force_index)
+	local add = prices_table.add
+	local button = add(FLOW).add(SELL_PRICE_BUTTON)
+	button.sprite = "item/" .. item_name
+	button.add(EMPTY_WIDGET).name = tostring(force_index)
+	add = add(PRICE_FRAME).add
+	-- It's possible to make it better, but it'll require to make a style with an image
+	add(PRICE_LABEL).caption = price
+	add(POST_PRICE_LABEL)
+
+	local children = prices_table.children
+	if #children / 2 > player.mod_settings["FM_sell_notification_size"].value then
+		children[2].destroy()
+		children[1].destroy()
+	end
+end
+
+---@param prices_table LuaElement #LuaElement
+---@param player LuaPlayer #LuaPlayer
+---@param item_name string
+---@param force_index number
+local function add_item_in_buy_prices(prices_table, player, item_name, price, force_index)
+	local add = prices_table.add
+	local button = add(FLOW).add(BUY_PRICE_BUTTON)
+	button.sprite = "item/" .. item_name
+	button.add(EMPTY_WIDGET).name = tostring(force_index)
+	add = add(PRICE_FRAME).add
+	-- It's possible to make it better, but it'll require to make a style with an image
+	add(PRICE_LABEL).caption = price
+	add(POST_PRICE_LABEL)
+
+	local children = prices_table.children
+	if #children / 2 > player.mod_settings["FM_buy_notification_size"].value then
+		children[2].destroy()
+		children[1].destroy()
+	end
+end
+
+--TODO: improve (ignore teams with embargo)
+---@param source_index number # force intex
+---@param item_name string
+---@param sell_price count
+local function notify_sell_price(source_index, item_name, sell_price)
+	local forces = game.forces
+	for _, force_index in pairs(active_forces) do
+		if force_index ~= source_index then
+			local force = forces[force_index]
+			if force and force.valid then
+				for _, player in pairs(force.connected_players) do
+					if player and player.valid then
+						local prices_flow = player.gui.screen.FM_sell_prices_frame.FM_prices_flow
+						if prices_flow and prices_flow.valid then
+							add_item_in_sell_prices(prices_flow.FM_prices_table, player, item_name, sell_price, source_index)
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+--TODO: improve (ignore teams with embargo)
+---@param source_index number # force intex
+---@param item_name string
+---@param sell_price count
+local function notify_buy_price(source_index, item_name, sell_price)
+	local forces = game.forces
+	for _, force_index in pairs(active_forces) do
+		if force_index ~= source_index then
+			local force = forces[force_index]
+			if force and force.valid then
+				for _, player in pairs(force.connected_players) do
+					if player and player.valid then
+						local prices_flow = player.gui.screen.FM_buy_prices_frame.FM_prices_flow
+						if prices_flow and prices_flow.valid then
+							add_item_in_buy_prices(prices_flow.FM_prices_table, player, item_name, sell_price, source_index)
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+---@param gui LuaElement #LuaElement
+---@param name string # name of button
+local function create_side_handler(gui, name)
+	local flow = gui.add(TITLEBAR_FLOW)
+	flow.style.vertically_stretchable = true
+	flow.style.left_padding = -3
+	local drag_handler = flow.add(DRAG_HANDLER)
+	drag_handler.drag_target = gui
+	drag_handler.style.width = 24
+	drag_handler.style.height = 46
+	drag_handler.style.margin = 0
+	drag_handler.add{
+		type = "sprite-button",
+		sprite = "FM_price",
+		style = "frame_action_button",
+		name = name
+	}
+end
+
+---@param player LuaPlayer #LuaPlayer
+local function switch_sell_prices_gui(player)
+	local screen = player.gui.screen
+	local main_frame = screen.FM_sell_prices_frame
+	if main_frame then
+		local children = main_frame.children
+		children[1].destroy()
+		if #children > 1 then
+			return
+		else
+			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_flow", direction = "vertical"}
+			local prices_table = prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = 2}
+			create_side_handler(main_frame, "FM_switch_sell_prices_gui")
+		end
+	else
+		main_frame = screen.add{type = "frame", name = "FM_sell_prices_frame", style = "borderless_frame"}
+		main_frame.location = {x = 0, y = 50}
+		create_side_handler(main_frame, "FM_switch_sell_prices_gui")
+	end
+end
+
+---@param player LuaPlayer #LuaPlayer
+local function switch_buy_prices_gui(player)
+	local screen = player.gui.screen
+	local main_frame = screen.FM_buy_prices_frame
+	if main_frame then
+		local children = main_frame.children
+		children[1].destroy()
+		if #children > 1 then
+			return
+		else
+			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_flow", direction = "vertical"}
+			local prices_table = prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = 2}
+			create_side_handler(main_frame, "FM_switch_buy_prices_gui")
+		end
+	else
+		main_frame = screen.add{type = "frame", name = "FM_buy_prices_frame", style = "borderless_frame"}
+		main_frame.location = {x = 160, y = 50}
+		create_side_handler(main_frame, "FM_switch_buy_prices_gui")
+	end
+end
+
+---@param player LuaPlayer #LuaPlayer
 local function open_embargo_gui(player)
 	local screen = player.gui.screen
 	if screen.FM_embargo_frame then
@@ -1222,11 +1381,11 @@ end
 ---@param entity? LuaEntity #LuaEntity # The buy box when is_new = true
 local function open_buy_box_gui(player, is_new, entity)
 	local box_operations = player.gui.relative.FM_boxes_frame.content.main_flow.box_operations
-	if box_operations.buy_content then
-		box_operations.clear()
+	box_operations.clear()
+	if box_operations.buy_content and not is_new then
 		return
 	end
-	box_operations.clear()
+
 	local row = box_operations.add{type = "table", name = "buy_content", column_count = 4}
 	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 	row.add{type = "label", caption = {'', {"free-market.count-gui"}, {"colon"}}}
@@ -1261,11 +1420,11 @@ end
 ---@param entity? LuaEntity #LuaEntity # The sell box when is_new = true
 local function open_sell_box_gui(player, is_new, entity)
 	local box_operations = player.gui.relative.FM_boxes_frame.content.main_flow.box_operations
-	if box_operations.sell_content then
-		box_operations.clear()
+	box_operations.clear()
+	if box_operations.sell_content and not is_new then
 		return
 	end
-	box_operations.clear()
+
 	local row = box_operations.add{type = "table", name = "sell_content", column_count = 2}
 	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 	local confirm_button = row.add(CHECK_BUTTON)
@@ -1510,6 +1669,8 @@ local function on_player_created(event)
 	local player = game.get_player(event.player_index)
 	create_top_relative_gui(player)
 	create_left_relative_gui(player)
+	switch_sell_prices_gui(player)
+	switch_buy_prices_gui(player)
 end
 
 -- check
@@ -1523,14 +1684,7 @@ local function on_player_joined_game(event)
 end
 
 local function on_force_created(event)
-	local index = event.force.index
-	pull_boxes[index] = {}
-	sell_boxes[index] = {}
-	buy_boxes[index] = {}
-	embargoes[index] = {}
-	sell_prices[index] = {}
-	buy_prices[index] = {}
-	storages[index] = {}
+	init_force_data(event.force.index)
 end
 
 local function check_teams_data()
@@ -1969,8 +2123,12 @@ local GUIS = {
 			return
 		end
 
-		local buy_price = tonumber(buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name])
+		local prev_sell_price = f_sell_prices[item_name] or f_inactive_sell_prices[item_name]
+		if prev_sell_price == sell_price then
+			return
+		end
 
+		local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
 		if sell_price < minimal_price or sell_price > maximal_price or (buy_price and sell_price < buy_price) then
 			player.print({"gui-map-generator.invalid-value-for-field", sell_price, buy_price or minimal_price, maximal_price})
 			sell_price_element.text = tostring(f_sell_prices[item_name] or f_inactive_sell_prices[item_name] or '')
@@ -1979,10 +2137,12 @@ local GUIS = {
 
 		if f_sell_prices[item_name] then
 			f_sell_prices[item_name] = sell_price
+			notify_sell_price(force_index, item_name, sell_price)
 		elseif f_inactive_sell_prices[item_name] then
 			f_inactive_sell_prices[item_name] = sell_price
 		elseif sell_boxes[force_index][item_name] then
 			f_sell_prices[item_name] = sell_price
+			notify_sell_price(force_index, item_name, sell_price)
 		else
 			f_inactive_sell_prices[item_name] = sell_price
 		end
@@ -2003,8 +2163,12 @@ local GUIS = {
 			return
 		end
 
-		local sell_price = tonumber(sell_prices[force_index][item_name])
+		local prev_buy_price = f_buy_prices[item_name] or f_inactive_buy_prices[item_name]
+		if prev_buy_price == buy_price then
+			return
+		end
 
+		local sell_price = sell_prices[force_index][item_name]
 		if buy_price < minimal_price or buy_price > maximal_price or (sell_price and sell_price < buy_price) then
 			player.print({"gui-map-generator.invalid-value-for-field", buy_price, minimal_price, sell_price or maximal_price})
 			buy_price_element.text = tostring(f_buy_prices[item_name] or f_inactive_buy_prices[item_name] or '')
@@ -2013,10 +2177,12 @@ local GUIS = {
 
 		if f_buy_prices[item_name] then
 			f_buy_prices[item_name] = buy_price
+			notify_buy_price(force_index, item_name, buy_price)
 		elseif f_inactive_buy_prices[item_name] then
 			f_inactive_buy_prices[item_name] = buy_price
 		elseif buy_boxes[force_index][item_name] then
 			f_buy_prices[item_name] = buy_price
+			notify_buy_price(force_index, item_name, buy_price)
 		else
 			f_inactive_buy_prices[item_name] = buy_price
 		end
@@ -2255,6 +2421,56 @@ local GUIS = {
 	end,
 	FM_open_price = function(element, player)
 		open_prices_gui(player)
+	end,
+	FM_switch_sell_prices_gui = function(element, player)
+		switch_sell_prices_gui(player)
+	end,
+	FM_switch_buy_prices_gui = function(element, player)
+		switch_buy_prices_gui(player)
+	end,
+	FM_open_sell_price = function(element, player)
+		local force_index = tonumber(element.children[1].name)
+		local force = game.forces[force_index or 0]
+		if not (force and force.valid) then
+			game.print({"force-doesnt-exist", '?'})
+			return
+		end
+
+		local item_name = sub(element.sprite, 6)
+		if game.item_prototypes[item_name] == nil then
+			game.print({"missing-item", item_name})
+			return
+		end
+
+		local price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
+		if price then
+			game.print({"free-market.team-selling-item-for", force.name, item_name, price})
+		else
+			-- TODO: improve! (remove the row)
+			game.print({"free-market.team-doesnt-sell-item", force.name, item_name})
+		end
+	end,
+	FM_open_buy_price = function(element, player)
+		local force_index = tonumber(element.children[1].name) or 0
+		local force = game.forces[force_index]
+		if not (force and force.valid) then
+			game.print({"force-doesnt-exist", '?'})
+			return
+		end
+
+		local item_name = sub(element.sprite, 6)
+		if game.item_prototypes[item_name] == nil then
+			game.print({"missing-item", item_name})
+			return
+		end
+
+		local price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+		if price then
+			game.print({"free-market.team-buying-item-for", force.name, item_name, price})
+		else
+			-- TODO: improve! (remove the row)
+			game.print({"free-market.team-doesnt-buy-item", force.name, item_name})
+		end
 	end,
 	FM_open_price_list = function(element, player)
 		open_price_list_gui(player)
@@ -2500,6 +2716,15 @@ local function on_player_left_game(event)
 	destroy_prices_gui(player)
 	destroy_price_list_gui(player)
 	destroy_force_configuration(player)
+	local screen = player.gui.screen
+	local frame = screen.FM_sell_prices_frame
+	if frame and frame.valid and #frame.children > 1 then
+		switch_sell_prices_gui(player)
+	end
+	local frame = screen.FM_buy_prices_frame
+	if frame and frame.valid and #frame.children > 1 then
+		switch_buy_prices_gui(player)
+	end
 end
 
 local SPRITE_OFFSET = {0, -0.25}
@@ -2846,7 +3071,7 @@ local function on_configuration_changed(event)
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
-	if version < 0.23 then
+	if version < 0.26 then
 		for _, force in pairs(game.forces) do
 			local index = force.index
 			if sell_boxes[index] then
@@ -2864,9 +3089,16 @@ local function on_configuration_changed(event)
 			create_left_relative_gui(player)
 		end
 	end
+	if version < 0.26 then
+		for _, player in pairs(game.players) do
+			switch_sell_prices_gui(player)
+			switch_buy_prices_gui(player)
+		end
+		game.print({'',{"mod-name.free-market"}, {"colon"}, " added price notification with settings"})
+	end
 end
 
-M.on_load = function ()
+M.on_load = function()
 	link_data()
 	set_filters()
 end
