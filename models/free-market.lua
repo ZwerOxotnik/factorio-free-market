@@ -614,7 +614,7 @@ local function clear_invalid_sell_boxes_data(_data)
 	end
 end
 
----@param data buy_boxes|inactive_buy_boxes
+---@param _data buy_boxes|inactive_buy_boxes
 local function clear_invalid_buy_boxes_data(_data)
 	local item_prototypes = game.item_prototypes
 	local forces = game.forces
