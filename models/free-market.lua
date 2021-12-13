@@ -62,12 +62,14 @@ local open_box
 ---@type table<number, table>
 local all_boxes
 
+-- key, force index\
+-- Should give valid force indexes
 ---@class active_forces
 ---@type table<number, number>
 local active_forces
 
+-- {force index = {[item name] = count}}
 ---@class storages
---- {force index = {[item name] = count}}
 ---@type table<number, table<string, number>>
 local storages
 
@@ -254,6 +256,17 @@ local function clear_force_data(index)
 	buy_boxes[index] = nil
 	embargoes[index] = nil
 	storages[index] = nil
+
+	for _, force_data in pairs(embargoes) do
+		force_data[index] = nil
+	end
+
+	for i, force_index in pairs(active_forces) do
+		if force_index == index then
+			tremove(active_forces, i)
+			break
+		end
+	end
 end
 
 ---@param index number
@@ -900,11 +913,11 @@ local function update_embargo_table(embargo_table, player)
 	embargo_list.style.height = 200
 end
 
----@param prices_table LuaElement #LuaElement
 ---@param player LuaPlayer #LuaPlayer
 ---@param item_name string
 ---@param force_index number
-local function add_item_in_sell_prices(prices_table, player, item_name, price, force_index)
+local function add_item_in_sell_prices(player, item_name, price, force_index)
+	local prices_table = player.gui.screen.FM_sell_prices_frame.FM_prices_flow.FM_prices_table
 	local add = prices_table.add
 	local button = add(FLOW).add(SELL_PRICE_BUTTON)
 	button.sprite = "item/" .. item_name
@@ -921,11 +934,11 @@ local function add_item_in_sell_prices(prices_table, player, item_name, price, f
 	end
 end
 
----@param prices_table LuaElement #LuaElement
 ---@param player LuaPlayer #LuaPlayer
 ---@param item_name string
 ---@param force_index number
-local function add_item_in_buy_prices(prices_table, player, item_name, price, force_index)
+local function add_item_in_buy_prices(player, item_name, price, force_index)
+	local prices_table = player.gui.screen.FM_buy_prices_frame.FM_prices_flow.FM_prices_table
 	local add = prices_table.add
 	local button = add(FLOW).add(BUY_PRICE_BUTTON)
 	button.sprite = "item/" .. item_name
@@ -942,47 +955,30 @@ local function add_item_in_buy_prices(prices_table, player, item_name, price, fo
 	end
 end
 
---TODO: improve (ignore teams with embargo)
----@param source_index number # force intex
+---@param source_index number # force index who changed the price
 ---@param item_name string
 ---@param sell_price count
 local function notify_sell_price(source_index, item_name, sell_price)
 	local forces = game.forces
+	local f_embargoes = embargoes[source_index]
 	for _, force_index in pairs(active_forces) do
-		if force_index ~= source_index then
-			local force = forces[force_index]
-			if force and force.valid then
-				for _, player in pairs(force.connected_players) do
-					if player and player.valid then
-						local prices_flow = player.gui.screen.FM_sell_prices_frame.FM_prices_flow
-						if prices_flow and prices_flow.valid then
-							add_item_in_sell_prices(prices_flow.FM_prices_table, player, item_name, sell_price, source_index)
-						end
-					end
-				end
+		if force_index ~= source_index and not f_embargoes[f_embargoes] then
+			for _, player in pairs(forces[force_index].connected_players) do
+				pcall(add_item_in_sell_prices, player, item_name, sell_price, source_index)
 			end
 		end
 	end
 end
 
---TODO: improve (ignore teams with embargo)
----@param source_index number # force intex
+---@param source_index number # force index who changed the price
 ---@param item_name string
 ---@param sell_price count
 local function notify_buy_price(source_index, item_name, sell_price)
 	local forces = game.forces
 	for _, force_index in pairs(active_forces) do
-		if force_index ~= source_index then
-			local force = forces[force_index]
-			if force and force.valid then
-				for _, player in pairs(force.connected_players) do
-					if player and player.valid then
-						local prices_flow = player.gui.screen.FM_buy_prices_frame.FM_prices_flow
-						if prices_flow and prices_flow.valid then
-							add_item_in_buy_prices(prices_flow.FM_prices_table, player, item_name, sell_price, source_index)
-						end
-					end
-				end
+		if force_index ~= source_index and not embargoes[force_index][source_index] then
+			for _, player in pairs(forces[force_index].connected_players) do
+				pcall(add_item_in_buy_prices, player, item_name, sell_price, source_index)
 			end
 		end
 	end
@@ -1018,7 +1014,8 @@ local function switch_sell_prices_gui(player)
 			return
 		else
 			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_flow", direction = "vertical"}
-			local prices_table = prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = 2}
+			local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
+			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			create_side_handler(main_frame, "FM_switch_sell_prices_gui")
 		end
 	else
@@ -1039,7 +1036,8 @@ local function switch_buy_prices_gui(player)
 			return
 		else
 			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_flow", direction = "vertical"}
-			local prices_table = prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = 2}
+			local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
+			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			create_side_handler(main_frame, "FM_switch_buy_prices_gui")
 		end
 	else
@@ -1482,14 +1480,6 @@ local function open_pull_box_gui(player, is_new, entity)
 	end
 end
 
----@param index number
-local function remove_index_among_embargoes(index)
-	embargoes[index] = nil
-	for _, data in pairs(embargoes) do
-		data[index] = nil
-	end
-end
-
 local left_anchor = {gui = defines.relative_gui_type.controller_gui, position = defines.relative_gui_position.left}
 local function create_left_relative_gui(player)
 	local relative = player.gui.relative
@@ -1757,7 +1747,6 @@ end
 local function on_forces_merging(event)
 	local source = event.source
 	local source_index = source.index
-	remove_index_among_embargoes(source_index)
 
 	local source_storage = storages[source_index]
 	local destination_storage = storages[event.destination.index]
@@ -2643,9 +2632,9 @@ local function check_buy_boxes()
 							goto skip_buy
 						end
 						stack_count = need_count
-						for other_force_index, storage in pairs(storages) do
-							if buyer_index ~= other_force_index and forces_money[other_force_index] and not embargoes[other_force_index][buyer_index] then
-								local sell_price = sell_prices[other_force_index][item_name]
+						for seller_index, storage in pairs(storages) do
+							if buyer_index ~= seller_index and forces_money[seller_index] and not embargoes[seller_index][buyer_index] then
+								local sell_price = sell_prices[seller_index][item_name]
 								if sell_price and buy_price >= sell_price then
 									local count_in_storage = storage[item_name]
 									if count_in_storage then
@@ -2654,14 +2643,14 @@ local function check_buy_boxes()
 											stack_count = 0
 											payment = need_count * sell_price
 											buyer_money = buyer_money - payment
-											forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
+											forces_money_copy[seller_index] = forces_money_copy[seller_index] + payment
 											goto fulfilled_needs
 										else
 											stack_count = stack_count - count_in_storage
 											storage[item_name] = 0
 											payment = (need_count - stack_count) * sell_price
 											buyer_money = buyer_money - payment
-											forces_money_copy[other_force_index] = forces_money_copy[other_force_index] + payment
+											forces_money_copy[seller_index] = forces_money_copy[seller_index] + payment
 										end
 									end
 								end
@@ -2890,10 +2879,72 @@ local mod_settings = {
 		script.on_nth_tick(value, check_buy_boxes)
 	end
 }
+
+local player_settings = {
+	["FM_sell_notification_column_count"] = function(setting, event, player)
+		if value > 10 then
+			value = 10
+		elseif value < 1 then
+			value = 1
+		else
+			return
+		end
+
+		player.mod_settings[event.setting] = {
+			value = value
+		}
+	end,
+	["FM_buy_notification_column_count"] = function(value, event, player)
+		if value > 10 then
+			value = 10
+		elseif value < 1 then
+			value = 1
+		else
+			return
+		end
+
+		player.mod_settings[event.setting] = {
+			value = value
+		}
+	end,
+	["FM_sell_notification_size"] = function(value, event, player)
+		if value > 40 then
+			value = 40
+		elseif value < 1 then
+			value = 1
+		else
+			return
+		end
+
+		player.mod_settings[event.setting] = {
+			value = value
+		}
+	end,
+	["FM_buy_notification_size"] = function(value, event, player)
+		if value > 40 then
+			value = 40
+		elseif value < 1 then
+			value = 1
+		else
+			return
+		end
+
+		player.mod_settings[event.setting] = {
+			value = value
+		}
+	end,
+}
 local function on_runtime_mod_setting_changed(event)
-	-- if event.setting_type ~= "runtime-global" then return end
-	local f = mod_settings[event.setting]
-	if f then f(settings.global[event.setting].value) end
+	if event.setting_type == "runtime-global" then
+		local f = mod_settings[event.setting]
+		if f then f(settings.global[event.setting].value) end
+	else -- Fix for a Factorio bug
+		if event.player_index then
+			local f = player_settings[event.setting]
+			local player = game.get_player(event.player_index)
+			if f then f(player.mod_settings[event.setting].value, event, player) end
+		end
+	end
 end
 
 --#endregion

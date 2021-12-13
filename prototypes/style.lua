@@ -15,6 +15,7 @@ styles["FM_price_label"] = {
 
 styles["FM_prices_flow"] = {
 	type = "frame_style",
+	right_padding = -1,
 	vertically_stretchable = "on",
 	horizontally_stretchable = "on",
 	graphical_set = {
@@ -31,6 +32,7 @@ styles["FM_prices_flow"] = {
 styles["FM_price_frame"] = {
 	type = "frame_style",
 	left_padding = 6,
+	right_margin = 10,
 	maximal_height = 20,
 	graphical_set = {
 		base = {
