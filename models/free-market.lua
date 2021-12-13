@@ -1603,16 +1603,14 @@ end
 local function on_forces_merging(event)
 	local source = event.source
 	local source_index = source.index
-	sell_prices[source_index] = nil
-	buy_prices[source_index] = nil
-	pull_boxes[source_index] = nil
-	sell_boxes[source_index] = nil
-	buy_boxes[source_index] = nil
 	remove_index_among_embargoes(source_index)
 
-	local destination_index = event.destination.index
-	storages[destination_index] = storages[destination_index] + storages[source_index]
-	storages[source_index] = nil
+	local source_storage = storages[source_index]
+	local destination_storage = storages[event.destination.index]
+	for item_name, count in pairs(source_storage) do
+		destination_storage[item_name] = count + (destination_storage[item_name] or 0)
+	end
+	clear_force_data(source_index)
 
 	local ids = rendering.get_all_ids()
 	for i = 1, #ids do
