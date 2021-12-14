@@ -1,4 +1,13 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.26.3
+Date: 2021-12-14
+  Features:
+    - Players can copy prices by clicking with shift button on price notification
+    - Players can copy prices into another price by clicking with control button on price notification
+    - Players can open prices by clicking with alt button on price notification
+  Changes:
+    - Made changing of chests more visible
+---------------------------------------------------------------------------------------------------
 Version: 0.26.2
 Date: 2021-12-13
   Changes:
@@ -14,7 +23,7 @@ Date: 2021-12-13
     - Improved stability of data
     - Improved price notification
   Bugfixes:
-    - Made a workaround for player settings
+    - Made a dirty workaround for player settings
   Notes:
     - Refactored slightly
 ---------------------------------------------------------------------------------------------------

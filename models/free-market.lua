@@ -101,6 +101,7 @@ local WHITE_COLOR = {1, 1, 1}
 local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
 local TEXT_OFFSET = {0, 0.3}
+local SPRITE_OFFSET = {0, -0.25}
 local LABEL = {type = "label"}
 local FLOW = {type = "flow"}
 local SPRITE_BUTTON = {type = "sprite-button"}
@@ -383,6 +384,23 @@ local function clear_invalid_embargoes()
 end
 
 ---@param item_name string
+---@param force LuaForce #LuaForce
+---@param entity LuaEntity #LuaEntity
+local function show_item_sprite_above_chest(item_name, force, entity)
+	if #force.connected_players > 1 then
+		draw_sprite{
+			sprite = "item." .. item_name,
+			target = entity,
+			surface = entity.surface,
+			forces = {force},
+			time_to_live = 200,
+			x_scale = 0.9,
+			target_offset = SPRITE_OFFSET
+		}
+	end
+end
+
+---@param item_name string
 ---@param player LuaPlayer #LuaPlayer
 ---@param entity LuaEntity #LuaEntity
 local function set_sell_box_data(item_name, player, entity)
@@ -417,6 +435,8 @@ local function set_sell_box_data(item_name, player, entity)
 	end
 	---@type number
 	local id = draw_text(text_data)
+	show_item_sprite_above_chest(item_name, player_force, entity)
+
 	entity.get_inventory(chest_inventory_type).set_bar(2)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
@@ -450,6 +470,8 @@ local function set_pull_box_data(item_name, player, entity)
 	end
 	---@type number
 	local id = draw_text(text_data)
+	show_item_sprite_above_chest(item_name, player_force, entity)
+
 	entity.get_inventory(chest_inventory_type).set_bar(2)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
@@ -494,6 +516,7 @@ local function set_buy_box_data(item_name, player, entity, count)
 	end
 	---@type number
 	local id = draw_text(text_data)
+	show_item_sprite_above_chest(item_name, player_force, entity)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
 	all_boxes[entity.unit_number] = {entity, id, BUY_TYPE, items, item_name}
@@ -981,6 +1004,82 @@ local function notify_buy_price(source_index, item_name, sell_price)
 				pcall(add_item_in_buy_prices, player, item_name, sell_price, source_index)
 			end
 		end
+	end
+end
+
+---@param item_name string
+---@param player LuaPlayer
+---@param sell_price? number
+---@return number|string? # returns previous sell price in a case of conflict
+local function change_sell_price(item_name, player, sell_price)
+	local force_index = player.force.index
+	local f_sell_prices = sell_prices[force_index]
+	local f_inactive_sell_prices = inactive_sell_prices[force_index]
+	if sell_price == nil then
+		f_inactive_sell_prices[item_name] = nil
+		f_sell_prices[item_name] = nil
+		return
+	end
+
+	local prev_sell_price = f_sell_prices[item_name] or f_inactive_sell_prices[item_name]
+	if prev_sell_price == sell_price then
+		return
+	end
+
+	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+	if sell_price < minimal_price or sell_price > maximal_price or (buy_price and sell_price < buy_price) then
+		player.print({"gui-map-generator.invalid-value-for-field", sell_price, buy_price or minimal_price, maximal_price})
+		return f_sell_prices[item_name] or f_inactive_sell_prices[item_name] or ''
+	end
+
+	if f_sell_prices[item_name] then
+		f_sell_prices[item_name] = sell_price
+		notify_sell_price(force_index, item_name, sell_price)
+	elseif f_inactive_sell_prices[item_name] then
+		f_inactive_sell_prices[item_name] = sell_price
+	elseif sell_boxes[force_index][item_name] then
+		f_sell_prices[item_name] = sell_price
+		notify_sell_price(force_index, item_name, sell_price)
+	else
+		f_inactive_sell_prices[item_name] = sell_price
+	end
+end
+
+---@param item_name string
+---@param player LuaPlayer
+---@param buy_price? number
+---@return number|string? # returns previous sell price in a case of conflict
+local function change_buy_price(item_name, player, buy_price)
+	local force_index = player.force.index
+	local f_buy_prices = buy_prices[force_index]
+	local f_inactive_buy_prices = inactive_buy_prices[force_index]
+	if buy_price == nil then
+		f_inactive_buy_prices[item_name] = nil
+		f_buy_prices[item_name] = nil
+		return
+	end
+
+	local prev_buy_price = f_buy_prices[item_name] or f_inactive_buy_prices[item_name]
+	if prev_buy_price == buy_price then
+		return
+	end
+
+	local sell_price = sell_prices[force_index][item_name]
+	if buy_price < minimal_price or buy_price > maximal_price or (sell_price and sell_price < buy_price) then
+		player.print({"gui-map-generator.invalid-value-for-field", buy_price, minimal_price, sell_price or maximal_price})
+		return f_buy_prices[item_name] or f_inactive_buy_prices[item_name] or ''
+	end
+
+	if f_buy_prices[item_name] then
+		f_buy_prices[item_name] = buy_price
+		notify_buy_price(force_index, item_name, buy_price)
+	elseif f_inactive_buy_prices[item_name] then
+		f_inactive_buy_prices[item_name] = buy_price
+	elseif buy_boxes[force_index][item_name] then
+		f_buy_prices[item_name] = buy_price
+		notify_buy_price(force_index, item_name, buy_price)
+	else
+		f_inactive_buy_prices[item_name] = buy_price
 	end
 end
 
@@ -2002,13 +2101,15 @@ local GUIS = {
 			local prev_item_name = box_data[5]
 			if item_name then
 				if box_data and box_data[3] == SELL_TYPE then
+					local player_force = player.force
 					remove_certain_sell_box(entity, prev_item_name)
-					local force_sell_boxes = sell_boxes[player.force.index]
+					local force_sell_boxes = sell_boxes[player_force.index]
 					force_sell_boxes[item_name] = force_sell_boxes[item_name] or {}
 					local entities = force_sell_boxes[item_name]
 					entities[#entities+1] = entity
 					box_data[4] = entities
 					box_data[5] = item_name
+					show_item_sprite_above_chest(item_name, player_force, entity)
 				else
 					player.print({"gui-train.invalid"})
 				end
@@ -2035,13 +2136,15 @@ local GUIS = {
 			local prev_item_name = box_data[5]
 			if item_name then
 				if box_data and box_data[3] == PULL_TYPE then
+					local player_force = player.force
 					remove_certain_pull_box(entity, prev_item_name)
-					local force_pull_boxes = pull_boxes[player.force.index]
+					local force_pull_boxes = pull_boxes[player_force.index]
 					force_pull_boxes[item_name] = force_pull_boxes[item_name] or {}
 					local entities = force_pull_boxes[item_name]
 					entities[#entities+1] = entity
 					box_data[4] = entities
 					box_data[5] = item_name
+					show_item_sprite_above_chest(item_name, player_force, entity)
 				else
 					player.print({"gui-train.invalid"})
 				end
@@ -2072,13 +2175,15 @@ local GUIS = {
 					change_count_in_buy_box_data(entity, item_name, count)
 				else
 					if box_data and box_data[3] == BUY_TYPE then
+						local player_force = player.force
 						remove_certain_buy_box(entity, prev_item_name)
-						local force_buy_boxes = buy_boxes[player.force.index]
+						local force_buy_boxes = buy_boxes[player_force.index]
 						force_buy_boxes[item_name] = force_buy_boxes[item_name] or {}
 						local entities = force_buy_boxes[item_name]
 						entities[#entities+1] = {entity, count}
 						box_data[4] = entities
 						box_data[5] = item_name
+						show_item_sprite_above_chest(item_name, player_force, entity)
 					else
 						player.print({"gui-train.invalid"})
 					end
@@ -2101,39 +2206,11 @@ local GUIS = {
 		local item_name = parent.FM_prices_item.elem_value
 		if item_name == nil then return end
 
-		local force_index = player.force.index
-		local f_sell_prices = sell_prices[force_index]
-		local f_inactive_sell_prices = inactive_sell_prices[force_index]
 		local sell_price_element = parent.sell_price
 		local sell_price = tonumber(sell_price_element.text)
-		if sell_price == nil then
-			f_inactive_sell_prices[item_name] = nil
-			f_sell_prices[item_name] = nil
-			return
-		end
-
-		local prev_sell_price = f_sell_prices[item_name] or f_inactive_sell_prices[item_name]
-		if prev_sell_price == sell_price then
-			return
-		end
-
-		local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
-		if sell_price < minimal_price or sell_price > maximal_price or (buy_price and sell_price < buy_price) then
-			player.print({"gui-map-generator.invalid-value-for-field", sell_price, buy_price or minimal_price, maximal_price})
-			sell_price_element.text = tostring(f_sell_prices[item_name] or f_inactive_sell_prices[item_name] or '')
-			return
-		end
-
-		if f_sell_prices[item_name] then
-			f_sell_prices[item_name] = sell_price
-			notify_sell_price(force_index, item_name, sell_price)
-		elseif f_inactive_sell_prices[item_name] then
-			f_inactive_sell_prices[item_name] = sell_price
-		elseif sell_boxes[force_index][item_name] then
-			f_sell_prices[item_name] = sell_price
-			notify_sell_price(force_index, item_name, sell_price)
-		else
-			f_inactive_sell_prices[item_name] = sell_price
+		local prev_sell_price = change_sell_price(item_name, player, sell_price)
+		if prev_sell_price then
+			sell_price_element.text = tostring(prev_sell_price)
 		end
 	end,
 	FM_confirm_buy_price = function(element, player)
@@ -2141,39 +2218,11 @@ local GUIS = {
 		local item_name = parent.FM_prices_item.elem_value
 		if item_name == nil then return end
 
-		local force_index = player.force.index
-		local f_buy_prices = buy_prices[force_index]
-		local f_inactive_buy_prices = inactive_buy_prices[force_index]
 		local buy_price_element = parent.buy_price
-		local buy_price = tonumber(buy_price_element.text)
-		if buy_price == nil then
-			f_inactive_buy_prices[item_name] = nil
-			f_buy_prices[item_name] = nil
-			return
-		end
-
-		local prev_buy_price = f_buy_prices[item_name] or f_inactive_buy_prices[item_name]
-		if prev_buy_price == buy_price then
-			return
-		end
-
-		local sell_price = sell_prices[force_index][item_name]
-		if buy_price < minimal_price or buy_price > maximal_price or (sell_price and sell_price < buy_price) then
-			player.print({"gui-map-generator.invalid-value-for-field", buy_price, minimal_price, sell_price or maximal_price})
-			buy_price_element.text = tostring(f_buy_prices[item_name] or f_inactive_buy_prices[item_name] or '')
-			return
-		end
-
-		if f_buy_prices[item_name] then
-			f_buy_prices[item_name] = buy_price
-			notify_buy_price(force_index, item_name, buy_price)
-		elseif f_inactive_buy_prices[item_name] then
-			f_inactive_buy_prices[item_name] = buy_price
-		elseif buy_boxes[force_index][item_name] then
-			f_buy_prices[item_name] = buy_price
-			notify_buy_price(force_index, item_name, buy_price)
-		else
-			f_inactive_buy_prices[item_name] = buy_price
+		local sell_price = tonumber(buy_price_element.text)
+		local prev_buy_price = change_buy_price(item_name, player, sell_price)
+		if prev_buy_price then
+			buy_price_element.text = tostring(prev_buy_price)
 		end
 	end,
 	FM_refresh_prices_table = function(element, player)
@@ -2417,7 +2466,7 @@ local GUIS = {
 	FM_switch_buy_prices_gui = function(element, player)
 		switch_buy_prices_gui(player)
 	end,
-	FM_open_sell_price = function(element, player)
+	FM_open_sell_price = function(element, player, event)
 		local force_index = tonumber(element.children[1].name)
 		local force = game.forces[force_index or 0]
 		if not (force and force.valid) then
@@ -2433,13 +2482,23 @@ local GUIS = {
 
 		local price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
 		if price then
-			game.print({"free-market.team-selling-item-for", force.name, item_name, price})
+			if event.shift then
+				-- use buy price for sell price
+				change_buy_price(item_name, player, price)
+			elseif event.control then
+				-- copy price
+				change_sell_price(item_name, player, price)
+			elseif event.alt then
+				open_prices_gui(player, item_name)
+			else
+				game.print({"free-market.team-selling-item-for", force.name, item_name, price})
+			end
 		else
 			-- TODO: improve! (remove the row)
 			game.print({"free-market.team-doesnt-sell-item", force.name, item_name})
 		end
 	end,
-	FM_open_buy_price = function(element, player)
+	FM_open_buy_price = function(element, player, event)
 		local force_index = tonumber(element.children[1].name) or 0
 		local force = game.forces[force_index]
 		if not (force and force.valid) then
@@ -2455,7 +2514,17 @@ local GUIS = {
 
 		local price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
 		if price then
-			game.print({"free-market.team-buying-item-for", force.name, item_name, price})
+			if event.shift then
+				-- copy price
+				change_buy_price(item_name, player, price)
+			elseif event.control then
+				-- use buy price for sell price
+				change_sell_price(item_name, player, price)
+			elseif event.alt then
+				open_prices_gui(player, item_name)
+			else
+				game.print({"free-market.team-buying-item-for", force.name, item_name, price})
+			end
 		else
 			-- TODO: improve! (remove the row)
 			game.print({"free-market.team-doesnt-buy-item", force.name, item_name})
@@ -2517,7 +2586,7 @@ local GUIS = {
 }
 local function on_gui_click(event)
 	local f = GUIS[event.element.name]
-	if f then f(event.element, game.get_player(event.player_index)) end
+	if f then f(event.element, game.get_player(event.player_index), event) end
 end
 
 local function on_gui_closed(event)
@@ -2716,7 +2785,6 @@ local function on_player_left_game(event)
 	end
 end
 
-local SPRITE_OFFSET = {0, -0.25}
 local function on_selected_entity_changed(event)
 	local entity = event.last_entity
 	if not ALLOWED_TYPES[entity.type] then return end
