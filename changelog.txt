@@ -1,8 +1,9 @@
 ﻿---------------------------------------------------------------------------------------------------
-Version: 0.26.4
+Version: 0.27.0
 Date: 2021-12-14
   Changes:
     - Added support of multi-interactions for price notification
+    - Changed price notification gui
 ---------------------------------------------------------------------------------------------------
 Version: 0.26.3
 Date: 2021-12-14

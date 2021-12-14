@@ -1085,64 +1085,110 @@ end
 
 ---@param gui LuaElement #LuaElement
 ---@param name string # name of button
-local function create_side_handler(gui, name)
+---@param is_vertical boolean
+local function create_side_handler(gui, name, is_vertical)
 	local flow = gui.add(TITLEBAR_FLOW)
-	flow.style.vertically_stretchable = true
-	flow.style.left_padding = -3
+	if is_vertical then
+		flow.style.horizontally_stretchable = true
+		flow.add(EMPTY_WIDGET).style.horizontally_stretchable = true
+	end
 	local drag_handler = flow.add(DRAG_HANDLER)
 	drag_handler.drag_target = gui
-	drag_handler.style.width = 24
-	drag_handler.style.height = 46
 	drag_handler.style.margin = 0
-	drag_handler.add{
-		type = "sprite-button",
-		sprite = "FM_price",
-		style = "frame_action_button",
-		name = name
-	}
+	if is_vertical then
+		flow.style.horizontal_spacing = -3
+		drag_handler.style.width = 27
+		drag_handler.style.height = 25
+		drag_handler.style.horizontally_stretchable = false
+		local button = flow.add{
+			type = "sprite-button",
+			sprite = "FM_price",
+			style = "frame_action_button",
+			name = name
+		}
+		button.style.margin = 0
+	else
+		flow.style.left_padding = -3
+		drag_handler.style.width = 24
+		drag_handler.style.height = 46
+		drag_handler.add{
+			type = "sprite-button",
+			sprite = "FM_price",
+			style = "frame_action_button",
+			name = name
+		}
+	end
 end
 
 ---@param player LuaPlayer #LuaPlayer
-local function switch_sell_prices_gui(player)
+---@param location? GuiLocation
+local function switch_sell_prices_gui(player, location)
 	local screen = player.gui.screen
 	local main_frame = screen.FM_sell_prices_frame
 	if main_frame then
+		local is_vertical = (main_frame.direction == "vertical")
 		local children = main_frame.children
-		children[1].destroy()
+		if not is_vertical then
+			children[1].destroy()
+		end
 		if #children > 1 then
+			local last_location = main_frame.location
+			main_frame.destroy()
+			switch_sell_prices_gui(player, last_location)
 			return
 		else
 			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_flow", direction = "vertical"}
 			local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
-			create_side_handler(main_frame, "FM_switch_sell_prices_gui")
+			if not is_vertical then
+				create_side_handler(main_frame, "FM_switch_sell_prices_gui")
+			end
 		end
-	else
-		main_frame = screen.add{type = "frame", name = "FM_sell_prices_frame", style = "borderless_frame"}
-		main_frame.location = {x = 0, y = 50}
-		create_side_handler(main_frame, "FM_switch_sell_prices_gui")
+else
+		local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
+		local is_vertical = (column_count == 2)
+		if is_vertical then
+			direction = "vertical"
+		end
+		main_frame = screen.add{type = "frame", name = "FM_sell_prices_frame", style = "borderless_frame", direction = direction}
+		main_frame.location = location or {x = player.display_resolution.width - 752, y = 272}
+		create_side_handler(main_frame, "FM_switch_sell_prices_gui", is_vertical)
 	end
 end
 
 ---@param player LuaPlayer #LuaPlayer
-local function switch_buy_prices_gui(player)
+---@param location? GuiLocation
+local function switch_buy_prices_gui(player, location)
 	local screen = player.gui.screen
 	local main_frame = screen.FM_buy_prices_frame
 	if main_frame then
+		local is_vertical = (main_frame.direction == "vertical")
 		local children = main_frame.children
-		children[1].destroy()
+		if not is_vertical then
+			children[1].destroy()
+		end
 		if #children > 1 then
+			local last_location = main_frame.location
+			main_frame.destroy()
+			switch_buy_prices_gui(player, last_location)
 			return
 		else
 			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_flow", direction = "vertical"}
 			local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
-			create_side_handler(main_frame, "FM_switch_buy_prices_gui")
+			if not is_vertical then
+				create_side_handler(main_frame, "FM_switch_buy_prices_gui")
+			end
 		end
 	else
-		main_frame = screen.add{type = "frame", name = "FM_buy_prices_frame", style = "borderless_frame"}
-		main_frame.location = {x = 160, y = 50}
-		create_side_handler(main_frame, "FM_switch_buy_prices_gui")
+		local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
+		local is_vertical = (column_count == 2)
+		if is_vertical then
+			direction = "vertical"
+		end
+		main_frame = screen.add{type = "frame", name = "FM_buy_prices_frame", style = "borderless_frame", direction = direction}
+		main_frame.location = location or {x = player.display_resolution.width - 712, y = 272}
+		create_side_handler(main_frame, "FM_switch_buy_prices_gui", is_vertical)
 	end
 end
 
@@ -3130,6 +3176,21 @@ local function on_configuration_changed(event)
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
+	if version < 0.27 then
+		for _, player in pairs(game.players) do
+			if player.valid then
+				local screen = player.gui.screen
+				if screen.FM_sell_prices_frame then
+					screen.FM_sell_prices_frame.destroy()
+				end
+				if screen.FM_buy_prices_frame then
+					screen.FM_buy_prices_frame.destroy()
+				end
+				switch_buy_prices_gui(player)
+				switch_sell_prices_gui(player)
+			end
+		end
+	end
 	if version < 0.26 then
 		for _, force in pairs(game.forces) do
 			local index = force.index
@@ -3183,7 +3244,8 @@ M.events = {
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
-		pcall(on_gui_click, event)
+		on_gui_click(event)
+		-- pcall(on_gui_click, event)
 	end,
 	[defines.events.on_gui_closed] = function(event)
 		pcall(on_gui_closed, event)
