@@ -2485,14 +2485,15 @@ local GUIS = {
 			if event.shift then
 				-- use buy price for sell price
 				change_buy_price(item_name, player, price)
-			elseif event.control then
+			end
+			if event.control then
 				-- copy price
 				change_sell_price(item_name, player, price)
-			elseif event.alt then
-				open_prices_gui(player, item_name)
-			else
-				game.print({"free-market.team-selling-item-for", force.name, item_name, price})
 			end
+			if event.alt then
+				open_prices_gui(player, item_name)
+			end
+			game.print({"free-market.team-selling-item-for", force.name, item_name, price})
 		else
 			-- TODO: improve! (remove the row)
 			game.print({"free-market.team-doesnt-sell-item", force.name, item_name})
@@ -2517,14 +2518,15 @@ local GUIS = {
 			if event.shift then
 				-- copy price
 				change_buy_price(item_name, player, price)
-			elseif event.control then
+			end
+			if event.control then
 				-- use buy price for sell price
 				change_sell_price(item_name, player, price)
-			elseif event.alt then
-				open_prices_gui(player, item_name)
-			else
-				game.print({"free-market.team-buying-item-for", force.name, item_name, price})
 			end
+			if event.alt then
+				open_prices_gui(player, item_name)
+			end
+			game.print({"free-market.team-buying-item-for", force.name, item_name, price})
 		else
 			-- TODO: improve! (remove the row)
 			game.print({"free-market.team-doesnt-buy-item", force.name, item_name})
