@@ -400,128 +400,6 @@ local function show_item_sprite_above_chest(item_name, force, entity)
 	end
 end
 
----@param item_name string
----@param player LuaPlayer #LuaPlayer
----@param entity LuaEntity #LuaEntity
-local function set_sell_box_data(item_name, player, entity)
-	local player_force = player.force
-	local force_index = player_force.index
-	local f_sell_boxes = sell_boxes[force_index]
-	if f_sell_boxes[item_name] == nil then
-		local f_inactive_sell_prices = inactive_sell_prices[force_index]
-		local inactive_sell_price = f_inactive_sell_prices[item_name]
-		if inactive_sell_price then
-			sell_prices[force_index][item_name] = inactive_sell_price
-			f_inactive_sell_prices[item_name] = nil
-		end
-		f_sell_boxes[item_name] = {}
-	end
-	local items = f_sell_boxes[item_name]
-	items[#items+1] = entity
-	local text_data = {
-		text = SELLING_TEXT,
-		vertical_alignment = "middle",
-		surface = player.surface,
-		scale_with_zoom = false,
-		only_in_alt_mode = true,
-		alignment = "center",
-		color = GREEN_COLOR,
-		target = entity,
-		target_offset = TEXT_OFFSET,
-		scale = 0.7,
-	}
-	if is_public_titles == false then
-		text_data.forces = {player_force}
-	end
-	---@type number
-	local id = draw_text(text_data)
-	show_item_sprite_above_chest(item_name, player_force, entity)
-
-	entity.get_inventory(chest_inventory_type).set_bar(2)
-
-	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, SELL_TYPE, items, item_name}
-end
-
----@param item_name string
----@param player LuaPlayer #LuaPlayer
----@param entity LuaEntity #LuaEntity
-local function set_pull_box_data(item_name, player, entity)
-	local player_force = player.force
-	local force_index = player_force.index
-	local force_pull_boxes = pull_boxes[force_index]
-	force_pull_boxes[item_name] = force_pull_boxes[item_name] or {}
-	local items = force_pull_boxes[item_name]
-	items[#items+1] = entity
-	local text_data = {
-		text = PULLING_TEXT,
-		vertical_alignment = "middle",
-		surface = player.surface,
-		scale_with_zoom = false,
-		only_in_alt_mode = true,
-		alignment = "center",
-		color = WHITE_COLOR,
-		target = entity,
-		target_offset = TEXT_OFFSET,
-		scale = 0.7,
-	}
-	if is_public_titles == false then
-		text_data.forces = {player_force}
-	end
-	---@type number
-	local id = draw_text(text_data)
-	show_item_sprite_above_chest(item_name, player_force, entity)
-
-	entity.get_inventory(chest_inventory_type).set_bar(2)
-
-	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, PULL_TYPE, items, item_name}
-end
-
----@param item_name string
----@param player LuaPlayer #LuaPlayer
----@param entity LuaEntity #LuaEntity
----@param count? number
-local function set_buy_box_data(item_name, player, entity, count)
-	count = count or game.item_prototypes[item_name].stack_size
-
-	local player_force = player.force
-	local force_index = player_force.index
-	local f_buy_boxes = buy_boxes[force_index]
-	if f_buy_boxes[item_name] == nil then
-		local f_inactive_buy_prices = inactive_buy_prices[force_index]
-		local inactive_buy_price = f_inactive_buy_prices[item_name]
-		if inactive_buy_price then
-			buy_prices[force_index][item_name] = inactive_buy_price
-			f_inactive_buy_prices[item_name] = nil
-		end
-		f_buy_boxes[item_name] = {}
-	end
-	local items = f_buy_boxes[item_name]
-	items[#items+1] = {entity, count}
-	local text_data = {
-		text = BUYING_TEXT,
-		vertical_alignment = "middle",
-		surface = player.surface,
-		scale_with_zoom = false,
-		only_in_alt_mode = true,
-		alignment = "center",
-		color = RED_COLOR,
-		target = entity,
-		target_offset = TEXT_OFFSET,
-		scale = 0.7,
-	}
-	if is_public_titles == false then
-		text_data.forces = {player_force}
-	end
-	---@type number
-	local id = draw_text(text_data)
-	show_item_sprite_above_chest(item_name, player_force, entity)
-
-	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, BUY_TYPE, items, item_name}
-end
-
 ---@param force_index number
 local function reset_buy_boxes(force_index)
 	for _, forces_data in pairs(buy_boxes[force_index]) do
@@ -1226,6 +1104,130 @@ local function open_embargo_gui(player)
 
 	update_embargo_table(embargo_table, player)
 	main_frame.force_auto_center()
+end
+
+---@param item_name string
+---@param player LuaPlayer #LuaPlayer
+---@param entity LuaEntity #LuaEntity
+local function set_sell_box_data(item_name, player, entity)
+	local player_force = player.force
+	local force_index = player_force.index
+	local f_sell_boxes = sell_boxes[force_index]
+	if f_sell_boxes[item_name] == nil then
+		local f_inactive_sell_prices = inactive_sell_prices[force_index]
+		local inactive_sell_price = f_inactive_sell_prices[item_name]
+		if inactive_sell_price then
+			sell_prices[force_index][item_name] = inactive_sell_price
+			f_inactive_sell_prices[item_name] = nil
+			notify_sell_price(force_index, item_name, inactive_sell_price)
+		end
+		f_sell_boxes[item_name] = {}
+	end
+	local items = f_sell_boxes[item_name]
+	items[#items+1] = entity
+	local text_data = {
+		text = SELLING_TEXT,
+		vertical_alignment = "middle",
+		surface = player.surface,
+		scale_with_zoom = false,
+		only_in_alt_mode = true,
+		alignment = "center",
+		color = GREEN_COLOR,
+		target = entity,
+		target_offset = TEXT_OFFSET,
+		scale = 0.7,
+	}
+	if is_public_titles == false then
+		text_data.forces = {player_force}
+	end
+	---@type number
+	local id = draw_text(text_data)
+	show_item_sprite_above_chest(item_name, player_force, entity)
+
+	entity.get_inventory(chest_inventory_type).set_bar(2)
+
+	-- (it's kind of messy data. Perhaps, there's another way)
+	all_boxes[entity.unit_number] = {entity, id, SELL_TYPE, items, item_name}
+end
+
+---@param item_name string
+---@param player LuaPlayer #LuaPlayer
+---@param entity LuaEntity #LuaEntity
+local function set_pull_box_data(item_name, player, entity)
+	local player_force = player.force
+	local force_index = player_force.index
+	local force_pull_boxes = pull_boxes[force_index]
+	force_pull_boxes[item_name] = force_pull_boxes[item_name] or {}
+	local items = force_pull_boxes[item_name]
+	items[#items+1] = entity
+	local text_data = {
+		text = PULLING_TEXT,
+		vertical_alignment = "middle",
+		surface = player.surface,
+		scale_with_zoom = false,
+		only_in_alt_mode = true,
+		alignment = "center",
+		color = WHITE_COLOR,
+		target = entity,
+		target_offset = TEXT_OFFSET,
+		scale = 0.7,
+	}
+	if is_public_titles == false then
+		text_data.forces = {player_force}
+	end
+	---@type number
+	local id = draw_text(text_data)
+	show_item_sprite_above_chest(item_name, player_force, entity)
+
+	entity.get_inventory(chest_inventory_type).set_bar(2)
+
+	-- (it's kind of messy data. Perhaps, there's another way)
+	all_boxes[entity.unit_number] = {entity, id, PULL_TYPE, items, item_name}
+end
+
+---@param item_name string
+---@param player LuaPlayer #LuaPlayer
+---@param entity LuaEntity #LuaEntity
+---@param count? number
+local function set_buy_box_data(item_name, player, entity, count)
+	count = count or game.item_prototypes[item_name].stack_size
+
+	local player_force = player.force
+	local force_index = player_force.index
+	local f_buy_boxes = buy_boxes[force_index]
+	if f_buy_boxes[item_name] == nil then
+		local f_inactive_buy_prices = inactive_buy_prices[force_index]
+		local inactive_buy_price = f_inactive_buy_prices[item_name]
+		if inactive_buy_price then
+			buy_prices[force_index][item_name] = inactive_buy_price
+			f_inactive_buy_prices[item_name] = nil
+			notify_buy_price(force_index, item_name, inactive_buy_price)
+		end
+		f_buy_boxes[item_name] = {}
+	end
+	local items = f_buy_boxes[item_name]
+	items[#items+1] = {entity, count}
+	local text_data = {
+		text = BUYING_TEXT,
+		vertical_alignment = "middle",
+		surface = player.surface,
+		scale_with_zoom = false,
+		only_in_alt_mode = true,
+		alignment = "center",
+		color = RED_COLOR,
+		target = entity,
+		target_offset = TEXT_OFFSET,
+		scale = 0.7,
+	}
+	if is_public_titles == false then
+		text_data.forces = {player_force}
+	end
+	---@type number
+	local id = draw_text(text_data)
+	show_item_sprite_above_chest(item_name, player_force, entity)
+
+	-- (it's kind of messy data. Perhaps, there's another way)
+	all_boxes[entity.unit_number] = {entity, id, BUY_TYPE, items, item_name}
 end
 
 ---@param player LuaPlayer #LuaPlayer
