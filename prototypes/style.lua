@@ -15,6 +15,12 @@ styles["FM_price_label"] = {
 	rich_text_setting = "disabled"
 }
 
+styles["FM_price_textfield"] = {
+	type = "textbox_style",
+	rich_text_setting = "disabled",
+	width = 70
+}
+
 styles["FM_prices_flow"] = {
 	type = "frame_style",
 	right_padding = -1,

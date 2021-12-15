@@ -1,4 +1,14 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.27.3
+Date: 2021-12-15
+  Changes:
+    - Changed gui when a player created a buy/sell chest
+    - Changed Russian locale (Вроде, "Закупочная цена" больше подходит, чем "Цена покупки" при настраивание цен)
+  Bugfixes:
+    - Fixed on_gui_click event
+  Notes:
+    - Refactored some code
+---------------------------------------------------------------------------------------------------
 Version: 0.27.2
 Date: 2021-12-15
   Changes:

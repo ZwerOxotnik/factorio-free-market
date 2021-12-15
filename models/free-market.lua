@@ -102,9 +102,11 @@ local RED_COLOR = {1, 0, 0}
 local GREEN_COLOR = {0, 1, 0}
 local TEXT_OFFSET = {0, 0.3}
 local SPRITE_OFFSET = {0, -0.25}
+local COLON = {"colon"}
 local LABEL = {type = "label"}
 local FLOW = {type = "flow"}
 local SPRITE_BUTTON = {type = "sprite-button"}
+local SLOT_BUTTON = {type = "sprite-button", style = "slot_button"}
 local BUYING_TEXT = {"free-market.buying"}
 local SELLING_TEXT = {"free-market.selling"}
 local PULLING_TEXT = {"free-market.pulling"}
@@ -117,6 +119,8 @@ local BUY_PRICE_BUTTON = {type = "sprite-button", style = "slot_button", name = 
 local ALLOWED_TYPES = {["container"] = true, ["logistic-container"] = true}
 local TITLEBAR_FLOW = {type = "flow", style = "flib_titlebar_flow", name = "titlebar"}
 local DRAG_HANDLER = {type = "empty-widget", style = "flib_dialog_footer_drag_handle", name = "drag_handler"}
+local BUY_PRICE_TEXTFIELD = {type = "textfield", name = "buy_price",  style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
+local SELL_PRICE_TEXTFIELD = {type = "textfield", name = "sell_price", style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
 local SCROLL_PANE = {
 	type = "scroll-pane",
 	name = "scroll-pane",
@@ -134,6 +138,7 @@ local ITEM_FILTERS = {
 	{filter = "type", type = "blueprint-book", invert = true, mode = "and"},
 	{filter = "selection-tool", invert = true, mode = "and"}
 }
+local FM_ITEM_ELEMENT = {type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 local CHECK_BUTTON = {
 	type = "sprite-button",
 	style = "item_and_count_select_confirm",
@@ -889,7 +894,7 @@ end
 ---@param player LuaPlayer
 ---@param sell_price? number
 ---@return number|string? # returns previous sell price in a case of conflict
-local function change_sell_price(item_name, player, sell_price)
+local function change_sell_price_by_player(item_name, player, sell_price)
 	local force_index = player.force.index
 	local f_sell_prices = sell_prices[force_index]
 	local f_inactive_sell_prices = inactive_sell_prices[force_index]
@@ -927,7 +932,7 @@ end
 ---@param player LuaPlayer
 ---@param buy_price? number
 ---@return number|string? # returns previous sell price in a case of conflict
-local function change_buy_price(item_name, player, buy_price)
+local function change_buy_price_by_player(item_name, player, buy_price)
 	local force_index = player.force.index
 	local f_buy_prices = buy_prices[force_index]
 	local f_inactive_buy_prices = inactive_buy_prices[force_index]
@@ -1266,15 +1271,15 @@ local function open_force_configuration(player)
 	if is_player_admin then
 		local admin_row = content.add(FLOW)
 		admin_row.name = "admin_row"
-		admin_row.add(LABEL).caption = {'', {"gui-multiplayer-lobby.allow-commands-admins-only"}, {"colon"}}
+		admin_row.add(LABEL).caption = {'', {"gui-multiplayer-lobby.allow-commands-admins-only"}, COLON}
 		admin_row.add{type = "button", caption = {"free-market.print-force-data-button"}, name = "FM_print_force_data"}
 	end
 
 	if is_reset_public or is_player_admin then
 		if is_player_admin then
-			content.add(LABEL).caption = {'', "Attention", {"colon"}, "reset is public"}
+			content.add(LABEL).caption = {'', "Attention", COLON, "reset is public"}
 		end
-		local reset_caption = {'', {"free-market.reset-gui"}, {"colon"}}
+		local reset_caption = {'', {"free-market.reset-gui"}, COLON}
 		local reset_prices_row = content.add(FLOW)
 		reset_prices_row.name = "reset_prices_row"
 		reset_prices_row.add(LABEL).caption = reset_caption
@@ -1292,16 +1297,16 @@ local function open_force_configuration(player)
 	end
 
 	local label = content.add(LABEL)
-	label.caption = {'', {"gui.credits"}, {"colon"}}
+	label.caption = {'', {"gui.credits"}, COLON}
 	label.style.font = "heading-1"
 	local translations_row = content.add(FLOW)
-	translations_row.add(LABEL).caption = {'', "Translations", {"colon"}}
+	translations_row.add(LABEL).caption = {'', "Translations", COLON}
 	local link = translations_row.add({type = "textfield", text = "https://crowdin.com/project/factorio-mods-localization"})
 	link.style.horizontally_stretchable = true
 	link.style.width = 320
-	content.add(LABEL).caption = {'', "Translators", {"colon"}, ' ', "zszzlzm (刘泽民), Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik"}
-	content.add(LABEL).caption = {'', "Supporters", {"colon"}, ' ', "Eerrikki"}
-	content.add(LABEL).caption = {'', {"gui-other-settings.developer"}, {"colon"}, ' ', "ZwerOxotnik"}
+	content.add(LABEL).caption = {'', "Translators", COLON, ' ', "zszzlzm (刘泽民), Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik"}
+	content.add(LABEL).caption = {'', "Supporters", COLON, ' ', "Eerrikki"}
+	content.add(LABEL).caption = {'', {"gui-other-settings.developer"}, COLON, ' ', "ZwerOxotnik"}
 	local text_box = content.add({type = "text-box"})
 	text_box.read_only = true
 	text_box.text = "see-prices.png from https://www.svgrepo.com/svg/77065/price-tag\n" ..
@@ -1354,8 +1359,7 @@ local function open_prices_gui(player, item_name)
 	local item = item_row.add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 	item.elem_value = item_name
 	item_row.add(LABEL).caption = {"free-market.buy-gui"}
-	local buy_textfield = item_row.add{type = "textfield", name = "buy_price", numeric = true, allow_decimal = false, allow_negative = false}
-	buy_textfield.style.width = 70
+	local buy_textfield = item_row.add(BUY_PRICE_TEXTFIELD)
 	if item_name then
 		local price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
 		if price then
@@ -1364,8 +1368,7 @@ local function open_prices_gui(player, item_name)
 	end
 	item_row.add(CHECK_BUTTON).name = "FM_confirm_buy_price"
 	item_row.add(LABEL).caption = {"free-market.sell-gui"}
-	local sell_textfield = item_row.add{type = "textfield", name = "sell_price", numeric = true, allow_decimal = false, allow_negative = false}
-	sell_textfield.style.width = 70
+	local sell_textfield = item_row.add(SELL_PRICE_TEXTFIELD)
 	if item_name then
 		local price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
 		if price then
@@ -1462,7 +1465,7 @@ local function open_price_list_gui(player)
 
 	local team_row = content_flow.add(FLOW)
 	team_row.name = "team_row"
-	team_row.add(LABEL).caption = {'', {"team"}, {"colon"}}
+	team_row.add(LABEL).caption = {'', {"team"}, COLON}
 	local items = {}
 	local size = 0
 	for force_name, force in pairs(game.forces) do
@@ -1478,7 +1481,7 @@ local function open_price_list_gui(player)
 
 	local search_row = content_flow.add({type = "table", name = "search_row", column_count = 4})
 	search_row.add{type = "textfield", name = "FM_search_text"}
-	search_row.add(LABEL).caption = {'', {"gui.search"}, {"colon"}}
+	search_row.add(LABEL).caption = {'', {"gui.search"}, COLON}
 	search_row.add{
 		type = "drop-down",
 		name = "FM_search_price_drop_down",
@@ -1536,8 +1539,8 @@ local function open_buy_box_gui(player, is_new, entity)
 	end
 
 	local row = box_operations.add{type = "table", name = "buy_content", column_count = 4}
-	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
-	row.add{type = "label", caption = {'', {"free-market.count-gui"}, {"colon"}}}
+	local FM_item = row.add(FM_ITEM_ELEMENT)
+	row.add{type = "label", caption = {'', {"free-market.count-gui"}, COLON}}
 	local count_element = row.add{type = "textfield", name = "count", numeric = true, allow_decimal = false, allow_negative = false}
 	count_element.style.width = 70
 	local confirm_button = row.add(CHECK_BUTTON)
@@ -1575,7 +1578,7 @@ local function open_sell_box_gui(player, is_new, entity)
 	end
 
 	local row = box_operations.add{type = "table", name = "sell_content", column_count = 2}
-	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
+	local FM_item = row.add(FM_ITEM_ELEMENT)
 	local confirm_button = row.add(CHECK_BUTTON)
 	if is_new then
 		confirm_button.name = "FM_confirm_sell_box"
@@ -1621,7 +1624,7 @@ local function open_pull_box_gui(player, is_new, entity)
 	end
 	box_operations.clear()
 	local row = box_operations.add{type = "table", name = "pull_content", column_count = 2}
-	local FM_item = row.add{type = "choose-elem-button", name = "FM_item", elem_type = "item", elem_filters = ITEM_FILTERS}
+	local FM_item = row.add(FM_ITEM_ELEMENT)
 	local confirm_button = row.add(CHECK_BUTTON)
 	if is_new then
 		confirm_button.name = "FM_confirm_pull_box"
@@ -1689,6 +1692,36 @@ local function check_buy_price(player, item_name)
 		end
 		content_flow.item_row.buy_price.focus()
 	end
+end
+
+---@param player LuaPlayer #LuaPlayer
+---@param gui GuiElement # box_operations gui
+---@param item_name string
+local function check_sell_price_for_opened_chest(player, gui, item_name)
+	local force_index = player.force.index
+	local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
+	if sell_price then return end
+
+	local add = gui.add
+	add(LABEL).caption = {'', {"free-market.sell-price-label"}, COLON}
+	add(SLOT_BUTTON).sprite = "item/" .. item_name
+	add(SELL_PRICE_TEXTFIELD).focus()
+	add(CHECK_BUTTON).name = "FM_confirm_sell_price_for_chest"
+end
+
+---@param player LuaPlayer #LuaPlayer
+---@param gui GuiElement # box_operations gui
+---@param item_name string
+local function check_buy_price_for_opened_chest(player, gui, item_name)
+	local force_index = player.force.index
+	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+	if buy_price then return end
+
+	local add = gui.add
+	add(LABEL).caption = {'', {"free-market.buy-price-label"}, COLON}
+	add(SLOT_BUTTON).sprite = "item/" .. item_name
+	add(BUY_PRICE_TEXTFIELD).focus()
+	add(CHECK_BUTTON).name = "FM_confirm_buy_price_for_chest"
 end
 
 ---@param player LuaPlayer #LuaPlayer
@@ -2069,7 +2102,8 @@ local GUIS = {
 		element.parent.parent.destroy()
 	end,
 	FM_confirm_buy_box = function(element, player)
-		local count = tonumber(element.parent.count.text)
+		local parent = element.parent
+		local count = tonumber(parent.count.text)
 		if not count then
 			player.print({"multiplayer.no-address", {"gui-train.add-item-count-condition"}})
 			return
@@ -2078,69 +2112,123 @@ local GUIS = {
 			return
 		end
 
-		local item_name = element.parent.FM_item.elem_value
+		local item_name = parent.FM_item.elem_value
 		if not item_name then
 			player.print({"multiplayer.no-address", {"item"}})
 			return
 		end
 
+		local box_operations = parent.parent
 		local player_index = player.index
-		local entity = open_box[player_index]
+		local entity = open_box[player_index] -- TODO: change?
 		if entity then
 			local inventory_size = #entity.get_inventory(chest_inventory_type)
 			local max_count = game.item_prototypes[item_name].stack_size * inventory_size
 			if count > max_count then
 				player.print({"gui-map-generator.invalid-value-for-field", count, 1, max_count})
-				element.parent.count.text = tostring(max_count)
+				parent.count.text = tostring(max_count)
 				return
 			end
 
 			set_buy_box_data(item_name, player, entity, count)
-			check_buy_price(player, item_name)
+			box_operations.clear()
+			check_buy_price_for_opened_chest(player, box_operations, item_name)
 		else
+			box_operations.clear()
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
-		open_box[player_index] = nil
-		local box_operations = element.parent.parent
+
+		if #box_operations.children == 0 then
+			open_box[player_index] = nil
+		end
+	end,
+	FM_confirm_buy_price_for_chest = function(element, player)
+		local box_operations = element.parent
+		local entity = open_box[player.index] -- TODO: change?
+		local box_data = all_boxes[entity.unit_number]
+		if box_data == nil then
+			-- TODO: improve
+			box_operations.clear()
+			return
+		end
+
+		local buy_price = tonumber(box_operations.buy_price.text)
+		if not buy_price then
+			box_operations.clear()
+		elseif buy_price < 1 then
+			-- TODO: change?
+			player.print({"count-must-be-more-n", 0})
+			return
+		end
+
+		local item_name = box_data[5]
+		change_buy_price_by_player(item_name, player, buy_price)
 		box_operations.clear()
 	end,
 	FM_confirm_sell_box = function(element, player)
-		local item_name = element.parent.FM_item.elem_value
+		local parent = element.parent
+		local item_name = parent.FM_item.elem_value
 		if not item_name then
 			player.print({"multiplayer.no-address", {"item"}})
 			return
 		end
 
+		local box_operations = parent.parent
 		local player_index = player.index
-
-		local entity = open_box[player_index]
+		local entity = open_box[player_index] -- TODO: change?
 		if entity then
 			set_sell_box_data(item_name, player, entity)
-			check_sell_price(player, item_name)
+			box_operations.clear()
+			check_sell_price_for_opened_chest(player, box_operations, item_name)
 		else
+			box_operations.clear()
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
-		open_box[player_index] = nil
-		local box_operations = element.parent.parent
+
+		if #box_operations.children == 0 then
+			open_box[player_index] = nil
+		end
+	end,
+	FM_confirm_sell_price_for_chest = function(element, player)
+		local box_operations = element.parent
+		local entity = open_box[player.index] -- TODO: change?
+		local box_data = all_boxes[entity.unit_number]
+		if box_data == nil then
+			-- TODO: improve
+			box_operations.clear()
+			return
+		end
+
+		local sell_price = tonumber(box_operations.sell_price.text)
+		if not sell_price then
+			box_operations.clear()
+		elseif sell_price < 1 then
+			-- TODO: change?
+			player.print({"count-must-be-more-n", 0})
+			return
+		end
+
+		local item_name = box_data[5]
+		change_sell_price_by_player(item_name, player, sell_price)
 		box_operations.clear()
 	end,
 	FM_confirm_pull_box = function(element, player)
-		local item_name = element.parent.FM_item.elem_value
+		local parent = element.parent
+		local item_name = parent.FM_item.elem_value
 		if not item_name then
 			player.print({"multiplayer.no-address", {"item"}})
 			return
 		end
 
 		local player_index = player.index
-
-		local entity = open_box[player_index]
+		local entity = open_box[player_index] -- TODO: change?
 		if entity then
 			set_pull_box_data(item_name, player, entity)
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
 		open_box[player_index] = nil
-		local box_operations = element.parent.parent
+		local box_operations = parent.parent
 		box_operations.clear()
 	end,
 	FM_change_sell_box = function(element, player)
@@ -2260,7 +2348,7 @@ local GUIS = {
 
 		local sell_price_element = parent.sell_price
 		local sell_price = tonumber(sell_price_element.text)
-		local prev_sell_price = change_sell_price(item_name, player, sell_price)
+		local prev_sell_price = change_sell_price_by_player(item_name, player, sell_price)
 		if prev_sell_price then
 			sell_price_element.text = tostring(prev_sell_price)
 		end
@@ -2271,8 +2359,8 @@ local GUIS = {
 		if item_name == nil then return end
 
 		local buy_price_element = parent.buy_price
-		local sell_price = tonumber(buy_price_element.text)
-		local prev_buy_price = change_buy_price(item_name, player, sell_price)
+		local buy_price = tonumber(buy_price_element.text)
+		local prev_buy_price = change_buy_price_by_player(item_name, player, buy_price)
 		if prev_buy_price then
 			buy_price_element.text = tostring(prev_buy_price)
 		end
@@ -2536,11 +2624,11 @@ local GUIS = {
 		if price then
 			if event.shift then
 				-- use buy price for sell price
-				change_buy_price(item_name, player, price)
+				change_buy_price_by_player(item_name, player, price)
 			end
 			if event.control then
 				-- copy price
-				change_sell_price(item_name, player, price)
+				change_sell_price_by_player(item_name, player, price)
 			end
 			if event.alt then
 				open_prices_gui(player, item_name)
@@ -2569,11 +2657,11 @@ local GUIS = {
 		if price then
 			if event.shift then
 				-- copy price
-				change_buy_price(item_name, player, price)
+				change_buy_price_by_player(item_name, player, price)
 			end
 			if event.control then
 				-- use buy price for sell price
-				change_sell_price(item_name, player, price)
+				change_sell_price_by_player(item_name, player, price)
 			end
 			if event.alt then
 				open_prices_gui(player, item_name)
@@ -2889,7 +2977,7 @@ local function on_player_selected_area(event)
 			end
 		end
 		if count > 0 then
-			player.print({'', {"gui-migrated-content.removed-entity"}, {"colon"}, ' ', count})
+			player.print({'', {"gui-migrated-content.removed-entity"}, COLON, ' ', count})
 		end
 	end
 end
@@ -3220,7 +3308,7 @@ local function on_configuration_changed(event)
 			switch_sell_prices_gui(player)
 			switch_buy_prices_gui(player)
 		end
-		game.print({'',{"mod-name.free-market"}, {"colon"}, " added price notification with settings"})
+		game.print({'', {"mod-name.free-market"}, COLON, " added price notification with settings"})
 	end
 end
 
@@ -3250,8 +3338,7 @@ M.events = {
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
-		on_gui_click(event)
-		-- pcall(on_gui_click, event)
+		pcall(on_gui_click, event)
 	end,
 	[defines.events.on_gui_closed] = function(event)
 		pcall(on_gui_closed, event)
