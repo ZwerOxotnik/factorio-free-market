@@ -1702,9 +1702,10 @@ local function check_sell_price_for_opened_chest(player, gui, item_name)
 	local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
 	if sell_price then return end
 
-	local add = gui.add
-	add(LABEL).caption = {'', {"free-market.sell-price-label"}, COLON}
+	local row = gui.add{type = "table", name = "sell_price_table", column_count = 4}
+	local add = row.add
 	add(SLOT_BUTTON).sprite = "item/" .. item_name
+	add(LABEL).caption = {'', {"free-market.sell-price-label"}, COLON}
 	add(SELL_PRICE_TEXTFIELD).focus()
 	add(CHECK_BUTTON).name = "FM_confirm_sell_price_for_chest"
 end
@@ -1717,9 +1718,10 @@ local function check_buy_price_for_opened_chest(player, gui, item_name)
 	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
 	if buy_price then return end
 
-	local add = gui.add
-	add(LABEL).caption = {'', {"free-market.buy-price-label"}, COLON}
+	local row = gui.add{type = "table", name = "buy_price_table", column_count = 4}
+	local add = row.add
 	add(SLOT_BUTTON).sprite = "item/" .. item_name
+	add(LABEL).caption = {'', {"free-market.buy-price-label"}, COLON}
 	add(BUY_PRICE_TEXTFIELD).focus()
 	add(CHECK_BUTTON).name = "FM_confirm_buy_price_for_chest"
 end
