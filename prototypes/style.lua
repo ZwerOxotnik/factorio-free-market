@@ -10,7 +10,9 @@ styles.fm_subheader_frame = {
 styles["FM_price_label"] = {
 	type = "label_style",
 	font = "heading-2",
-	top_padding = -7
+	top_padding = -7,
+	font_color = {206, 206, 190},
+	rich_text_setting = "disabled"
 }
 
 styles["FM_prices_flow"] = {

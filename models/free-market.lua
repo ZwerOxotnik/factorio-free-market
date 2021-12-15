@@ -1084,18 +1084,18 @@ local function change_buy_price(item_name, player, buy_price)
 end
 
 ---@param gui LuaElement #LuaElement
----@param name string # name of button
----@param is_vertical boolean
-local function create_side_handler(gui, name, is_vertical)
+---@param button_name string # name of button
+---@param is_top_handler boolean
+local function create_price_notification_handler(gui, button_name, is_top_handler)
 	local flow = gui.add(TITLEBAR_FLOW)
-	if is_vertical then
+	if is_top_handler then
 		flow.style.horizontally_stretchable = true
 		flow.add(EMPTY_WIDGET).style.horizontally_stretchable = true
 	end
 	local drag_handler = flow.add(DRAG_HANDLER)
 	drag_handler.drag_target = gui
 	drag_handler.style.margin = 0
-	if is_vertical then
+	if is_top_handler then
 		flow.style.horizontal_spacing = -3
 		drag_handler.style.width = 27
 		drag_handler.style.height = 25
@@ -1104,7 +1104,7 @@ local function create_side_handler(gui, name, is_vertical)
 			type = "sprite-button",
 			sprite = "FM_price",
 			style = "frame_action_button",
-			name = name
+			name = button_name
 		}
 		button.style.margin = 0
 	else
@@ -1115,7 +1115,7 @@ local function create_side_handler(gui, name, is_vertical)
 			type = "sprite-button",
 			sprite = "FM_price",
 			style = "frame_action_button",
-			name = name
+			name = button_name
 		}
 	end
 end
@@ -1141,18 +1141,20 @@ local function switch_sell_prices_gui(player, location)
 			local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			if not is_vertical then
-				create_side_handler(main_frame, "FM_switch_sell_prices_gui")
+				create_price_notification_handler(main_frame, "FM_switch_sell_prices_gui")
 			end
 		end
 else
 		local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
 		local is_vertical = (column_count == 2)
 		if is_vertical then
-			direction = "vertical"
+			direction = "vertical" -- it works weird
+		else
+			direction = "horizontal"
 		end
 		main_frame = screen.add{type = "frame", name = "FM_sell_prices_frame", style = "borderless_frame", direction = direction}
 		main_frame.location = location or {x = player.display_resolution.width - 752, y = 272}
-		create_side_handler(main_frame, "FM_switch_sell_prices_gui", is_vertical)
+		create_price_notification_handler(main_frame, "FM_switch_sell_prices_gui", is_vertical)
 	end
 end
 
@@ -1177,18 +1179,20 @@ local function switch_buy_prices_gui(player, location)
 			local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			if not is_vertical then
-				create_side_handler(main_frame, "FM_switch_buy_prices_gui")
+				create_price_notification_handler(main_frame, "FM_switch_buy_prices_gui")
 			end
 		end
 	else
 		local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
 		local is_vertical = (column_count == 2)
 		if is_vertical then
-			direction = "vertical"
+			direction = "vertical" -- it works weird
+		else
+			direction = "horizontal"
 		end
 		main_frame = screen.add{type = "frame", name = "FM_buy_prices_frame", style = "borderless_frame", direction = direction}
 		main_frame.location = location or {x = player.display_resolution.width - 712, y = 272}
-		create_side_handler(main_frame, "FM_switch_buy_prices_gui", is_vertical)
+		create_price_notification_handler(main_frame, "FM_switch_buy_prices_gui", is_vertical)
 	end
 end
 
