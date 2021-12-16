@@ -1322,16 +1322,34 @@ end
 
 ---@param player LuaPlayer #LuaPlayer
 ---@param item_name? string
-local function open_prices_gui(player, item_name)
+local function switch_prices_gui(player, item_name)
 	local screen = player.gui.screen
-	if screen.FM_prices_frame then
-		screen.FM_prices_frame.destroy()
+	local main_frame = screen.FM_prices_frame
+	if main_frame then
+		if item_name == nil then
+			main_frame.destroy()
+		else
+			local content_flow = main_frame.shallow_frame.content_flow
+			local item_row = main_frame.shallow_frame.content_flow.item_row
+			item_row.elem_value = item_name
+
+			local force_index = player.force.index
+			local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
+			if sell_price then
+				item_row.sell_price.text = tostring(sell_price)
+			end
+			local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+			if buy_price then
+				item_row.buy_price.text = tostring(buy_price)
+			end
+			update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+		end
 		return
 	end
 
 	local force_index = player.force.index
 
-	local main_frame = screen.add{type = "frame", name = "FM_prices_frame", direction = "vertical"}
+	main_frame = screen.add{type = "frame", name = "FM_prices_frame", direction = "vertical"}
 	main_frame.style.horizontally_stretchable = true
 	local flow = main_frame.add(TITLEBAR_FLOW)
 	flow.add{
@@ -1563,8 +1581,8 @@ local function open_buy_box_gui(player, is_new, entity)
 end
 
 local function clear_boxes_gui(player)
-	player.gui.relative.FM_boxes_frame.content.main_flow.box_operations.clear()
 	open_box[player.index] = nil
+	player.gui.relative.FM_boxes_frame.content.main_flow.box_operations.clear()
 end
 
 ---@param player LuaPlayer #LuaPlayer
@@ -1679,7 +1697,7 @@ local function check_buy_price(player, item_name)
 		local prices_frame = player.gui.screen.FM_prices_frame
 		local content_flow
 		if prices_frame == nil then
-			content_flow = open_prices_gui(player, item_name)
+			content_flow = switch_prices_gui(player, item_name)
 			prices_frame = player.gui.screen.FM_prices_frame
 		else
 			content_flow = prices_frame.shallow_frame.content_flow
@@ -1734,7 +1752,7 @@ local function check_sell_price(player, item_name)
 		local prices_frame = player.gui.screen.FM_prices_frame
 		local content_flow
 		if prices_frame == nil then
-			content_flow = open_prices_gui(player, item_name)
+			content_flow = switch_prices_gui(player, item_name)
 			prices_frame = player.gui.screen.FM_prices_frame
 		else
 			content_flow = prices_frame.shallow_frame.content_flow
@@ -2089,7 +2107,7 @@ local GUIS = {
 		local force_index = player.force.index
 		local prices_frame = player.gui.screen.FM_prices_frame
 		if prices_frame == nil then
-			open_prices_gui(player, item_name)
+			switch_prices_gui(player, item_name)
 		else
 			local content_flow = prices_frame.shallow_frame.content_flow
 			content_flow.item_row.FM_prices_item.elem_value = item_name
@@ -2483,7 +2501,7 @@ local GUIS = {
 						local prices_frame = player.gui.screen.FM_prices_frame
 						local content_flow
 						if prices_frame == nil then
-							content_flow = open_prices_gui(player, item_name)
+							content_flow = switch_prices_gui(player, item_name)
 							prices_frame = player.gui.screen.FM_prices_frame
 						else
 							content_flow = prices_frame.shallow_frame.content_flow
@@ -2600,7 +2618,7 @@ local GUIS = {
 		open_force_configuration(player)
 	end,
 	FM_open_price = function(element, player)
-		open_prices_gui(player)
+		switch_prices_gui(player)
 	end,
 	FM_switch_sell_prices_gui = function(element, player)
 		switch_sell_prices_gui(player)
@@ -2633,7 +2651,7 @@ local GUIS = {
 				change_sell_price_by_player(item_name, player, price)
 			end
 			if event.alt then
-				open_prices_gui(player, item_name)
+				switch_prices_gui(player, item_name)
 			end
 			game.print({"free-market.team-selling-item-for", force.name, item_name, price})
 		else
@@ -2666,7 +2684,7 @@ local GUIS = {
 				change_sell_price_by_player(item_name, player, price)
 			end
 			if event.alt then
-				open_prices_gui(player, item_name)
+				switch_prices_gui(player, item_name)
 			end
 			game.print({"free-market.team-buying-item-for", force.name, item_name, price})
 		else
@@ -3111,7 +3129,7 @@ end
 local function prices_command(cmd)
 	local player = game.get_player(cmd.player_index)
 	if not (player and player.valid) then return end
-	open_prices_gui(player)
+	switch_prices_gui(player)
 end
 
 local function price_list_command(cmd)
