@@ -21,7 +21,7 @@ styles["FM_price_textfield"] = {
 	width = 70
 }
 
-styles["FM_prices_flow"] = {
+styles["FM_prices_frame"] = {
 	type = "frame_style",
 	right_padding = -1,
 	vertically_stretchable = "on",
@@ -42,6 +42,22 @@ styles["FM_price_frame"] = {
 	left_padding = 6,
 	right_margin = 10,
 	maximal_height = 20,
+	graphical_set = {
+		base = {
+			center = {position = {336, 0}, size = {1, 1}},
+			opacity = 0.4,
+			background_blur = true,
+			background_blur_sigma = 0.5,
+			blend_mode = "additive-soft-with-alpha"
+		},
+		shadow = default_glow(default_shadow_color, 0.5)
+	}
+}
+
+styles["FM_item_price_frame"] = {
+	type = "frame_style",
+	padding = 0,
+	right_padding = 6,
 	graphical_set = {
 		base = {
 			center = {position = {336, 0}, size = {1, 1}},

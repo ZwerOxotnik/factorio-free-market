@@ -105,6 +105,7 @@ local SPRITE_OFFSET = {0, -0.25}
 local COLON = {"colon"}
 local LABEL = {type = "label"}
 local FLOW = {type = "flow"}
+local VERTICAL_FLOW = {type = "flow", direction = "vertical"}
 local SPRITE_BUTTON = {type = "sprite-button"}
 local SLOT_BUTTON = {type = "sprite-button", style = "slot_button"}
 local BUYING_TEXT = {"free-market.buying"}
@@ -811,7 +812,7 @@ local function update_embargo_table(embargo_table, player)
 	local forces_list = embargo_table.add{type = "list-box", name = "forces_list", items = forces_items}
 	forces_list.style.horizontally_stretchable = true
 	forces_list.style.height = 200
-	local buttons_flow = embargo_table.add{type = "flow", direction = "vertical"}
+	local buttons_flow = embargo_table.add(VERTICAL_FLOW)
 	buttons_flow.add{type = "sprite-button", name = "FM_cancel_embargo", style = "tool_button", sprite = "utility/left_arrow"}
 	buttons_flow.add{type = "sprite-button", name = "FM_declare_embargo", style = "tool_button", sprite = "utility/right_arrow"}
 	local embargo_list = embargo_table.add{type = "list-box", name = "embargo_list", items = embargoes_items}
@@ -1020,7 +1021,7 @@ local function switch_sell_prices_gui(player, location)
 			switch_sell_prices_gui(player, last_location)
 			return
 		else
-			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_flow", direction = "vertical"}
+			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
 			local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			if not is_vertical then
@@ -1058,7 +1059,7 @@ local function switch_buy_prices_gui(player, location)
 			switch_buy_prices_gui(player, last_location)
 			return
 		else
-			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_flow", direction = "vertical"}
+			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
 			local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			if not is_vertical then
@@ -1767,6 +1768,80 @@ local function check_sell_price(player, item_name)
 	end
 end
 
+---@param player LuaPlayer #LuaPlayer
+local function create_item_price_HUD(player)
+	local screen = player.gui.screen
+	if screen.FM_item_price_frame then
+		return
+	end
+
+	local main_frame = screen.add{type = "frame", name = "FM_item_price_frame", style = "FM_item_price_frame", direction = "horizontal"}
+	main_frame.location = {x = player.display_resolution.width / 2, y = 10}
+
+	local flow = main_frame.add(TITLEBAR_FLOW)
+	local drag_handler = flow.add(DRAG_HANDLER)
+	drag_handler.drag_target = main_frame
+	drag_handler.style.vertically_stretchable = true
+	drag_handler.style.minimal_height = 22
+	drag_handler.style.maximal_height = 0
+	drag_handler.style.margin = 0
+	drag_handler.style.width = 10
+
+	local labels_table = main_frame.add(VERTICAL_FLOW)
+	labels_table.name = "FM_price_labels_flow"
+	labels_table.visible = false
+	labels_table.add{type = "label", caption = {'', {"free-market.sell-price-label"}, COLON}}
+	labels_table.add{type = "label", caption = {'', {"free-market.buy-price-label"},  COLON}}
+
+	local prices_table = main_frame.add(VERTICAL_FLOW)
+	prices_table.name = "FM_item_prices_flow"
+	prices_table.visible = false
+	prices_table.add(LABEL).name = "buy_price"
+	prices_table.add(LABEL).name = "sell_price"
+end
+
+---@param player LuaPlayer #LuaPlayer
+local function delete_item_price_HUD(player)
+	local frame = player.gui.screen.FM_item_price_frame
+	if frame then
+		frame.destroy()
+	end
+end
+
+---@param player LuaPlayer #LuaPlayer
+local function hide_item_price_HUD(player)
+	local frame = player.gui.screen.FM_item_price_frame
+	frame.FM_price_labels_flow.visible = false
+	frame.FM_item_prices_flow.visible = false
+end
+
+---@param player LuaPlayer #LuaPlayer
+---@param item_name string
+local function show_item_price_in_HUD(player, item_name)
+	local force_index = player.force.index
+	local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
+	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+	if buy_price == nil and sell_price == nil then
+		hide_item_price_HUD(player)
+		return
+	end
+
+	local frame = player.gui.screen.FM_item_price_frame
+	frame.FM_price_labels_flow.visible = true
+	local item_prices = frame.FM_item_prices_flow
+	item_prices.visible = true
+	if sell_price then
+		item_prices.sell_price.caption = tostring(sell_price)
+	else
+		item_prices.sell_price.caption = ''
+	end
+	if buy_price then
+		item_prices.buy_price.caption = tostring(buy_price)
+	else
+		item_prices.buy_price.caption = ''
+	end
+end
+
 --#endregion
 
 
@@ -1865,9 +1940,12 @@ local function on_player_created(event)
 	create_left_relative_gui(player)
 	switch_sell_prices_gui(player)
 	switch_buy_prices_gui(player)
+	if player.mod_settings["FM_show_item_price"].value then
+		create_item_price_HUD(player)
+	end
 end
 
--- check
+-- TODO: check
 local function on_player_joined_game(event)
 	local player_index = event.player_index
 	open_box[player_index] = nil
@@ -1875,6 +1953,19 @@ local function on_player_joined_game(event)
 	clear_boxes_gui(player)
 	destroy_prices_gui(player)
 	destroy_price_list_gui(player)
+end
+
+local function on_player_cursor_stack_changed(event)
+	local player_index = event.player_index
+	local player = game.get_player(player_index)
+	local cursor_stack = player.cursor_stack
+	if cursor_stack.valid_for_read then
+		if player.mod_settings["FM_show_item_price"].value then
+			show_item_price_in_HUD(player, cursor_stack.name)
+		end
+	else
+		hide_item_price_HUD(player)
+	end
 end
 
 local function on_force_created(event)
@@ -3111,8 +3202,20 @@ local mod_settings = {
 }
 local function on_runtime_mod_setting_changed(event)
 	-- if event.setting_type ~= "runtime-global" then return ned
-	local f = mod_settings[event.setting]
-	if f then f(settings.global[event.setting].value) end
+	local setting_name = event.setting
+	local f = mod_settings[setting_name]
+	if f then
+		f(settings.global[setting_name].value)
+	elseif setting_name == "FM_show_item_price" then
+		local player = game.get_player(event.player_index)
+		if player and player.valid then
+			if player.mod_settings["FM_show_item_price"].value then
+				create_item_price_HUD(player)
+			else
+				delete_item_price_HUD(player)
+			end
+		end
+	end
 end
 
 --#endregion
@@ -3290,6 +3393,14 @@ local function on_configuration_changed(event)
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
+	if version < 0.26 then
+		for _, force in pairs(game.forces) do
+			local index = force.index
+			if sell_boxes[index] then
+				init_force_data(index)
+			end
+		end
+	end
 	if version < 0.27 then
 		for _, player in pairs(game.players) do
 			if player.valid then
@@ -3305,11 +3416,10 @@ local function on_configuration_changed(event)
 			end
 		end
 	end
-	if version < 0.26 then
-		for _, force in pairs(game.forces) do
-			local index = force.index
-			if sell_boxes[index] then
-				init_force_data(index)
+	if version < 0.28 then
+		for _, player in pairs(game.players) do
+			if player.valid and player.mod_settings["FM_show_item_price"].value then
+				create_item_price_HUD(player)
 			end
 		end
 	end
@@ -3354,6 +3464,9 @@ M.events = {
 	[defines.events.on_player_created] = on_player_created,
 	[defines.events.on_player_joined_game] = function(event)
 		pcall(on_player_joined_game, event)
+	end,
+	[defines.events.on_player_cursor_stack_changed] = function(event)
+		pcall(on_player_cursor_stack_changed, event)
 	end,
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
