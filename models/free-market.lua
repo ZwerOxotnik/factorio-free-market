@@ -972,18 +972,8 @@ end
 ---@param is_top_handler boolean
 local function create_price_notification_handler(gui, button_name, is_top_handler)
 	local flow = gui.add(TITLEBAR_FLOW)
+	flow.style.padding = 0
 	if is_top_handler then
-		flow.style.horizontally_stretchable = true
-		flow.add(EMPTY_WIDGET).style.horizontally_stretchable = true
-	end
-	local drag_handler = flow.add(DRAG_HANDLER)
-	drag_handler.drag_target = gui
-	drag_handler.style.margin = 0
-	if is_top_handler then
-		flow.style.horizontal_spacing = -3
-		drag_handler.style.width = 27
-		drag_handler.style.height = 25
-		drag_handler.style.horizontally_stretchable = false
 		local button = flow.add{
 			type = "sprite-button",
 			sprite = "FM_price",
@@ -991,8 +981,16 @@ local function create_price_notification_handler(gui, button_name, is_top_handle
 			name = button_name
 		}
 		button.style.margin = 0
+	end
+	local drag_handler = flow.add(DRAG_HANDLER)
+	drag_handler.drag_target = gui
+	drag_handler.style.margin = 0
+	if is_top_handler then
+		flow.style.horizontal_spacing = 0
+		drag_handler.style.width = 27
+		drag_handler.style.height = 25
+		drag_handler.style.horizontally_stretchable = false
 	else
-		flow.style.left_padding = -3
 		drag_handler.style.width = 24
 		drag_handler.style.height = 46
 		drag_handler.add{
@@ -1021,12 +1019,12 @@ local function switch_sell_prices_gui(player, location)
 			switch_sell_prices_gui(player, last_location)
 			return
 		else
-			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
-			local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
-			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			if not is_vertical then
 				create_price_notification_handler(main_frame, "FM_switch_sell_prices_gui")
 			end
+			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
+			local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
+			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 		end
 else
 		local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
@@ -1059,12 +1057,12 @@ local function switch_buy_prices_gui(player, location)
 			switch_buy_prices_gui(player, last_location)
 			return
 		else
-			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
-			local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
-			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			if not is_vertical then
 				create_price_notification_handler(main_frame, "FM_switch_buy_prices_gui")
 			end
+			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
+			local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
+			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 		end
 	else
 		local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
@@ -3198,15 +3196,8 @@ local mod_settings = {
 		script.on_nth_tick(update_pull_tick, nil)
 		update_pull_tick = value
 		script.on_nth_tick(value, check_buy_boxes)
-	end
-}
-local function on_runtime_mod_setting_changed(event)
-	-- if event.setting_type ~= "runtime-global" then return ned
-	local setting_name = event.setting
-	local f = mod_settings[setting_name]
-	if f then
-		f(settings.global[setting_name].value)
-	elseif setting_name == "FM_show_item_price" then
+	end,
+	FM_show_item_price = function(event)
 		local player = game.get_player(event.player_index)
 		if player and player.valid then
 			if player.mod_settings["FM_show_item_price"].value then
@@ -3215,6 +3206,16 @@ local function on_runtime_mod_setting_changed(event)
 				delete_item_price_HUD(player)
 			end
 		end
+	end
+}
+local function on_runtime_mod_setting_changed(event)
+	local f = mod_settings[event.setting]
+	if f == nil then return end
+
+	if event.setting_type == "runtime-global" then
+		f(settings.global[event.setting].value)
+	else
+		f(event)
 	end
 end
 
@@ -3401,7 +3402,7 @@ local function on_configuration_changed(event)
 			end
 		end
 	end
-	if version < 0.27 then
+	if version < 0.29 then
 		for _, player in pairs(game.players) do
 			if player.valid then
 				local screen = player.gui.screen
