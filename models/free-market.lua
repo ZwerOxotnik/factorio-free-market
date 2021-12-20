@@ -86,6 +86,7 @@ local sub = string.sub
 local call = remote.call
 local draw_text = rendering.draw_text
 local draw_sprite = rendering.draw_sprite
+local Rget_type = rendering.get_type
 local get_render_target = rendering.get_target
 local is_render_valid = rendering.is_valid
 local rendering_destroy = rendering.destroy
@@ -2052,10 +2053,13 @@ local function on_forces_merging(event)
 	for i = 1, #ids do
 		local id = ids[i]
 		if is_render_valid(id) then
-			local entity = get_render_target(id).entity
-			if not (entity and entity.valid) or entity.force == source then
-				all_boxes[entity.unit_number] = nil
-				rendering_destroy(id)
+			local target = get_render_target(id)
+			if target then
+				local entity = target.entity
+				if (not (entity and entity.valid) or entity.force == source) and Rget_type(id) == "text" then
+					all_boxes[entity.unit_number] = nil
+					rendering_destroy(id)
+				end
 			end
 		end
 	end
