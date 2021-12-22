@@ -1,6 +1,6 @@
 if script.level.campaign_name then return end -- Don't init if it's a campaign
 
-local event_handler = require("event_handler")
+local event_handler = require("__zk-lib__/static-libs/lualibs/event_handler_vZO.lua")
 
 
 ---@type table<string, module>

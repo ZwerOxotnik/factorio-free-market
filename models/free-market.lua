@@ -146,7 +146,6 @@ local CHECK_BUTTON = {
 	style = "item_and_count_select_confirm",
 	sprite = "utility/check_mark"
 }
-local boxes_anchor = {gui = defines.relative_gui_type.container_gui, position = defines.relative_gui_position.top}
 --#endregion
 
 
@@ -1612,6 +1611,8 @@ local function create_top_relative_gui(player)
 	if relative.FM_boxes_frame then
 		relative.FM_boxes_frame.destroy()
 	end
+
+	local boxes_anchor = {gui = defines.relative_gui_type.container_gui, position = defines.relative_gui_position.top}
 	local main_frame = relative.add{type = "frame", name = "FM_boxes_frame", anchor = boxes_anchor}
 	main_frame.style.vertical_align = "center"
 	main_frame.style.horizontally_stretchable = false
@@ -1652,12 +1653,13 @@ local function open_pull_box_gui(player, is_new, entity)
 	end
 end
 
-local left_anchor = {gui = defines.relative_gui_type.controller_gui, position = defines.relative_gui_position.left}
 local function create_left_relative_gui(player)
 	local relative = player.gui.relative
 	if relative.FM_buttons then
 		relative.FM_buttons.destroy()
 	end
+
+	local left_anchor = {gui = defines.relative_gui_type.controller_gui, position = defines.relative_gui_position.left}
 	local main_table = relative.add{type = "table", name = "FM_buttons", anchor = left_anchor, column_count = 2}
 	main_table.style.vertical_align = "center"
 	main_table.style.horizontal_spacing = 0
