@@ -1957,8 +1957,7 @@ local function on_player_joined_game(event)
 end
 
 local function on_player_cursor_stack_changed(event)
-	local player_index = event.player_index
-	local player = game.get_player(player_index)
+	local player = game.get_player(event.player_index)
 	local cursor_stack = player.cursor_stack
 	if cursor_stack.valid_for_read then
 		if player.mod_settings["FM_show_item_price"].value then
@@ -2847,7 +2846,9 @@ local function on_gui_click(event)
 end
 
 local function on_gui_closed(event)
-	if not ALLOWED_TYPES[event.entity.type] then return end
+	local entity = event.entity
+	if entity == nil then return end
+	if not ALLOWED_TYPES[entity.type] then return end
 	game.get_player(event.player_index).gui.relative.FM_boxes_frame.content.main_flow.box_operations.clear()
 end
 
@@ -3044,11 +3045,14 @@ end
 
 local function on_selected_entity_changed(event)
 	local entity = event.last_entity
+	if entity == nil then return end
 	if not ALLOWED_TYPES[entity.type] then return end
 	local player = game.get_player(event.player_index)
 	if entity.force ~= player.force then return end
 
-	local item_name = all_boxes[entity.unit_number][5]
+	local box_data = all_boxes[entity.unit_number]
+	if box_data == nil then return end
+	local item_name = box_data[5]
 	draw_sprite{
 		sprite = "item." .. item_name,
 		target = entity,
@@ -3500,6 +3504,7 @@ M.events = {
 		pcall(on_player_changed_surface, event)
 	end,
 	[defines.events.on_force_cease_fire_changed] = function(event)
+		-- TODO: refactor
 		if is_auto_embargo then
 			pcall(on_force_cease_fire_changed, event)
 		end
