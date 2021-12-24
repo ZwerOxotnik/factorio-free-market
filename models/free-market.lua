@@ -1948,9 +1948,9 @@ end
 
 -- TODO: check
 local function on_player_joined_game(event)
-	local player_index = event.player_index
-	open_box[player_index] = nil
-	local player = game.get_player(player_index)
+	local player = game.get_player(event.player_index)
+	if not (player and player.valid) then return end
+
 	clear_boxes_gui(player)
 	destroy_prices_gui(player)
 	destroy_price_list_gui(player)
@@ -2841,15 +2841,18 @@ local GUIS = {
 	end
 }
 local function on_gui_click(event)
-	local f = GUIS[event.element.name]
-	if f then f(event.element, game.get_player(event.player_index), event) end
+	local element = event.element
+	local f = GUIS[element.name]
+	if f then f(element, game.get_player(event.player_index), event) end
 end
 
 local function on_gui_closed(event)
 	local entity = event.entity
-	if entity == nil then return end
+	if not (entity and entity.valid) then return end
 	if not ALLOWED_TYPES[entity.type] then return end
-	game.get_player(event.player_index).gui.relative.FM_boxes_frame.content.main_flow.box_operations.clear()
+	local player = game.get_player(event.player_index)
+	if not (player and player.valid) then return end
+	player.gui.relative.FM_boxes_frame.content.main_flow.box_operations.clear()
 end
 
 local function check_pull_boxes()
@@ -3013,6 +3016,7 @@ end
 
 local function on_player_changed_force(event)
 	local player = game.get_player(event.player_index)
+	if not (player and player.valid) then return end
 	clear_boxes_gui(player)
 
 	local index = player.force.index
@@ -3023,11 +3027,14 @@ end
 
 local function on_player_changed_surface(event)
 	local player = game.get_player(event.player_index)
+	if not (player and player.valid) then return end
 	clear_boxes_gui(player)
 end
 
 local function on_player_left_game(event)
 	local player = game.get_player(event.player_index)
+	if not (player and player.valid) then return end
+
 	clear_boxes_gui(player)
 	destroy_prices_gui(player)
 	destroy_price_list_gui(player)
@@ -3037,7 +3044,7 @@ local function on_player_left_game(event)
 	if frame and frame.valid and #frame.children > 1 then
 		switch_sell_prices_gui(player)
 	end
-	local frame = screen.FM_buy_prices_frame
+	frame = screen.FM_buy_prices_frame
 	if frame and frame.valid and #frame.children > 1 then
 		switch_buy_prices_gui(player)
 	end
@@ -3045,13 +3052,14 @@ end
 
 local function on_selected_entity_changed(event)
 	local entity = event.last_entity
-	if entity == nil then return end
+	if not (entity and entity.valid) then return end
 	if not ALLOWED_TYPES[entity.type] then return end
 	local player = game.get_player(event.player_index)
+	if not (player and player.valid) then return end
 	if entity.force ~= player.force then return end
-
 	local box_data = all_boxes[entity.unit_number]
 	if box_data == nil then return end
+
 	local item_name = box_data[5]
 	draw_sprite{
 		sprite = "item." .. item_name,
@@ -3473,36 +3481,24 @@ M.events = {
 	[defines.events.on_surface_cleared] = clear_invalid_entities,
 	[defines.events.on_chunk_deleted] = clear_invalid_entities,
 	[defines.events.on_player_created] = on_player_created,
-	[defines.events.on_player_joined_game] = function(event)
-		pcall(on_player_joined_game, event)
-	end,
+	[defines.events.on_player_joined_game] = on_player_joined_game,
 	[defines.events.on_player_cursor_stack_changed] = function(event)
-		pcall(on_player_cursor_stack_changed, event)
+		pcall(on_player_cursor_stack_changed, event) -- TODO: recheck
 	end,
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
 		pcall(on_gui_click, event)
 	end,
-	[defines.events.on_gui_closed] = function(event)
-		pcall(on_gui_closed, event)
-	end,
-	[defines.events.on_player_left_game] = function(event)
-		pcall(on_player_left_game, event)
-	end,
-	[defines.events.on_selected_entity_changed] = function(event)
-		pcall(on_selected_entity_changed, event)
-	end,
+	[defines.events.on_gui_closed] = on_gui_closed,
+	[defines.events.on_player_left_game] = on_player_left_game,
+	[defines.events.on_selected_entity_changed] = on_selected_entity_changed,
 	[defines.events.on_player_removed] = delete_player_data,
 	[defines.events.on_force_created] = on_force_created,
 	[defines.events.on_forces_merging] = on_forces_merging,
 	[defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
-	[defines.events.on_player_changed_force] = function(event)
-		pcall(on_player_changed_force, event)
-	end,
-	[defines.events.on_player_changed_surface] = function(event)
-		pcall(on_player_changed_surface, event)
-	end,
+	[defines.events.on_player_changed_force] = on_player_changed_force,
+	[defines.events.on_player_changed_surface] = on_player_changed_surface,
 	[defines.events.on_force_cease_fire_changed] = function(event)
 		-- TODO: refactor
 		if is_auto_embargo then
