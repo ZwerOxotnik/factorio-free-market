@@ -7,16 +7,19 @@ local M = {}
 ---@type table<string, table>
 local mod_data
 
+-- {force index = {[force index] = boolean}}
 ---@class embargoes
----@type table<number, table>
+---@type table<number, table<number, boolean>>
 local embargoes
 
+-- {force index = {[item name] = price}}
 ---@class sell_prices
 ---@type table<number, table>
 local sell_prices
 
+-- {force index = {[item name] = price}}
 ---@class buy_prices
----@type table<number, table>
+---@type table<number, table<string, number>>
 local buy_prices
 
 --- {force index = {[item name] = {LuaEntity}}}
@@ -28,18 +31,21 @@ local sell_boxes
 ---@type table<number, table>
 local buy_boxes
 
+-- {force index = {[item name] = price}}
 ---@class inactive_sell_prices
----@type table<number, table>
+---@type table<number, table<string, number>>
 local inactive_sell_prices
 
+-- {force index = {[item name] = price}}
 ---@class inactive_buy_prices
----@type table<number, table>
+---@type table<number, table<string, number>>
 local inactive_buy_prices
 
 ---@class inactive_sell_boxes
 ---@type table<number, table>
 local inactive_sell_boxes
 
+-- {force index = {[item name] = price}}
 ---@class inactive_buy_boxes
 ---@type table<number, table>
 local inactive_buy_boxes
@@ -72,6 +78,11 @@ local active_forces
 ---@class storages
 ---@type table<number, table<string, number>>
 local storages
+
+-- {force index = {[item name] = max count}}
+---@class storages_limit
+---@type table<number, table<string, number>>
+local storages_limit
 
 --#endregion
 
@@ -121,8 +132,9 @@ local BUY_PRICE_BUTTON = {type = "sprite-button", style = "slot_button", name = 
 local ALLOWED_TYPES = {["container"] = true, ["logistic-container"] = true}
 local TITLEBAR_FLOW = {type = "flow", style = "flib_titlebar_flow", name = "titlebar"}
 local DRAG_HANDLER = {type = "empty-widget", style = "flib_dialog_footer_drag_handle", name = "drag_handler"}
-local BUY_PRICE_TEXTFIELD = {type = "textfield", name = "buy_price",  style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
+local STORAGE_LIMIT_TEXTFIELD = {type = "textfield", name = "storage_limit",  style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
 local SELL_PRICE_TEXTFIELD = {type = "textfield", name = "sell_price", style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
+local BUY_PRICE_TEXTFIELD = {type = "textfield", name = "buy_price",  style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
 local SCROLL_PANE = {
 	type = "scroll-pane",
 	name = "scroll-pane",
@@ -256,6 +268,7 @@ local function clear_force_data(index)
 	inactive_buy_prices[index] = nil
 	inactive_sell_boxes[index] = nil
 	inactive_buy_boxes[index] = nil
+	storages_limit[index] = nil
 	sell_prices[index] = nil
 	buy_prices[index] = nil
 	pull_boxes[index] = nil
@@ -282,6 +295,7 @@ local function init_force_data(index)
 	inactive_buy_prices[index] = inactive_buy_prices[index] or {}
 	inactive_sell_boxes[index] = inactive_sell_boxes[index] or {}
 	inactive_buy_boxes[index] = inactive_buy_boxes[index] or {}
+	storages_limit[index] = storages_limit[index] or {}
 	sell_prices[index] = sell_prices[index] or {}
 	buy_prices[index] = buy_prices[index] or {}
 	pull_boxes[index] = pull_boxes[index] or {}
@@ -1349,6 +1363,7 @@ local function switch_prices_gui(player, item_name)
 	local force_index = player.force.index
 
 	main_frame = screen.add{type = "frame", name = "FM_prices_frame", direction = "vertical"}
+	main_frame.location = {x = 100 / player.display_scale, y = 50}
 	main_frame.style.horizontally_stretchable = true
 	local flow = main_frame.add(TITLEBAR_FLOW)
 	flow.add{
@@ -1368,31 +1383,51 @@ local function switch_prices_gui(player, item_name)
 	local shallow_frame = main_frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame", direction = "vertical"}
 	local content = shallow_frame.add{type = "flow", name = "content_flow", direction = "vertical"}
 	content.style.padding = 12
-	local item_row = content.add{type = "table", name = "item_row", column_count = 7}
-	-- row.style.horizontally_stretchable = true
-	-- row.style.column_alignments[4] = "right"
-	-- row.style.column_alignments[5] = "right"
-	-- row.style.column_alignments[6] = "right"
-	local item = item_row.add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item", elem_filters = ITEM_FILTERS}
+
+	local item_row = content.add(FLOW)
+	local add = item_row.add
+	item_row.name = "item_row"
+	item_row.style.vertical_align = "center"
+	local item = add{type = "choose-elem-button", name = "FM_prices_item", elem_type = "item", elem_filters = ITEM_FILTERS}
 	item.elem_value = item_name
-	item_row.add(LABEL).caption = {"free-market.buy-gui"}
-	local buy_textfield = item_row.add(BUY_PRICE_TEXTFIELD)
+	add(LABEL).caption = {"free-market.buy-gui"}
+	local buy_textfield = add(BUY_PRICE_TEXTFIELD)
 	if item_name then
 		local price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
 		if price then
 			buy_textfield.text = tostring(price)
 		end
 	end
-	item_row.add(CHECK_BUTTON).name = "FM_confirm_buy_price"
-	item_row.add(LABEL).caption = {"free-market.sell-gui"}
-	local sell_textfield = item_row.add(SELL_PRICE_TEXTFIELD)
+	add(CHECK_BUTTON).name = "FM_confirm_buy_price"
+	add(LABEL).caption = {"free-market.sell-gui"}
+	local sell_textfield = add(SELL_PRICE_TEXTFIELD)
 	if item_name then
 		local price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
 		if price then
 			sell_textfield.text = tostring(price)
 		end
 	end
-	item_row.add(CHECK_BUTTON).name = "FM_confirm_sell_price"
+	add(CHECK_BUTTON).name = "FM_confirm_sell_price"
+
+	local storage_row = content.add(FLOW)
+	local add = storage_row.add
+	storage_row.name = "storage_row"
+	storage_row.style.vertical_align = "center"
+	add(LABEL).caption = {'', "Storage", COLON}
+	local storage_count = add(LABEL)
+	storage_count.name = "storage_count"
+	add(LABEL).caption = '/'
+	local storage_limit_textfield = add(STORAGE_LIMIT_TEXTFIELD)
+	add(CHECK_BUTTON).name = "FM_confirm_storage_limit"
+	if item_name == nil then
+		storage_row.visible = false
+	else
+		local count = storages[force_index][item_name] or 0
+		storage_count.caption = tostring(count)
+		local limit = storages_limit[force_index][item_name] or max_storage_threshold
+		storage_limit_textfield.text = tostring(limit)
+	end
+
 	local prices_frame = content.add{type = "frame", name = "other_prices_frame", style = "deep_frame_in_shallow_frame", direction = "vertical"}
 	local scroll_pane = prices_frame.add(SCROLL_PANE)
 	scroll_pane.style.padding = 12
@@ -1411,7 +1446,6 @@ local function switch_prices_gui(player, item_name)
 		make_prices_header(prices_table)
 	end
 
-	main_frame.force_auto_center()
 	return content
 end
 
@@ -1637,11 +1671,10 @@ end
 ---@param entity? LuaEntity #LuaEntity # The sell box when is_new = true
 local function open_pull_box_gui(player, is_new, entity)
 	local box_operations = player.gui.relative.FM_boxes_frame.content.main_flow.box_operations
+	box_operations.clear()
 	if box_operations.pull_content then
-		box_operations.clear()
 		return
 	end
-	box_operations.clear()
 	local row = box_operations.add{type = "table", name = "pull_content", column_count = 2}
 	local FM_item = row.add(FM_ITEM_ELEMENT)
 	local confirm_button = row.add(CHECK_BUTTON)
@@ -1664,24 +1697,26 @@ local function create_left_relative_gui(player)
 	main_table.style.vertical_align = "center"
 	main_table.style.horizontal_spacing = 0
 	main_table.style.vertical_spacing = 0
+
 	local button = main_table.add{type = "button", style = "side_menu_button", caption = ">", name = "FM_hide_left_buttons"}
 	button.style.font = "default-dialog-button"
 	button.style.font_color = WHITE_COLOR
 	button.style.top_padding = -4
 	button.style.width = 18
 	button.style.height = 20
+
 	local frame = main_table.add{type = "frame", name = "content"}
 	frame.style.right_margin = -14
 	local shallow_frame = frame.add{type = "frame", name = "shallow_frame", style = "inside_shallow_frame"}
-	local table = shallow_frame.add{type = "table", column_count = 3}
-	table.style.horizontal_spacing = 0
-	table.style.vertical_spacing = 0
-	table.add{type = "sprite-button", sprite = "FM_change-price", style="slot_button", name = "FM_open_price"}
-	table.add{type = "sprite-button", sprite = "FM_see-prices", style="slot_button", name = "FM_open_price_list"}
-	table.add{type = "sprite-button", sprite = "FM_embargo", style="slot_button", name = "FM_open_embargo"}
-	table.add{type = "sprite-button", sprite = "item/wooden-chest", style = "slot_button", name = "FM_open_storage"} -- TODO: change the sprite
-	table.add{type = "sprite-button", sprite = "virtual-signal/signal-info", style = "slot_button", name = "FM_show_hint"}
-	table.add{
+	local buttons_table = shallow_frame.add{type = "table", column_count = 3}
+	buttons_table.style.horizontal_spacing = 0
+	buttons_table.style.vertical_spacing = 0
+	buttons_table.add{type = "sprite-button", sprite = "FM_change-price", style="slot_button", name = "FM_open_price"}
+	buttons_table.add{type = "sprite-button", sprite = "FM_see-prices", style="slot_button", name = "FM_open_price_list"}
+	buttons_table.add{type = "sprite-button", sprite = "FM_embargo", style="slot_button", name = "FM_open_embargo"}
+	buttons_table.add{type = "sprite-button", sprite = "item/wooden-chest", style = "slot_button", name = "FM_open_storage"} -- TODO: change the sprite
+	buttons_table.add{type = "sprite-button", sprite = "virtual-signal/signal-info", style = "slot_button", name = "FM_show_hint"}
+	buttons_table.add{
 		type = "sprite-button",
 		sprite = "utility/side_menu_menu_icon",
 		hovered_sprite = "utility/side_menu_menu_hover_icon",
@@ -1696,11 +1731,12 @@ end
 local function check_buy_price(player, item_name)
 	local force_index = player.force.index
 	if buy_prices[force_index][item_name] == nil then
-		local prices_frame = player.gui.screen.FM_prices_frame
+		local screen = player.gui.screen
+		local prices_frame = screen.FM_prices_frame
 		local content_flow
 		if prices_frame == nil then
 			content_flow = switch_prices_gui(player, item_name)
-			prices_frame = player.gui.screen.FM_prices_frame
+			prices_frame = screen.FM_prices_frame
 		else
 			content_flow = prices_frame.shallow_frame.content_flow
 			content_flow.item_row.FM_prices_item.elem_value = item_name
@@ -2155,33 +2191,45 @@ local function set_buy_box_key_pressed(event)
 end
 
 local function on_gui_elem_changed(event)
-	if event.element.name ~= "FM_prices_item" then return end
-
 	local element = event.element
-	local parent = element.parent
+	if not (element and element.valid) then return end
+	if element.name ~= "FM_prices_item" then return end
+	local player = game.get_player(event.player_index)
+	if not (player and player.valid) then return end
+
+	local item_row = element.parent
+	local content_flow = item_row.parent
+	local storage_row = content_flow.storage_row
 	local item_name = element.elem_value
 	if item_name == nil then
-		parent.sell_price.text = ''
-		parent.buy_price.text = ''
-		local prices_table = parent.parent.other_prices_frame["scroll-pane"].prices_table
+		item_row.sell_price.text = ''
+		item_row.buy_price.text = ''
+		local prices_table = content_flow.other_prices_frame["scroll-pane"].prices_table
 		prices_table.clear()
 		make_prices_header(prices_table)
+		storage_row.visible = false
 		return
 	end
 
-	local player = game.get_player(event.player_index)
 	local force_index = player.force.index
-	parent.sell_price.text = tostring(sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name] or '')
-	parent.buy_price.text = tostring(buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name] or '')
-	update_prices_table(player, item_name, parent.parent.other_prices_frame["scroll-pane"].prices_table)
+
+	storage_row.visible = true
+	local count = storages[force_index][item_name] or 0
+	storage_row.storage_count.caption = tostring(count)
+	local limit = storages_limit[force_index][item_name] or max_storage_threshold
+	storage_row.storage_limit.text = tostring(limit)
+
+	item_row.sell_price.text = tostring(sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name] or '')
+	item_row.buy_price.text = tostring(buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name] or '')
+	update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 end
 
 local function on_gui_selection_state_changed(event)
 	local element = event.element
+	if not (element and element.valid) then return end
 	if element.name ~= "FM_force_price_list" then return end
 
-	local parent = element.parent
-	local scroll_pane = parent.parent.deep_frame["scroll-pane"]
+	local scroll_pane = element.parent.parent.deep_frame["scroll-pane"]
 	local force = game.forces[element.items[element.selected_index]]
 	if force == nil then
 		scroll_pane.clear()
@@ -2215,10 +2263,25 @@ local GUIS = {
 	FM_close = function(element)
 		element.parent.parent.destroy()
 	end,
+	FM_confirm_storage_limit = function(element, player)
+		local storage_row = element.parent
+		local storage_limit = tonumber(storage_row.storage_limit.text)
+		if storage_limit == nil or storage_limit < 1 or storage_limit > max_storage_threshold then
+			player.print({"gui-map-generator.invalid-value-for-field", storage_limit or '', 1, max_storage_threshold})
+			return
+		end
+
+		local item_name = storage_row.parent.item_row.FM_prices_item.elem_value
+		if item_name == nil then return end
+
+		local force_index = player.force.index
+		storages_limit[force_index][item_name] = storage_limit
+	end,
 	FM_confirm_buy_box = function(element, player)
 		local parent = element.parent
 		local count = tonumber(parent.count.text)
-		if not count then
+		-- TODO: change?
+		if count == nil then
 			player.print({"multiplayer.no-address", {"gui-train.add-item-count-condition"}})
 			return
 		elseif count < 1 then
@@ -2481,13 +2544,20 @@ local GUIS = {
 	end,
 	FM_refresh_prices_table = function(element, player)
 		local content_flow = element.parent.parent.shallow_frame.content_flow
-		local row = content_flow.item_row
-		local item_name = row.FM_prices_item.elem_value
+		local item_row = content_flow.item_row
+		local item_name = item_row.FM_prices_item.elem_value
 		if item_name == nil then return end
 
 		local force_index = player.force.index
-		row.buy_price.text = tostring(buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name] or '')
-		row.sell_price.text = tostring(sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name] or '')
+		item_row.buy_price.text = tostring(buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name] or '')
+		item_row.sell_price.text = tostring(sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name] or '')
+
+		local storage_row = content_flow.storage_row
+		local count = storages[force_index][item_name] or 0
+		storage_row.storage_count.caption = tostring(count)
+		local limit = storages_limit[force_index][item_name] or max_storage_threshold
+		storage_row.storage_limit.text = tostring(limit)
+
 		update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 	end,
 	FM_set_sell_box = function(element, player)
@@ -2879,10 +2949,11 @@ end
 local function check_sell_boxes()
 	local stack = {name = "", count = 0}
 	for other_force_index, _items_data in pairs(sell_boxes) do
+		local storage_limit = storages_limit[other_force_index]
 		local storage = storages[other_force_index]
 		for item_name, item_offers in pairs(_items_data) do
 			local count = storage[item_name] or 0
-			local max_count = max_storage_threshold - count
+			local max_count = (storage_limit[item_name] or max_storage_threshold) - count
 			if max_count > 0 then
 				stack["count"] = max_count
 				stack["name"] = item_name
@@ -3353,6 +3424,7 @@ local function link_data()
 	open_box = mod_data.open_box
 	all_boxes = mod_data.all_boxes
 	active_forces = mod_data.active_forces
+	storages_limit = mod_data.storages_limit
 	storages = mod_data.storages
 end
 
@@ -3372,11 +3444,13 @@ local function update_global_data()
 	mod_data.buy_prices = mod_data.buy_prices or {}
 	mod_data.embargoes = mod_data.embargoes or {}
 	mod_data.all_boxes = mod_data.all_boxes or {}
+	mod_data.storages_limit = mod_data.storages_limit or {}
 	mod_data.storages = mod_data.storages or {}
 
 	link_data()
 
 	clear_invalid_entities()
+	clear_invalid_prices(storages_limit) -- it works, so it's fine
 	clear_invalid_prices(inactive_sell_prices)
 	clear_invalid_prices(inactive_buy_prices)
 	clear_invalid_prices(sell_prices)
@@ -3412,14 +3486,24 @@ local function on_configuration_changed(event)
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
-	if version < 0.26 then
+	if version < 0.30 then
 		for _, force in pairs(game.forces) do
 			local index = force.index
 			if sell_boxes[index] then
 				init_force_data(index)
 			end
 		end
+		for _, player in pairs(game.players) do
+			if player.valid then
+				local screen = player.gui.screen
+				local frame = screen.FM_prices_frame
+				if frame then
+					frame.destroy()
+				end
+			end
+		end
 	end
+
 	if version < 0.29 then
 		for _, player in pairs(game.players) do
 			if player.valid then
@@ -3435,6 +3519,7 @@ local function on_configuration_changed(event)
 			end
 		end
 	end
+
 	if version < 0.28 then
 		for _, player in pairs(game.players) do
 			if player.valid and player.mod_settings["FM_show_item_price"].value then
@@ -3442,16 +3527,19 @@ local function on_configuration_changed(event)
 			end
 		end
 	end
+
 	if version < 0.21 then
 		for _, player in pairs(game.players) do
 			create_top_relative_gui(player)
 		end
 	end
+
 	if version < 0.22 then
 		for _, player in pairs(game.players) do
 			create_left_relative_gui(player)
 		end
 	end
+
 	if version < 0.26 then
 		for _, player in pairs(game.players) do
 			switch_sell_prices_gui(player)

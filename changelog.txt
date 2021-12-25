@@ -1,11 +1,19 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.30.0
+Date: 2021-12-25
+  Features:
+    - Added limit on items in storage (change it via prices)
+  Changes:
+    - Improved slightly stability of some player events
+    - Refactored slightly
+---------------------------------------------------------------------------------------------------
 Version: 0.29.4
-Date: 2021-12-22
+Date: 2021-12-24
   Changes:
     - Refactored slightly (slightly better performance on some player events)
 ---------------------------------------------------------------------------------------------------
 Version: 0.29.3
-Date: 2021-12-22
+Date: 2021-12-24
   Changes:
     - Refactored slightly (slightly better performance on some player events)
 ---------------------------------------------------------------------------------------------------
