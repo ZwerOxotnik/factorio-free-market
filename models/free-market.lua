@@ -14,7 +14,7 @@ local embargoes
 
 -- {force index = {[item name] = price}}
 ---@class sell_prices
----@type table<number, table>
+---@type table<number, table<string, number>>
 local sell_prices
 
 -- {force index = {[item name] = price}}
@@ -83,6 +83,18 @@ local storages
 ---@class storages_limit
 ---@type table<number, table<string, number>>
 local storages_limit
+
+
+-- {force index = {Gui elements}}
+---@class item_HUD
+---@type table<number, table>
+---@field [1] GuiElement # flow
+---@field [2] GuiElement # sell_price
+---@field [3] GuiElement # buy_price
+---@field [4] GuiElement # item_label
+---@field [5] GuiElement # storage_count
+---@field [6] GuiElement # storage_limit
+local item_HUD
 
 --#endregion
 
@@ -606,7 +618,9 @@ local function get_distance(start, stop)
 end
 
 local function delete_player_data(event)
-	open_box[event.player_index] = nil
+	local player_index = event.player_index
+	open_box[player_index] = nil
+	item_HUD[player_index] = nil
 end
 
 local function make_prices_header(table)
@@ -1806,6 +1820,15 @@ local function check_sell_price(player, item_name)
 end
 
 ---@param player LuaPlayer #LuaPlayer
+local function delete_item_price_HUD(player)
+	local frame = player.gui.screen.FM_item_price_frame
+	if frame then
+		frame.destroy()
+		item_HUD[player.index] = nil
+	end
+end
+
+---@param player LuaPlayer #LuaPlayer
 local function create_item_price_HUD(player)
 	local screen = player.gui.screen
 	if screen.FM_item_price_frame then
@@ -1824,32 +1847,57 @@ local function create_item_price_HUD(player)
 	drag_handler.style.margin = 0
 	drag_handler.style.width = 10
 
-	local labels_table = main_frame.add(VERTICAL_FLOW)
-	labels_table.name = "FM_price_labels_flow"
-	labels_table.visible = false
-	labels_table.add{type = "label", caption = {'', {"free-market.sell-price-label"}, COLON}}
-	labels_table.add{type = "label", caption = {'', {"free-market.buy-price-label"},  COLON}}
+	local info_flow = main_frame.add(VERTICAL_FLOW)
+	info_flow.visible = false
+	local hud_table = info_flow.add{type = "table", column_count = 2}
+	local add = hud_table.add
+	hud_table.style.column_alignments[1] = "center"
+	hud_table.style.column_alignments[2] = "center"
 
-	local prices_table = main_frame.add(VERTICAL_FLOW)
-	prices_table.name = "FM_item_prices_flow"
-	prices_table.visible = false
-	prices_table.add(LABEL).name = "buy_price"
-	prices_table.add(LABEL).name = "sell_price"
+	add(LABEL).caption = {'', {"free-market.sell-price-label"}, COLON}
+	local sell_price = add(LABEL)
+	-- sell_price.name = "sell_price"
+	add(LABEL).caption = {'', {"free-market.buy-price-label"}, COLON}
+	local buy_price = add(LABEL)
+	-- buy_price.name = "buy_price"
+
+	local storage_flow = info_flow.add(FLOW)
+	local add = storage_flow.add
+	local item_label = add(LABEL)
+	add(LABEL).caption = {'', {"free-market.storage"}, COLON}
+	local storage_count = add(LABEL)
+	-- storage_count.name = "storage_count"
+	add(LABEL).caption = '/'
+	local storage_limit = add(LABEL)
+	-- storage_limit.name = "storage_limit"
+
+	item_HUD[player.index] = {
+		info_flow,
+		sell_price,
+		buy_price,
+		item_label,
+		storage_count,
+		storage_limit
+	}
 end
 
----@param player LuaPlayer #LuaPlayer
-local function delete_item_price_HUD(player)
-	local frame = player.gui.screen.FM_item_price_frame
-	if frame then
-		frame.destroy()
+local function clear_invalid_player_data()
+	for player_index in pairs(item_HUD) do
+		local player = game.get_player(player_index)
+		if not (player and player.valid) then
+			item_HUD[player_index] = nil
+		elseif not player.connected then
+			delete_item_price_HUD(player)
+		end
 	end
 end
 
 ---@param player LuaPlayer #LuaPlayer
 local function hide_item_price_HUD(player)
-	local frame = player.gui.screen.FM_item_price_frame
-	frame.FM_price_labels_flow.visible = false
-	frame.FM_item_prices_flow.visible = false
+	local hinter = item_HUD[player.index]
+	if hinter then
+		hinter[1].visible = false
+	end
 end
 
 ---@param player LuaPlayer #LuaPlayer
@@ -1858,25 +1906,28 @@ local function show_item_price_in_HUD(player, item_name)
 	local force_index = player.force.index
 	local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
 	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
-	if buy_price == nil and sell_price == nil then
-		hide_item_price_HUD(player)
-		return
-	end
+	local count = storages[force_index][item_name]
+	local limit = storages_limit[force_index][item_name] or max_storage_threshold
 
-	local frame = player.gui.screen.FM_item_price_frame
-	frame.FM_price_labels_flow.visible = true
-	local item_prices = frame.FM_item_prices_flow
-	item_prices.visible = true
+	local hinter = item_HUD[player.index]
+	hinter[1].visible = true
 	if sell_price then
-		item_prices.sell_price.caption = tostring(sell_price)
+		hinter[2].caption = tostring(sell_price)
 	else
-		item_prices.sell_price.caption = ''
+		hinter[2].caption = ''
 	end
 	if buy_price then
-		item_prices.buy_price.caption = tostring(buy_price)
+		hinter[3].caption = tostring(buy_price)
 	else
-		item_prices.buy_price.caption = ''
+		hinter[3].caption = ''
 	end
+	hinter[4].caption = "[item=" .. item_name .. ']'
+	if count then
+		hinter[5].caption = tostring(count)
+	else
+		hinter[5].caption = '0'
+	end
+	hinter[6].caption = limit
 end
 
 --#endregion
@@ -1973,6 +2024,7 @@ end
 
 local function on_player_created(event)
 	local player = game.get_player(event.player_index)
+	create_item_price_HUD(player)
 	create_top_relative_gui(player)
 	create_left_relative_gui(player)
 	switch_sell_prices_gui(player)
@@ -1987,9 +2039,14 @@ local function on_player_joined_game(event)
 	local player = game.get_player(event.player_index)
 	if not (player and player.valid) then return end
 
+	if #game.connected_players == 1 then
+		clear_invalid_player_data()
+	end
+
 	clear_boxes_gui(player)
 	destroy_prices_gui(player)
 	destroy_price_list_gui(player)
+	create_item_price_HUD(player)
 end
 
 local function on_player_cursor_stack_changed(event)
@@ -3108,6 +3165,7 @@ local function on_player_left_game(event)
 
 	clear_boxes_gui(player)
 	destroy_prices_gui(player)
+	delete_item_price_HUD(player)
 	destroy_price_list_gui(player)
 	destroy_force_configuration(player)
 	local screen = player.gui.screen
@@ -3122,25 +3180,29 @@ local function on_player_left_game(event)
 end
 
 local function on_selected_entity_changed(event)
-	local entity = event.last_entity
-	if not (entity and entity.valid) then return end
-	if not ALLOWED_TYPES[entity.type] then return end
+	if event.last_entity ~= nil then return end
 	local player = game.get_player(event.player_index)
 	if not (player and player.valid) then return end
+	local entity = player.selected
+	if not (entity and entity.valid) then return end
+	if not ALLOWED_TYPES[entity.type] then return end
 	if entity.force ~= player.force then return end
 	local box_data = all_boxes[entity.unit_number]
 	if box_data == nil then return end
 
 	local item_name = box_data[5]
-	draw_sprite{
-		sprite = "item." .. item_name,
-		target = entity,
-		surface = entity.surface,
-		players = {player},
-		time_to_live = 120,
-		x_scale = 0.9,
-		target_offset = SPRITE_OFFSET
-	}
+	show_item_price_in_HUD(player, item_name)
+
+	-- Old method:
+	-- draw_sprite{
+	-- 	sprite = "item." .. item_name,
+	-- 	target = entity,
+	-- 	surface = entity.surface,
+	-- 	players = {player},
+	-- 	time_to_live = 120,
+	-- 	x_scale = 0.9,
+	-- 	target_offset = SPRITE_OFFSET
+	-- }
 end
 
 
@@ -3421,6 +3483,7 @@ local function link_data()
 	inactive_buy_prices = mod_data.inactive_buy_prices
 	sell_prices = mod_data.sell_prices
 	buy_prices = mod_data.buy_prices
+	item_HUD = mod_data.item_hinter
 	open_box = mod_data.open_box
 	all_boxes = mod_data.all_boxes
 	active_forces = mod_data.active_forces
@@ -3431,6 +3494,7 @@ end
 local function update_global_data()
 	global.free_market = global.free_market or {}
 	mod_data = global.free_market
+	mod_data.item_hinter = mod_data.item_hinter or {}
 	mod_data.open_box = {}
 	mod_data.active_forces = mod_data.active_forces or {}
 	mod_data.inactive_sell_boxes = mod_data.inactive_sell_boxes or {}
@@ -3469,6 +3533,8 @@ local function update_global_data()
 		end
 	end
 
+	clear_invalid_player_data()
+
 	for _, force in pairs(game.forces) do
 		if #force.players > 0 then
 			init_force_data(force.index)
@@ -3485,6 +3551,17 @@ local function on_configuration_changed(event)
 	if not (mod_changes and mod_changes.old_version) then return end
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
+
+	if version < 0.31 then
+		for _, player in pairs(game.players) do
+			if player.valid then
+				delete_item_price_HUD(player)
+				if player.connected then
+					create_item_price_HUD(player)
+				end
+			end
+		end
+	end
 
 	if version < 0.30 then
 		for _, force in pairs(game.forces) do
@@ -3570,32 +3647,32 @@ M.events = {
 	[defines.events.on_chunk_deleted] = clear_invalid_entities,
 	[defines.events.on_player_created] = on_player_created,
 	[defines.events.on_player_joined_game] = on_player_joined_game,
+	[defines.events.on_player_left_game] = on_player_left_game,
 	[defines.events.on_player_cursor_stack_changed] = function(event)
 		pcall(on_player_cursor_stack_changed, event) -- TODO: recheck
 	end,
+	[defines.events.on_player_removed] = delete_player_data,
+	[defines.events.on_player_changed_force] = on_player_changed_force,
+	[defines.events.on_player_changed_surface] = on_player_changed_surface,
+	[defines.events.on_player_selected_area] = on_player_selected_area,
+	[defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
+	[defines.events.on_player_mined_entity] = clear_box_data,
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
 		pcall(on_gui_click, event)
 	end,
 	[defines.events.on_gui_closed] = on_gui_closed,
-	[defines.events.on_player_left_game] = on_player_left_game,
 	[defines.events.on_selected_entity_changed] = on_selected_entity_changed,
-	[defines.events.on_player_removed] = delete_player_data,
 	[defines.events.on_force_created] = on_force_created,
 	[defines.events.on_forces_merging] = on_forces_merging,
 	[defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
-	[defines.events.on_player_changed_force] = on_player_changed_force,
-	[defines.events.on_player_changed_surface] = on_player_changed_surface,
 	[defines.events.on_force_cease_fire_changed] = function(event)
 		-- TODO: refactor
 		if is_auto_embargo then
 			pcall(on_force_cease_fire_changed, event)
 		end
 	end,
-	[defines.events.on_player_selected_area] = on_player_selected_area,
-	[defines.events.on_player_alt_selected_area] = on_player_alt_selected_area,
-	[defines.events.on_player_mined_entity] = clear_box_data,
 	[defines.events.on_robot_mined_entity] = clear_box_data,
 	[defines.events.script_raised_destroy] = clear_box_data,
 	[defines.events.on_entity_died] = clear_box_data,
