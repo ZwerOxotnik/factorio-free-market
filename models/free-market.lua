@@ -1413,7 +1413,7 @@ local function switch_prices_gui(player, item_name)
 	local add = storage_row.add
 	storage_row.name = "storage_row"
 	storage_row.style.vertical_align = "center"
-	add(LABEL).caption = {'', "Storage", COLON}
+	add(LABEL).caption = {'', {"free-market.storage"}, COLON}
 	local storage_count = add(LABEL)
 	storage_count.name = "storage_count"
 	add(LABEL).caption = '/'
