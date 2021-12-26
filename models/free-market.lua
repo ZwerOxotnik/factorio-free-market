@@ -2073,50 +2073,33 @@ local function check_teams_data()
 			end
 		end
 	end
-	for _, items_data in pairs(pull_boxes) do
-		for item_name, entities in pairs(items_data) do
-			if next(entities) == nil then
-				items_data[item_name] = nil
-			end
-		end
-	end
-	for _, items_data in pairs(sell_boxes) do
-		for item_name, entities in pairs(items_data) do
-			if next(entities) == nil then
-				items_data[item_name] = nil
-			end
-		end
-	end
-	for _, items_data in pairs(buy_boxes) do
-		for item_name, entities in pairs(items_data) do
-			if next(entities) == nil then
-				items_data[item_name] = nil
-			end
-		end
-	end
 end
 
 local function check_forces()
 	local forces_money = call("EasyAPI", "get_forces_money")
 
+	local neutral_force = game.forces.neutral
 	mod_data.active_forces = {}
 	active_forces = mod_data.active_forces
 	local size = 0
+	-- TODO: improve and refactor
 	for _, force in pairs(game.forces) do
 		if #force.connected_players > 0 then
 			local force_index = force.index
 			local items_data = buy_boxes[force_index]
-			if items_data and next(items_data) then
+			local storage_data = storages[force_index]
+			if items_data and next(items_data) or storage_data and next(storage_data) then
 				local buyer_money = forces_money[force_index]
 				if buyer_money and buyer_money > money_treshold then
 					size = size + 1
 					active_forces[size] = force_index
 				end
 			end
-		elseif random(99) > skip_offline_team_chance then
+		elseif random(99) > skip_offline_team_chance or force == neutral_force then
 			local force_index = force.index
 			local items_data = buy_boxes[force_index]
-			if items_data and next(items_data) then
+			local storage_data = storages[force_index]
+			if items_data and next(items_data) or storage_data and next(storage_data) then
 				local buyer_money = forces_money[force_index]
 				if buyer_money and buyer_money > money_treshold then
 					size = size + 1
@@ -3452,6 +3435,31 @@ local function add_remote_interface()
 		force_set_buy_price = function(item_name, force_index, price)
 			inactive_buy_prices[force_index][item_name] = nil
 			buy_prices[force_index][item_name] = price
+		end,
+		reset_AI_force_storage = function(force_index)
+			local f_sell_prices = sell_prices[force_index]
+			local f_inactive_sell_prices = inactive_sell_prices[force_index]
+			for item_name, price in pairs(f_inactive_sell_prices) do
+				f_sell_prices[item_name] = price
+				f_inactive_sell_prices[item_name] = nil
+			end
+			local f_buy_prices = buy_prices[force_index]
+			local f_inactive_buy_prices = inactive_buy_prices[force_index]
+			for item_name, price in pairs(f_inactive_buy_prices) do
+				f_buy_prices[item_name] = price
+				f_inactive_buy_prices[item_name] = nil
+			end
+
+			local f_storages_limit = storages_limit[force_index]
+			local f_storage = storages[force_index]
+			for item_name in pairs(f_buy_prices) do
+				f_storage[item_name] = 4.5e300
+				f_storages_limit[item_name] = 9e300
+			end
+			for item_name in pairs(f_sell_prices) do
+				f_storage[item_name] = 4.5e300
+				f_storages_limit[item_name] = 9e300
+			end
 		end,
 		get_inactive_sell_prices = function() return inactive_sell_prices end,
 		get_inactive_buy_prices  = function() return inactive_buy_prices end,
