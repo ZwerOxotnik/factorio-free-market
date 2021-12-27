@@ -1,4 +1,10 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.31.2
+Date: 2021-12-27
+  Bugfixes:
+    - Improved stability of on_player_changed_force event for other mod
+    - Shows item info in HUD without checking previous entity
+---------------------------------------------------------------------------------------------------
 Version: 0.31.1
 Date: 2021-12-26
   Features:

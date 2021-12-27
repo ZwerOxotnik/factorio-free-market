@@ -1902,7 +1902,7 @@ end
 
 ---@param player LuaPlayer #LuaPlayer
 ---@param item_name string
-local function show_item_price_in_HUD(player, item_name)
+local function show_item_info_HUD(player, item_name)
 	local force_index = player.force.index
 	local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
 	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
@@ -2054,7 +2054,7 @@ local function on_player_cursor_stack_changed(event)
 	local cursor_stack = player.cursor_stack
 	if cursor_stack.valid_for_read then
 		if player.mod_settings["FM_show_item_price"].value then
-			show_item_price_in_HUD(player, cursor_stack.name)
+			show_item_info_HUD(player, cursor_stack.name)
 		end
 	else
 		hide_item_price_HUD(player)
@@ -3126,9 +3126,12 @@ local function check_buy_boxes()
 end
 
 local function on_player_changed_force(event)
-	local player = game.get_player(event.player_index)
+	local player_index = event.player_index
+	local player = game.get_player(player_index)
 	if not (player and player.valid) then return end
-	clear_boxes_gui(player)
+	if open_box[player_index] then
+		clear_boxes_gui(player)
+	end
 
 	local index = player.force.index
 	if sell_boxes[index] == nil then
@@ -3163,7 +3166,6 @@ local function on_player_left_game(event)
 end
 
 local function on_selected_entity_changed(event)
-	if event.last_entity ~= nil then return end
 	local player = game.get_player(event.player_index)
 	if not (player and player.valid) then return end
 	local entity = player.selected
@@ -3174,18 +3176,7 @@ local function on_selected_entity_changed(event)
 	if box_data == nil then return end
 
 	local item_name = box_data[5]
-	show_item_price_in_HUD(player, item_name)
-
-	-- Old method:
-	-- draw_sprite{
-	-- 	sprite = "item." .. item_name,
-	-- 	target = entity,
-	-- 	surface = entity.surface,
-	-- 	players = {player},
-	-- 	time_to_live = 120,
-	-- 	x_scale = 0.9,
-	-- 	target_offset = SPRITE_OFFSET
-	-- }
+	show_item_info_HUD(player, item_name)
 end
 
 
