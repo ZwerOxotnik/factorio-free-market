@@ -84,6 +84,10 @@ local storages
 ---@type table<number, table<string, number>>
 local storages_limit
 
+-- {force index = max count}
+---@class default_storage_limit
+---@type table<number, number>
+local default_storage_limit
 
 -- {force index = {Gui elements}}
 ---@class item_HUD
@@ -145,6 +149,7 @@ local ALLOWED_TYPES = {["container"] = true, ["logistic-container"] = true}
 local TITLEBAR_FLOW = {type = "flow", style = "flib_titlebar_flow", name = "titlebar"}
 local DRAG_HANDLER = {type = "empty-widget", style = "flib_dialog_footer_drag_handle", name = "drag_handler"}
 local STORAGE_LIMIT_TEXTFIELD = {type = "textfield", name = "storage_limit",  style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
+local DEFAULT_LIMIT_TEXTFIELD = {type = "textfield", name = "FM_default_limit",  style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
 local SELL_PRICE_TEXTFIELD = {type = "textfield", name = "sell_price", style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
 local BUY_PRICE_TEXTFIELD = {type = "textfield", name = "buy_price",  style = "FM_price_textfield", numeric = true, allow_decimal = false, allow_negative = false}
 local SCROLL_PANE = {
@@ -276,6 +281,7 @@ end
 
 ---@param index number
 local function clear_force_data(index)
+	default_storage_limit[index] = nil
 	inactive_sell_prices[index] = nil
 	inactive_buy_prices[index] = nil
 	inactive_sell_boxes[index] = nil
@@ -1279,6 +1285,7 @@ local function open_force_configuration(player)
 	end
 
 	local is_player_admin = player.admin
+	local force_index = player.force.index
 
 	local main_frame = screen.add{type = "frame", name = "FM_force_configuration", direction = "vertical"}
 	main_frame.style.horizontally_stretchable = true
@@ -1322,6 +1329,14 @@ local function open_force_configuration(player)
 		reset_boxes_row.add{type = "button", caption = {"free-market.reset-pull-requests"}, name = "FM_reset_pull_boxes"}.style.minimal_width = 10
 		reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}.style.minimal_width = 10
 	end
+
+	local setting_row = content.add(FLOW)
+	setting_row.style.vertical_align = "center"
+	setting_row.add(LABEL).caption = {'', {"free-market.default-storage-limit"}, COLON}
+	local default_limit_textfield = setting_row.add(DEFAULT_LIMIT_TEXTFIELD)
+	local default_limit = default_storage_limit[force_index] or max_storage_threshold
+	default_limit_textfield.text = tostring(default_limit)
+	setting_row.add(CHECK_BUTTON).name = "FM_confirm_default_limit"
 
 	local label = content.add(LABEL)
 	label.caption = {'', {"gui.credits"}, COLON}
@@ -1438,7 +1453,7 @@ local function switch_prices_gui(player, item_name)
 	else
 		local count = storages[force_index][item_name] or 0
 		storage_count.caption = tostring(count)
-		local limit = storages_limit[force_index][item_name] or max_storage_threshold
+		local limit = storages_limit[force_index][item_name] or default_storage_limit[force_index] or max_storage_threshold
 		storage_limit_textfield.text = tostring(limit)
 	end
 
@@ -1907,7 +1922,7 @@ local function show_item_info_HUD(player, item_name)
 	local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
 	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
 	local count = storages[force_index][item_name]
-	local limit = storages_limit[force_index][item_name] or max_storage_threshold
+	local limit = storages_limit[force_index][item_name] or default_storage_limit[force_index] or max_storage_threshold
 
 	local hinter = item_HUD[player.index]
 	hinter[1].visible = true
@@ -2256,7 +2271,7 @@ local function on_gui_elem_changed(event)
 	storage_row.visible = true
 	local count = storages[force_index][item_name] or 0
 	storage_row.storage_count.caption = tostring(count)
-	local limit = storages_limit[force_index][item_name] or max_storage_threshold
+	local limit = storages_limit[force_index][item_name] or default_storage_limit[force_index] or max_storage_threshold
 	storage_row.storage_limit.text = tostring(limit)
 
 	item_row.sell_price.text = tostring(sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name] or '')
@@ -2302,6 +2317,17 @@ local GUIS = {
 	end,
 	FM_close = function(element)
 		element.parent.parent.destroy()
+	end,
+	FM_confirm_default_limit = function(element, player)
+		local setting_row = element.parent
+		local default_limit = tonumber(setting_row.FM_default_limit.text)
+		if default_limit == nil or default_limit < 1 or default_limit > max_storage_threshold then
+			player.print({"gui-map-generator.invalid-value-for-field", default_limit or '', 1, max_storage_threshold})
+			return
+		end
+
+		local force_index = player.force.index
+		default_storage_limit[force_index] = default_limit
 	end,
 	FM_confirm_storage_limit = function(element, player)
 		local storage_row = element.parent
@@ -2595,7 +2621,7 @@ local GUIS = {
 		local storage_row = content_flow.storage_row
 		local count = storages[force_index][item_name] or 0
 		storage_row.storage_count.caption = tostring(count)
-		local limit = storages_limit[force_index][item_name] or max_storage_threshold
+		local limit = storages_limit[force_index][item_name] or default_storage_limit[force_index] or max_storage_threshold
 		storage_row.storage_limit.text = tostring(limit)
 
 		update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
@@ -2988,12 +3014,13 @@ end
 
 local function check_sell_boxes()
 	local stack = {name = "", count = 0}
-	for other_force_index, _items_data in pairs(sell_boxes) do
-		local storage_limit = storages_limit[other_force_index]
-		local storage = storages[other_force_index]
+	for force_index, _items_data in pairs(sell_boxes) do
+		local default_limit = default_storage_limit[force_index]
+		local storage_limit = storages_limit[force_index]
+		local storage = storages[force_index]
 		for item_name, item_offers in pairs(_items_data) do
 			local count = storage[item_name] or 0
-			local max_count = (storage_limit[item_name] or max_storage_threshold) - count
+			local max_count = (storage_limit[item_name] or default_limit or max_storage_threshold) - count
 			if max_count > 0 then
 				stack["count"] = max_count
 				stack["name"] = item_name
@@ -3129,6 +3156,7 @@ local function on_player_changed_force(event)
 	local player_index = event.player_index
 	local player = game.get_player(player_index)
 	if not (player and player.valid) then return end
+
 	if open_box[player_index] then
 		clear_boxes_gui(player)
 	end
@@ -3140,9 +3168,13 @@ local function on_player_changed_force(event)
 end
 
 local function on_player_changed_surface(event)
+	local player_index = event.player_index
 	local player = game.get_player(event.player_index)
 	if not (player and player.valid) then return end
-	clear_boxes_gui(player)
+
+	if open_box[player_index] then
+		clear_boxes_gui(player)
+	end
 end
 
 local function on_player_left_game(event)
@@ -3429,6 +3461,7 @@ local function add_remote_interface()
 		end,
 		reset_AI_force_storage = function(force_index)
 			local f_sell_prices = sell_prices[force_index]
+			if f_sell_prices == nil then return end
 			local f_inactive_sell_prices = inactive_sell_prices[force_index]
 			for item_name, price in pairs(f_inactive_sell_prices) do
 				f_sell_prices[item_name] = price
@@ -3486,6 +3519,7 @@ local function link_data()
 	open_box = mod_data.open_box
 	all_boxes = mod_data.all_boxes
 	active_forces = mod_data.active_forces
+	default_storage_limit = mod_data.default_storage_limit
 	storages_limit = mod_data.storages_limit
 	storages = mod_data.storages
 end
@@ -3507,6 +3541,7 @@ local function update_global_data()
 	mod_data.buy_prices = mod_data.buy_prices or {}
 	mod_data.embargoes = mod_data.embargoes or {}
 	mod_data.all_boxes = mod_data.all_boxes or {}
+	mod_data.default_storage_limit = mod_data.default_storage_limit or {}
 	mod_data.storages_limit = mod_data.storages_limit or {}
 	mod_data.storages = mod_data.storages or {}
 
@@ -3551,6 +3586,16 @@ local function on_configuration_changed(event)
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
+	if version < 0.32 then
+		for _, force in pairs(game.forces) do
+			local index = force.index
+			if sell_boxes[index] then
+				init_force_data(index)
+				default_storage_limit[index] = max_storage_threshold
+			end
+		end
+	end
+
 	if version < 0.31 then
 		for _, player in pairs(game.players) do
 			if player.valid then
@@ -3563,12 +3608,6 @@ local function on_configuration_changed(event)
 	end
 
 	if version < 0.30 then
-		for _, force in pairs(game.forces) do
-			local index = force.index
-			if sell_boxes[index] then
-				init_force_data(index)
-			end
-		end
 		for _, player in pairs(game.players) do
 			if player.valid then
 				local screen = player.gui.screen
