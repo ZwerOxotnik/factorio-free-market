@@ -84,7 +84,7 @@ Alternatively, join the [Discord group][Discord] and send a message there.
 License
 -------
 
-Copyright (c) 2021 ZwerOxotnik <zweroxotnik@gmail.com>
+Copyright (c) 2021-2022 ZwerOxotnik <zweroxotnik@gmail.com>
 
 <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/3.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" /></a>
 
