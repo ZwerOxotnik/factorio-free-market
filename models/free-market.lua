@@ -3426,6 +3426,7 @@ local function add_remote_interface()
 	remote.remove_interface("free-market") -- For safety
 	remote.add_interface("free-market", {
 		get_mod_data = function() return mod_data end,
+		get_internal_data = function(name) return mod_data[name] end,
 		change_count_in_buy_box_data = change_count_in_buy_box_data,
 		remove_certain_pull_box = remove_certain_pull_box,
 		remove_certain_sell_box = remove_certain_sell_box,
@@ -3433,8 +3434,20 @@ local function add_remote_interface()
 		set_pull_box_data = set_pull_box_data,
 		set_sell_box_data = set_sell_box_data,
 		set_buy_box_data = set_buy_box_data,
+		set_item_limit = function(item_name, force_index, count)
+			local f_storages_limit = storages_limit[force_index]
+			if f_storages_limit == nil then return end
+			f_storages_limit[item_name] = count
+		end,
+		set_default_storage_limit = function(force_index, count)
+			local f_default_storage_limit = default_storage_limit[force_index]
+			if f_default_storage_limit == nil then return end
+			default_storage_limit[force_index] = count
+		end,
 		set_sell_price = function(item_name, force_index, price)
 			local f_sell_prices = sell_prices[force_index]
+			if f_sell_prices == nil then return end
+
 			if f_sell_prices[item_name] == nil or #sell_boxes[force_index][item_name] > 0 then
 				f_sell_prices[item_name] = price
 			else
@@ -3444,6 +3457,8 @@ local function add_remote_interface()
 		end,
 		set_buy_price = function(item_name, force_index, price)
 			local f_buy_prices = buy_prices[force_index]
+			if f_buy_prices == nil then return end
+
 			if f_buy_prices[item_name] == nil or #buy_boxes[force_index][item_name] > 0 then
 				f_buy_prices[item_name] = price
 			else
@@ -3452,16 +3467,21 @@ local function add_remote_interface()
 			end
 		end,
 		force_set_sell_price = function(item_name, force_index, price)
+			local f_sell_prices = sell_prices[force_index]
+			if f_sell_prices == nil then return end
+			f_sell_prices[item_name] = price
 			inactive_sell_prices[force_index][item_name] = nil
-			sell_prices[force_index][item_name] = price
 		end,
 		force_set_buy_price = function(item_name, force_index, price)
+			local f_buy_prices = buy_prices[force_index]
+			if f_buy_prices == nil then return end
+			f_buy_prices[item_name] = price
 			inactive_buy_prices[force_index][item_name] = nil
-			buy_prices[force_index][item_name] = price
 		end,
 		reset_AI_force_storage = function(force_index)
 			local f_sell_prices = sell_prices[force_index]
 			if f_sell_prices == nil then return end
+
 			local f_inactive_sell_prices = inactive_sell_prices[force_index]
 			for item_name, price in pairs(f_inactive_sell_prices) do
 				f_sell_prices[item_name] = price
@@ -3474,6 +3494,7 @@ local function add_remote_interface()
 				f_inactive_buy_prices[item_name] = nil
 			end
 
+			-- TODO: change
 			local f_storages_limit = storages_limit[force_index]
 			local f_storage = storages[force_index]
 			for item_name in pairs(f_buy_prices) do
@@ -3484,6 +3505,14 @@ local function add_remote_interface()
 				f_storage[item_name] = 4.5e300
 				f_storages_limit[item_name] = 9e300
 			end
+		end,
+		get_item_limit = function(item_name, force_index)
+			local f_storages_limit = storages_limit[force_index]
+			if f_storages_limit == nil then return end
+			return f_storages_limit[item_name]
+		end,
+		get_default_storage_limit = function(force_index)
+			return default_storage_limit[force_index]
 		end,
 		get_inactive_sell_prices = function() return inactive_sell_prices end,
 		get_inactive_buy_prices  = function() return inactive_buy_prices end,
