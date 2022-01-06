@@ -607,10 +607,12 @@ local function clear_invalid_entities()
 	clear_invalid_buy_boxes_data(buy_boxes)
 	clear_invalid_buy_boxes_data(inactive_buy_boxes)
 
+	local item_prototypes = game.item_prototypes
 	for unit_number, data in pairs(all_boxes) do
 		if not data[1].valid then
-			-- rendering_destroy(data[2])
-
+			all_boxes[unit_number] = nil
+		elseif item_prototypes[data[5]] == nil then
+			rendering_destroy(data[2])
 			all_boxes[unit_number] = nil
 		end
 	end
