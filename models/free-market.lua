@@ -1482,11 +1482,13 @@ end
 
 local function open_storage_gui(player)
 	local screen = player.gui.screen
-	if screen.FM_storage_frame then
-		screen.FM_storage_frame.destroy()
+	local main_frame = screen.FM_storage_frame
+	if main_frame then
+		main_frame.destroy()
 		return
 	end
-	local main_frame = screen.add{type = "frame", name = "FM_storage_frame", direction = "vertical"}
+
+	main_frame = screen.add{type = "frame", name = "FM_storage_frame", direction = "vertical"}
 	main_frame.style.horizontally_stretchable = true
 	main_frame.style.maximal_height = 700
 	local flow = main_frame.add(TITLEBAR_FLOW)
@@ -1504,7 +1506,7 @@ local function open_storage_gui(player)
 
 	local scroll_pane = content_flow.add(SCROLL_PANE)
 	scroll_pane.style.padding = 12
-	local storage_table = scroll_pane.add{type = "table", name = "storage_table", column_count = 2}
+	local storage_table = scroll_pane.add{type = "table", name = "FM_storage_table", column_count = 2}
 	storage_table.style.horizontal_spacing = 16
 	storage_table.style.vertical_spacing = 8
 	storage_table.style.top_margin = -16
@@ -2300,21 +2302,25 @@ end
 
 local GUIS = {
 	[''] = function(element, player)
-		if element.parent.name ~= "price_list_table" then return end
-
-		local item_name = sub(element.sprite, 6)
-		local force_index = player.force.index
-		local prices_frame = player.gui.screen.FM_prices_frame
-		if prices_frame == nil then
+		local parent_name = element.parent.name
+		if parent_name == "price_list_table" then
+			local item_name = sub(element.sprite, 6)
+			local force_index = player.force.index
+			local prices_frame = player.gui.screen.FM_prices_frame
+			if prices_frame == nil then
+				switch_prices_gui(player, item_name)
+			else
+				local content_flow = prices_frame.shallow_frame.content_flow
+				content_flow.item_row.FM_prices_item.elem_value = item_name
+				local sell_price = sell_prices[force_index][item_name]
+				content_flow.item_row.sell_price.text = tostring(sell_price or '')
+				local buy_price = buy_prices[force_index][item_name]
+				content_flow.item_row.buy_price.text = tostring(buy_price or '')
+				update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
+			end
+		elseif parent_name == "FM_storage_table" then
+			local item_name = sub(element.sprite, 6)
 			switch_prices_gui(player, item_name)
-		else
-			local content_flow = prices_frame.shallow_frame.content_flow
-			content_flow.item_row.FM_prices_item.elem_value = item_name
-			local sell_price = sell_prices[force_index][item_name]
-			content_flow.item_row.sell_price.text = tostring(sell_price or '')
-			local buy_price = buy_prices[force_index][item_name]
-			content_flow.item_row.buy_price.text = tostring(buy_price or '')
-			update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 		end
 	end,
 	FM_close = function(element)
