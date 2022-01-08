@@ -58,6 +58,6 @@ local function create_FM_select_tool(name, style, hotkey_name)
 end
 
 create_FM_select_tool("FM_set_pull_boxes_tool", "green", "FM_get-pull-box-selection-tool")
-create_FM_select_tool("FM_set_sell_boxes_tool", "green", "FM_get-sell-box-selection-tool")
+create_FM_select_tool("FM_set_transfer_boxes_tool", "green", "FM_get-sell-box-selection-tool")
 create_FM_select_tool("FM_set_buy_boxes_tool", "green", "FM_get-buy-box-selection-tool")
 create_FM_select_tool("FM_remove_boxes_tool", "red", "FM_get-remove-boxes-selection-tool")
