@@ -313,7 +313,6 @@ local function init_force_data(index)
 	inactive_buy_prices[index] = inactive_buy_prices[index] or {}
 	inactive_sell_boxes[index] = inactive_sell_boxes[index] or {}
 	inactive_buy_boxes[index] = inactive_buy_boxes[index] or {}
-	storages_limit[index] = storages_limit[index] or {}
 	sell_prices[index] = sell_prices[index] or {}
 	buy_prices[index] = buy_prices[index] or {}
 	pull_boxes[index] = pull_boxes[index] or {}
@@ -321,6 +320,16 @@ local function init_force_data(index)
 	buy_boxes[index] = buy_boxes[index] or {}
 	embargoes[index] = embargoes[index] or {}
 	storages[index] = storages[index] or {}
+
+	if storages_limit[index] == nil then
+		storages_limit[index] = {}
+		local f_storages_limit = storages_limit[index]
+		for item_name, item in pairs(game.item_prototypes) do
+			if item.stack_size <= 5 then
+				f_storages_limit[item_name] = 1
+			end
+		end
+	end
 end
 
 ---@param entity LuaEntity #LuaEntity
@@ -3593,6 +3602,13 @@ local function update_global_data()
 	clear_invalid_embargoes()
 	clear_invalid_player_data()
 
+	for item_name, item in pairs(game.item_prototypes) do
+		if item.stack_size <= 5 then
+			for _, f_storage_limit in pairs(storages_limit) do
+				f_storage_limit[item_name] = f_storage_limit[item_name] or 1
+			end
+		end
+	end
 
 	init_force_data(game.forces.player.index)
 
@@ -3602,13 +3618,6 @@ local function update_global_data()
 		end
 	end
 
-	for item_name, item in pairs(game.item_prototypes) do
-		if item.stack_size <= 5 then
-			for _, f_storage_limit in pairs(storages_limit) do
-				f_storage_limit[item_name] = f_storage_limit[item_name] or 1
-			end
-		end
-	end
 
 	for _, player in pairs(game.players) do
 		if player.valid then
