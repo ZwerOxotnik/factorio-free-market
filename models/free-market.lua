@@ -3591,6 +3591,24 @@ local function update_global_data()
 	clear_invalid_prices(sell_prices)
 	clear_invalid_prices(buy_prices)
 	clear_invalid_embargoes()
+	clear_invalid_player_data()
+
+
+	init_force_data(game.forces.player.index)
+
+	for _, force in pairs(game.forces) do
+		if #force.players > 0 then
+			init_force_data(force.index)
+		end
+	end
+
+	for item_name, item in pairs(game.item_prototypes) do
+		if item.stack_size <= 5 then
+			for _, f_storage_limit in pairs(storages_limit) do
+				f_storage_limit[item_name] = f_storage_limit[item_name] or 1
+			end
+		end
+	end
 
 	for _, player in pairs(game.players) do
 		if player.valid then
@@ -3603,16 +3621,6 @@ local function update_global_data()
 			end
 		end
 	end
-
-	clear_invalid_player_data()
-
-	for _, force in pairs(game.forces) do
-		if #force.players > 0 then
-			init_force_data(force.index)
-		end
-	end
-
-	init_force_data(game.forces.player.index)
 end
 
 local function on_configuration_changed(event)
