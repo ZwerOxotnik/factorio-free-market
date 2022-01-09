@@ -1220,7 +1220,7 @@ local function set_transfer_box_data(item_name, player, entity)
 		surface = player.surface,
 		target_offset = TYPE_SPRITE_OFFSET,
 		only_in_alt_mode = true,
-		x_scale = 0.3, y_scale = 0.3
+		x_scale = 0.4, y_scale = 0.4
 	}
 	if is_public_titles == false then
 		sprite_data.forces = {player_force}
@@ -1248,7 +1248,7 @@ local function set_universal_transfer_box_data(player, entity)
 		surface = player.surface,
 		target_offset = TYPE_SPRITE_OFFSET,
 		only_in_alt_mode = true,
-		x_scale = 0.3, y_scale = 0.3
+		x_scale = 0.4, y_scale = 0.4
 	}
 	if is_public_titles == false then
 		sprite_data.forces = {player_force}
@@ -1278,7 +1278,7 @@ local function set_pull_box_data(item_name, player, entity)
 		surface = player.surface,
 		target_offset = TYPE_SPRITE_OFFSET,
 		only_in_alt_mode = true,
-		x_scale = 0.3, y_scale = 0.3
+		x_scale = 0.4, y_scale = 0.4
 	}
 	if is_public_titles == false then
 		sprite_data.forces = {player_force}
@@ -1321,7 +1321,7 @@ local function set_buy_box_data(item_name, player, entity, count)
 		surface = player.surface,
 		target_offset = TYPE_SPRITE_OFFSET,
 		only_in_alt_mode = true,
-		x_scale = 0.3, y_scale = 0.3
+		x_scale = 0.4, y_scale = 0.4
 	}
 	if is_public_titles == false then
 		sprite_data.forces = {player_force}
@@ -3848,7 +3848,7 @@ local function on_configuration_changed(event)
 		local sprite_data = {
 			target_offset = TYPE_SPRITE_OFFSET,
 			only_in_alt_mode = true,
-			x_scale = 0.3, y_scale = 0.3
+			x_scale = 0.4, y_scale = 0.4
 		}
 		for  _, box_data in pairs(all_boxes) do
 			rendering_destroy(box_data[2])
