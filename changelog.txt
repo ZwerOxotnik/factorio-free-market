@@ -6,6 +6,8 @@ Date: 2022-01-?
   Changes:
     - Improved localization of storage
     - Changed buttons for chests
+    - Changed price notifier gui
+    - Removed auto-hiding of price notifier
     - Changed style
     - Added modififed version of icons from https://www.svgrepo.com/svg/11042/shopping-cart-with-down-arrow-e-commerce-symbol
   Bugfixes:

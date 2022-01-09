@@ -1091,20 +1091,11 @@ local function switch_sell_prices_gui(player, location)
 	local screen = player.gui.screen
 	local main_frame = screen.FM_sell_prices_frame
 	if main_frame then
-		local is_vertical = (main_frame.direction == "vertical")
 		local children = main_frame.children
-		if not is_vertical then
-			children[1].destroy()
-		end
 		if #children > 1 then
-			-- local last_location = main_frame.location
 			children[2].destroy()
-			-- switch_sell_prices_gui(player, last_location)
 			return
 		else
-			if not is_vertical then
-				create_price_notification_handler(main_frame, "FM_switch_sell_prices_gui")
-			end
 			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
 			local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
@@ -1131,20 +1122,11 @@ local function switch_buy_prices_gui(player, location)
 	local screen = player.gui.screen
 	local main_frame = screen.FM_buy_prices_frame
 	if main_frame then
-		local is_vertical = (main_frame.direction == "vertical")
 		local children = main_frame.children
-		if not is_vertical then
-			children[1].destroy()
-		end
 		if #children > 1 then
-			local last_location = main_frame.location
-			main_frame.destroy()
-			switch_buy_prices_gui(player, last_location)
+			children[2].destroy()
 			return
 		else
-			if not is_vertical then
-				create_price_notification_handler(main_frame, "FM_switch_buy_prices_gui")
-			end
 			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
 			local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
@@ -1160,6 +1142,8 @@ local function switch_buy_prices_gui(player, location)
 		main_frame = screen.add{type = "frame", name = "FM_buy_prices_frame", style = "borderless_frame", direction = direction}
 		main_frame.location = location or {x = player.display_resolution.width - 712, y = 272}
 		create_price_notification_handler(main_frame, "FM_switch_buy_prices_gui", is_vertical)
+		local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
+		prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 	end
 end
 
@@ -3381,15 +3365,6 @@ local function on_player_left_game(event)
 	delete_item_price_HUD(player)
 	destroy_price_list_gui(player)
 	destroy_force_configuration(player)
-	local screen = player.gui.screen
-	local frame = screen.FM_sell_prices_frame
-	if frame and frame.valid and #frame.children > 1 then
-		switch_sell_prices_gui(player)
-	end
-	frame = screen.FM_buy_prices_frame
-	if frame and frame.valid and #frame.children > 1 then
-		switch_buy_prices_gui(player)
-	end
 end
 
 local function on_selected_entity_changed(event)
@@ -3560,25 +3535,48 @@ local mod_settings = {
 		update_pull_tick = value
 		script.on_nth_tick(value, check_buy_boxes)
 	end,
-	FM_show_item_price = function(event)
-		local player = game.get_player(event.player_index)
-		if player and player.valid then
-			if player.mod_settings["FM_show_item_price"].value then
-				create_item_price_HUD(player)
-			else
-				delete_item_price_HUD(player)
-			end
+	FM_show_item_price = function(player)
+		if player.mod_settings["FM_show_item_price"].value then
+			create_item_price_HUD(player)
+		else
+			delete_item_price_HUD(player)
+		end
+	end,
+	FM_sell_notification_column_count = function(player)
+		local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
+		local is_vertical = (column_count == 2)
+		local frame = player.gui.screen.FM_sell_prices_frame
+		local is_frame_vertical = (frame.direction == "vertical")
+		if is_vertical ~= is_frame_vertical then
+			local last_location = frame.location
+			frame.destroy()
+			switch_sell_prices_gui(player, last_location)
+		end
+	end,
+	FM_buy_notification_column_count = function(player)
+		local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
+		local is_vertical = (column_count == 2)
+		local frame = player.gui.screen.FM_buy_prices_frame
+		local is_frame_vertical = (frame.direction == "vertical")
+		if is_vertical ~= is_frame_vertical then
+			local last_location = frame.location
+			frame.destroy()
+			switch_buy_prices_gui(player, last_location)
 		end
 	end
 }
 local function on_runtime_mod_setting_changed(event)
-	local f = mod_settings[event.setting]
+	local setting_name = event.setting
+	local f = mod_settings[setting_name]
 	if f == nil then return end
 
 	if event.setting_type == "runtime-global" then
-		f(settings.global[event.setting].value)
+		f(settings.global[setting_name].value)
 	else
-		f(event)
+		local player = game.get_player(event.player_index)
+		if player and player.valid then
+			f(player)
+		end
 	end
 end
 
