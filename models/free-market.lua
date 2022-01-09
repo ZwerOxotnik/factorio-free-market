@@ -3190,7 +3190,7 @@ local function check_transfer_boxes()
 		end
 	end
 
-	-- Works much slower than transfer_boxes
+	-- Works has much more impact on UPS than transfer_boxes
 	for force_index, force_entities in pairs(universal_transfer_boxes) do
 		local default_limit = default_storage_limit[force_index]
 		local storage_limit = storages_limit[force_index]
@@ -3278,15 +3278,28 @@ local function check_buy_boxes()
 						if need_count <= 0 then
 							goto skip_buy
 						end
-						stack_count = need_count
-						for seller_index, storage in pairs(storages) do
+
+						local buyer_storage = storages[buyer_index]
+						local count_in_storage = buyer_storage[item_name]
+						if count_in_storage then
+							stack_count = need_count - count_in_storage
+							buyer_storage[item_name] = count_in_storage - need_count
+							if stack_count <= 0 then
+								stack_count = 0
+								goto fulfilled_needs
+							end
+						else
+							stack_count = need_count
+						end
+
+						for seller_index, seller_storage in pairs(storages) do
 							if buyer_index ~= seller_index and forces_money[seller_index] and not embargoes[seller_index][buyer_index] then
 								local sell_price = sell_prices[seller_index][item_name]
 								if sell_price and buy_price >= sell_price then
-									local count_in_storage = storage[item_name]
+									count_in_storage = seller_storage[item_name]
 									if count_in_storage then
 										if count_in_storage > stack_count then
-											storage[item_name] = count_in_storage - stack_count
+											seller_storage[item_name] = count_in_storage - stack_count
 											stack_count = 0
 											payment = need_count * sell_price
 											buyer_money = buyer_money - payment
@@ -3294,7 +3307,7 @@ local function check_buy_boxes()
 											goto fulfilled_needs
 										else
 											stack_count = stack_count - count_in_storage
-											storage[item_name] = 0
+											seller_storage[item_name] = 0
 											payment = (need_count - stack_count) * sell_price
 											buyer_money = buyer_money - payment
 											forces_money_copy[seller_index] = forces_money_copy[seller_index] + payment
