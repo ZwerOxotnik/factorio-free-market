@@ -2078,13 +2078,29 @@ local function remove_buy_box(entity)
 end
 
 ---@param entity LuaEntity
+local function remove_universal_transfer_box(entity)
+	local unit_number = entity.unit_number
+	local box_data = all_boxes[unit_number]
+	if box_data == nil then return end
+
+	if box_data[3] == UNIVERSAL_TRANSFER_TYPE then
+		remove_certain_universal_transfer_box(entity)
+	else
+		return
+	end
+	rendering_destroy(box_data[2])
+
+	all_boxes[unit_number] = nil
+end
+
+---@param entity LuaEntity
 local function remove_transfer_box(entity)
 	local unit_number = entity.unit_number
 	local box_data = all_boxes[unit_number]
 	if box_data == nil then return end
 
 	if box_data[3] == TRANSFER_TYPE then
-		remove_certain_buy_box(entity, box_data[5])
+		remove_certain_transfer_box(entity, box_data[5])
 	else
 		return
 	end
@@ -2243,6 +2259,7 @@ end
 local function set_transfer_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
+	if not (entity and entity.valid) then return end
 	if not entity.operable then return end
 	if not ALLOWED_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
@@ -2268,9 +2285,32 @@ local function set_transfer_box_key_pressed(event)
 	set_transfer_box_data(item.name, player, entity)
 end
 
+local function set_universal_transfer_box_key_pressed(event)
+	local player = game.get_player(event.player_index)
+	local entity = player.selected
+	if not (entity and entity.valid) then return end
+	if not entity.operable then return end
+	if not ALLOWED_TYPES[entity.type] then return end
+	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
+
+	local box_data = all_boxes[entity.unit_number]
+	if box_data == nil then
+		set_universal_transfer_box_data(player, entity)
+	else
+		local item_name = box_data[5]
+		local box_type = box_data[3]
+		if box_type == BUY_TYPE then
+			check_buy_price(player, item_name)
+		elseif box_type == TRANSFER_TYPE then
+			check_sell_price(player, item_name)
+		end
+	end
+end
+
 local function set_pull_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
+	if not (entity and entity.valid) then return end
 	if not entity.operable then return end
 	if not ALLOWED_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
@@ -2292,6 +2332,7 @@ end
 local function set_buy_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
+	if not (entity and entity.valid) then return end
 	if not entity.operable then return end
 	if not ALLOWED_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end
@@ -2302,7 +2343,7 @@ local function set_buy_box_key_pressed(event)
 		local box_type = box_data[3]
 		if box_type == BUY_TYPE then
 			check_buy_price(player, item_name)
-		elseif box_type == TRANSFER_TYPE or box_type == UNIVERSAL_TRANSFER_TYPE then
+		elseif box_type == TRANSFER_TYPE then
 			check_sell_price(player, item_name)
 		end
 		return
@@ -3346,6 +3387,15 @@ local function on_player_selected_area(event)
 				end
 			end
 		end
+	elseif tool_name == "FM_set_universal_transfer_boxes_tool" then
+		local entities = event.entities
+		local player = game.get_player(event.player_index)
+		for i=1, #entities do
+			local entity = entities[i]
+			if all_boxes[entity.unit_number] == nil then
+				set_universal_transfer_box_data(player, entity)
+			end
+		end
 	elseif tool_name == "FM_remove_boxes_tool" then
 		local entities = event.entities
 		local player = game.get_player(event.player_index)
@@ -3365,6 +3415,7 @@ end
 
 local ALT_SELECT_TOOLS = {
 	FM_set_pull_boxes_tool = remove_pull_box,
+	FM_set_universal_transfer_boxes_tool = remove_universal_transfer_box,
 	FM_set_transfer_boxes_tool = remove_transfer_box,
 	FM_set_buy_boxes_tool = remove_buy_box
 }
@@ -3926,8 +3977,11 @@ M.events = {
 	["FM_set-pull-box"] = function(event)
 		pcall(set_pull_box_key_pressed, event)
 	end,
-	["FM_set-sell-box"] = function(event)
+	["FM_set-transfer-box"] = function(event)
 		pcall(set_transfer_box_key_pressed, event)
+	end,
+	["FM_set-universal-transfer-box"] = function(event)
+		pcall(set_universal_transfer_box_key_pressed, event)
 	end,
 	["FM_set-buy-box"] = function(event)
 		pcall(set_buy_box_key_pressed, event)

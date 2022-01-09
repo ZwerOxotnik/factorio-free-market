@@ -3,7 +3,8 @@ require("prototypes/tools")
 
 data:extend({
 	{type = "custom-input", name = "FM_set-pull-box", key_sequence = "", consuming = "game-only"},
-	{type = "custom-input", name = "FM_set-sell-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
+	{type = "custom-input", name = "FM_set-transfer-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
+	{type = "custom-input", name = "FM_set-universal-transfer-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-buy-box",  key_sequence = "mouse-wheel-right", consuming = "game-only"}, {
 		type = "sprite",
 		name = "FM_price",
