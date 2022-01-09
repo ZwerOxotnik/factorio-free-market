@@ -1,7 +1,7 @@
 data:extend({
 	{type = "int-setting", name = "FM_money-treshold", setting_type = "runtime-global", default_value = 100, minimum_value = 1, maximum_value = 1e18},
 	{type = "int-setting", name = "FM_update-tick", setting_type = "runtime-global", default_value = 6, minimum_value = 1, maximum_value = 8e4},
-	{type = "int-setting", name = "FM_update-sell-tick", setting_type = "runtime-global", default_value = 120, minimum_value = 2, maximum_value = 8e4},
+	{type = "int-setting", name = "FM_update-transfer-tick", setting_type = "runtime-global", default_value = 240, minimum_value = 2, maximum_value = 8e4},
 	{type = "int-setting", name = "FM_update-pull-tick", setting_type = "runtime-global", default_value = 360, minimum_value = 1, maximum_value = 8e4},
 	{type = "int-setting", name = "FM_minimal-price", setting_type = "runtime-global", default_value = 1, minimum_value = 1, maximum_value = 1e18},
 	{type = "int-setting", name = "FM_maximal-price", setting_type = "runtime-global", default_value = 1e9, minimum_value = 1, maximum_value = 1e18},

@@ -189,7 +189,7 @@ local CHECK_BUTTON = {
 local update_buy_tick = settings.global["FM_update-tick"].value
 
 ---@type number
-local update_sell_tick = settings.global["FM_update-sell-tick"].value
+local update_transfer_tick = settings.global["FM_update-transfer-tick"].value
 
 ---@type number
 local update_pull_tick = settings.global["FM_update-pull-tick"].value
@@ -251,6 +251,7 @@ function print_force_data(target, getter)
 	print_to_target("Sell prices:" .. serpent.line(sell_prices[index]))
 	print_to_target("Buy prices:" .. serpent.line(buy_prices[index]))
 	print_to_target("Pull boxes:" .. serpent.line(pull_boxes[index]))
+	print_to_target("Universal transferers:" .. serpent.line(universal_transfer_boxes[index]))
 	print_to_target("Transferers:" .. serpent.line(transfer_boxes[index]))
 	print_to_target("Buy boxes:" .. serpent.line(buy_boxes[index]))
 	print_to_target("Embargoes:" .. serpent.line(embargoes[index]))
@@ -3188,6 +3189,30 @@ local function check_transfer_boxes()
 			end
 		end
 	end
+
+	-- Works much slower than transfer_boxes
+	for force_index, force_entities in pairs(universal_transfer_boxes) do
+		local default_limit = default_storage_limit[force_index]
+		local storage_limit = storages_limit[force_index]
+		local storage = storages[force_index]
+		for i=1, #force_entities do
+			local entity = force_entities[i]
+			local item = force_entities[i].get_inventory(chest_inventory_type)[1]
+			if item.valid_for_read then
+				local item_name = item.name
+				local count = storage[item_name] or 0
+				local max_count = (storage_limit[item_name] or default_limit or max_storage_threshold) - count
+				if max_count > 0 then
+					stack["count"] = max_count
+					stack["name"] = item_name
+					local sum = entity.remove_item(stack)
+					if sum > 0 then
+						storage[item_name] = count + sum
+					end
+				end
+			end
+		end
+	end
 end
 
 local function check_buy_boxes()
@@ -3457,7 +3482,7 @@ local mod_settings = {
 				value = value + 1
 			}
 			return
-		elseif update_sell_tick == value then
+		elseif update_transfer_tick == value then
 			settings.global["FM_update-tick"] = {
 				value = value + 1
 			}
@@ -3467,30 +3492,30 @@ local mod_settings = {
 		update_buy_tick = value
 		script.on_nth_tick(value, check_buy_boxes)
 	end,
-	["FM_update-sell-tick"] = function(value)
+	["FM_update-transfer-tick"] = function(value)
 		if CHECK_FORCES_TICK == value then
-			settings.global["FM_update-sell-tick"] = {
+			settings.global["FM_update-transfer-tick"] = {
 				value = value + 1
 			}
 			return
 		elseif CHECK_TEAMS_DATA_TICK == value then
-			settings.global["FM_update-sell-tick"] = {
+			settings.global["FM_update-transfer-tick"] = {
 				value = value + 1
 			}
 			return
 		elseif update_pull_tick == value then
-			settings.global["FM_update-sell-tick"] = {
+			settings.global["FM_update-transfer-tick"] = {
 				value = value + 1
 			}
 			return
 		elseif update_buy_tick == value then
-			settings.global["FM_update-sell-tick"] = {
+			settings.global["FM_update-transfer-tick"] = {
 				value = value + 1
 			}
 			return
 		end
-		script.on_nth_tick(update_sell_tick, nil)
-		update_sell_tick = value
+		script.on_nth_tick(update_transfer_tick, nil)
+		update_transfer_tick = value
 		script.on_nth_tick(value, check_buy_boxes)
 	end,
 	["FM_update-pull-tick"] = function(value)
@@ -3504,7 +3529,7 @@ local mod_settings = {
 				value = value + 1
 			}
 			return
-		elseif update_sell_tick == value then
+		elseif update_transfer_tick == value then
 			settings.global["FM_update-pull-tick"] = {
 				value = value + 1
 			}
@@ -3990,7 +4015,7 @@ M.events = {
 
 M.on_nth_tick = {
 	[update_buy_tick] = check_buy_boxes,
-	[update_sell_tick] = check_transfer_boxes,
+	[update_transfer_tick] = check_transfer_boxes,
 	[update_pull_tick] = check_pull_boxes,
 	[CHECK_FORCES_TICK] = check_forces,
 	[CHECK_TEAMS_DATA_TICK] = check_teams_data
