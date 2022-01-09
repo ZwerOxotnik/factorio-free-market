@@ -1,6 +1,6 @@
 ﻿---------------------------------------------------------------------------------------------------
 Version: 0.33.0
-Date: 2022-01-?
+Date: 2022-01-09
   Features:
     - Added universal transfer chest type (accepts any item)
   Changes:
@@ -9,7 +9,7 @@ Date: 2022-01-?
     - Changed price notifier gui
     - Removed auto-hiding of price notifier
     - Changed style
-    - Added modififed version of icons from https://www.svgrepo.com/svg/11042/shopping-cart-with-down-arrow-e-commerce-symbol
+    - Added modififed version of icons using https://www.svgrepo.com/svg/11042/shopping-cart-with-down-arrow-e-commerce-symbol
   Bugfixes:
     - Fixed shortcut of buy boxes
   Scripting:
