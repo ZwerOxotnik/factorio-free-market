@@ -5,7 +5,8 @@ local entity_type_filters = {"container", "logistic-container"}
 ---@param name string
 ---@param style string
 ---@param hotkey_name string
-local function create_FM_select_tool(name, style, hotkey_name)
+---@param icon string
+local function create_FM_select_tool(name, style, hotkey_name, icon)
 	local order = "free-market[" .. name .. "]"
 
 	local selection_cursor_box_type
@@ -20,8 +21,8 @@ local function create_FM_select_tool(name, style, hotkey_name)
 		{
 			type = "selection-tool",
 			name = name,
-			icon = "__iFreeMarket__/graphics/change-price.png",
-			icon_size = 32,
+			icon = "__iFreeMarket__/graphics/" .. icon .. ".png",
+			icon_size = 64,
 			order = order,
 			flags = flags,
 			icon_mipmaps = nil,
@@ -45,9 +46,9 @@ local function create_FM_select_tool(name, style, hotkey_name)
 			associated_control_input = hotkey_name,
 			item_to_spawn = name,
 			icon = {
-				filename = "__iFreeMarket__/graphics/change-price.png",
-				priority = "extra-high-no-scale",
-				size = 32,
+				filename = "__iFreeMarket__/graphics/" .. icon .. ".png",
+				priority = "low",
+				size = 64,
 				flags = {"gui-icon"}
 			},
 			toggleable = true,
@@ -57,8 +58,10 @@ local function create_FM_select_tool(name, style, hotkey_name)
 	})
 end
 
-create_FM_select_tool("FM_set_pull_boxes_tool", "green", "FM_get-pull-box-selection-tool")
-create_FM_select_tool("FM_set_transfer_boxes_tool", "green", "FM_get-transfer-box-selection-tool")
-create_FM_select_tool("FM_set_universal_transfer_boxes_tool", "green", "FM_get-universal-transfer-box-selection-tool")
-create_FM_select_tool("FM_set_buy_boxes_tool", "green", "FM_get-buy-box-selection-tool")
-create_FM_select_tool("FM_remove_boxes_tool", "red", "FM_get-remove-boxes-selection-tool")
+
+-- TODO: change icons
+create_FM_select_tool("FM_set_pull_boxes_tool", "green", "FM_get-pull-box-selection-tool", "pull-out")
+create_FM_select_tool("FM_set_transfer_boxes_tool", "green", "FM_get-transfer-box-selection-tool", "transfer")
+create_FM_select_tool("FM_set_universal_transfer_boxes_tool", "green", "FM_get-universal-transfer-box-selection-tool", "universal-transfer")
+create_FM_select_tool("FM_set_buy_boxes_tool", "green", "FM_get-buy-box-selection-tool", "buy")
+create_FM_select_tool("FM_remove_boxes_tool", "red", "FM_get-remove-boxes-selection-tool", "embargo")
