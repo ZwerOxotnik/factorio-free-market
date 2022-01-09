@@ -1240,8 +1240,6 @@ local function set_universal_transfer_box_data(player, entity)
 	---@type number
 	local id = draw_sprite(sprite_data)
 
-	entity.get_inventory(chest_inventory_type).set_bar(2)
-
 	-- (it's kind of messy data. Perhaps, there's another way)
 	all_boxes[entity.unit_number] = {entity, id, UNIVERSAL_TRANSFER_TYPE, entities, nil}
 end
@@ -3181,9 +3179,8 @@ local function check_transfer_boxes()
 		local storage = storages[force_index]
 		for i=1, #force_entities do
 			local entity = force_entities[i]
-			local item = force_entities[i].get_inventory(chest_inventory_type)[1]
-			if item.valid_for_read then
-				local item_name = item.name
+			local contents = entity.get_inventory(chest_inventory_type).get_contents()
+			for item_name in pairs(contents) do
 				local count = storage[item_name] or 0
 				local max_count = (storage_limit[item_name] or default_limit or max_storage_threshold) - count
 				if max_count > 0 then
