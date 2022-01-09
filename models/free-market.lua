@@ -3861,11 +3861,11 @@ local function on_configuration_changed(event)
 			local box_type = box_data[3]
 			if box_type == SELL_TYPE then
 				box_data[3] = TRANSFER_TYPE
-				sprite = "FM_transfer"
+				sprite_data.sprite = "FM_transfer"
 			elseif box_type == PULL_TYPE then
-				sprite = "FM_pull_out"
+				sprite_data.sprite = "FM_pull_out"
 			elseif box_type == BUY_TYPE then
-				sprite = "FM_buy"
+				sprite_data.sprite = "FM_buy"
 			end
 
 			box_data[2] = draw_sprite(sprite_data)
@@ -3873,7 +3873,6 @@ local function on_configuration_changed(event)
 
 		for _, player in pairs(game.players) do
 			if player.valid then
-				create_left_relative_gui(player)
 				create_top_relative_gui(player)
 			end
 		end
