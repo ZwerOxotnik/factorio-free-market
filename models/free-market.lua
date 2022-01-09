@@ -3252,6 +3252,7 @@ local function check_buy_boxes()
 		local f_buy_prices = buy_prices[buyer_index]
 		for item_name, entities in pairs(items_data) do
 			if money_treshold >= buyer_money then
+				-- TODO: improve
 				goto not_enough_money
 			end
 			local buy_price = f_buy_prices[item_name]
@@ -3281,12 +3282,14 @@ local function check_buy_boxes()
 
 						local buyer_storage = storages[buyer_index]
 						local count_in_storage = buyer_storage[item_name]
-						if count_in_storage then
+						if count_in_storage and count_in_storage > 0 then
 							stack_count = need_count - count_in_storage
-							buyer_storage[item_name] = count_in_storage - need_count
 							if stack_count <= 0 then
+								buyer_storage[item_name] = count_in_storage - need_count
 								stack_count = 0
 								goto fulfilled_needs
+							else
+								buyer_storage[item_name] = count_in_storage + (stack_count - need_count)
 							end
 						else
 							stack_count = need_count
