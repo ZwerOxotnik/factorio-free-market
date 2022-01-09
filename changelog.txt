@@ -1,9 +1,11 @@
----------------------------------------------------------------------------------------------------
+﻿---------------------------------------------------------------------------------------------------
 Version: 0.33.0
 Date: 2022-01-?
   Changes:
     - Improved localization of storage
     - Changed buttons for chests
+    - Changed style
+    - Added modififed version of icons from https://www.svgrepo.com/svg/11042/shopping-cart-with-down-arrow-e-commerce-symbol
   Scripting:
     - Refactored
 ---------------------------------------------------------------------------------------------------
