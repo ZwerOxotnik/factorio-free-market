@@ -1360,7 +1360,7 @@ local function open_force_configuration(player)
 	local link = translations_row.add({type = "textfield", text = "https://crowdin.com/project/factorio-mods-localization"})
 	link.style.horizontally_stretchable = true
 	link.style.width = 320
-	content.add(LABEL).caption = {'', "Translators", COLON, ' ', "zszzlzm (刘泽民), Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik"}
+	content.add(LABEL).caption = {'', "Translators", COLON, ' ', "eifel (Eifel87), zszzlzm (刘泽民), Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik"}
 	content.add(LABEL).caption = {'', "Supporters", COLON, ' ', "Eerrikki"}
 	content.add(LABEL).caption = {'', {"gui-other-settings.developer"}, COLON, ' ', "ZwerOxotnik"}
 	local text_box = content.add({type = "text-box"})

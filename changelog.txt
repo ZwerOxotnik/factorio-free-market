@@ -1,11 +1,17 @@
-﻿---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 Version: 0.33.0
 Date: 2022-01-?
   Changes:
-    - Improved localization of item hinter
+    - Improved localization of storage
     - Changed buttons for chests
   Scripting:
     - Refactored
+---------------------------------------------------------------------------------------------------
+Version: 0.32.7
+Date: 2022-01-09
+  Locale:
+    - Added Czech translation (thanks to @eifel (Eifel87) on crowdin)
+    - Translations: https://crowdin.com/project/factorio-mods-localization (thank you for contributions, I really appreciate it)
 ---------------------------------------------------------------------------------------------------
 Version: 0.32.6
 Date: 2022-01-08
