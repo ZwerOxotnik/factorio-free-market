@@ -3831,10 +3831,10 @@ local function on_configuration_changed(event)
 		for _, force in pairs(game.forces) do
 			local index = force.index
 			-- sell_boxes -> transfer_boxes
-			if sell_prices[index] then
+			init_force_data(index)
+			if sell_prices[index] and mod_data.sell_boxex then
 				transfer_boxes[index] = mod_data.sell_boxes[index]
 				inactive_transfer_boxes[index] = mod_data.inactive_sell_boxes[index]
-				init_force_data(index)
 			end
 			mod_data.sell_boxes = nil
 			mod_data.inactive_sell_boxes = nil
