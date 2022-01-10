@@ -9,19 +9,19 @@ data:extend({
 		type = "sprite",
 		name = "FM_price",
 		filename = "__iFreeMarket__/graphics/price.png",
-		width = 32, height = 32,
+		width = 64, height = 64,
 		flags = {"gui-icon"}
 	}, {
 		type = "sprite",
 		name = "FM_change-price",
 		filename = "__iFreeMarket__/graphics/change-price.png",
-		width = 32, height = 32,
+		width = 64, height = 64,
 		flags = {"gui-icon"}
 	}, {
 		type = "sprite",
 		name = "FM_see-prices",
 		filename = "__iFreeMarket__/graphics/see-prices.png",
-		width = 32, height = 32,
+		width = 64, height = 64,
 		flags = {"gui-icon"}
 	}, {
 		type = "sprite",
