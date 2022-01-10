@@ -1450,7 +1450,7 @@ local function switch_prices_gui(player, item_name)
 		else
 			local content_flow = main_frame.shallow_frame.content_flow
 			local item_row = main_frame.shallow_frame.content_flow.item_row
-			item_row.elem_value = item_name
+			item_row.FM_prices_item.elem_value = item_name
 
 			local force_index = player.force.index
 			local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
@@ -4021,7 +4021,7 @@ M.events = {
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
 	[defines.events.on_gui_click] = function(event)
-		pcall(on_gui_click, event)
+		on_gui_click(event)
 	end,
 	[defines.events.on_gui_closed] = on_gui_closed,
 	[defines.events.on_selected_entity_changed] = on_selected_entity_changed,
