@@ -1229,7 +1229,7 @@ local function set_transfer_box_data(item_name, player, entity)
 	local sprite_data = {
 		sprite = "FM_transfer",
 		target = entity,
-		surface = player.surface,
+		surface = entity.surface,
 		target_offset = TYPE_SPRITE_OFFSET,
 		only_in_alt_mode = true,
 		x_scale = 0.4, y_scale = 0.4
@@ -1257,7 +1257,7 @@ local function set_universal_transfer_box_data(player, entity)
 	local sprite_data = {
 		sprite = "FM_universal_transfer",
 		target = entity,
-		surface = player.surface,
+		surface = entity.surface,
 		target_offset = TYPE_SPRITE_OFFSET,
 		only_in_alt_mode = true,
 		x_scale = 0.4, y_scale = 0.4
@@ -1285,7 +1285,7 @@ local function set_pull_box_data(item_name, player, entity)
 	local sprite_data = {
 		sprite = "FM_pull_out",
 		target = entity,
-		surface = player.surface,
+		surface = entity.surface,
 		target_offset = TYPE_SPRITE_OFFSET,
 		only_in_alt_mode = true,
 		x_scale = 0.4, y_scale = 0.4
@@ -1328,7 +1328,7 @@ local function set_buy_box_data(item_name, player, entity, count)
 	local sprite_data = {
 		sprite = "FM_buy",
 		target = entity,
-		surface = player.surface,
+		surface = entity.surface,
 		target_offset = TYPE_SPRITE_OFFSET,
 		only_in_alt_mode = true,
 		x_scale = 0.4, y_scale = 0.4
