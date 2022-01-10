@@ -3745,7 +3745,8 @@ local function add_remote_interface()
 		get_default_storage_limit = function(force_index)
 			return default_storage_limit[force_index]
 		end,
-		get_inactive_transfer_boxes  = function() return inactive_transfer_boxes end,
+		get_inactive_universal_transfer_boxes = function() return inactive_universal_transfer_boxes end,
+		get_inactive_transfer_boxes = function() return inactive_transfer_boxes end,
 		get_inactive_sell_prices = function() return inactive_sell_prices end,
 		get_inactive_buy_prices  = function() return inactive_buy_prices end,
 		get_inactive_buy_boxes   = function() return inactive_buy_boxes end,
