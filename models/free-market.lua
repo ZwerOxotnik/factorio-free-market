@@ -359,8 +359,11 @@ local function remove_certain_transfer_box(entity, item_name)
 					local f_sell_prices = sell_prices[force_index]
 					local sell_price = f_sell_prices[item_name]
 					if sell_price then
-						inactive_sell_prices[force_index][item_name] = sell_price
-						f_sell_prices[item_name] = nil
+						local count_in_storage = storages[force_index][item_name]
+						if count_in_storage == nil or count_in_storage <= 0 then
+							inactive_sell_prices[force_index][item_name] = sell_price
+							f_sell_prices[item_name] = nil
+						end
 					end
 				end
 			end
@@ -990,27 +993,50 @@ local function change_sell_price_by_player(item_name, player, sell_price)
 		return
 	end
 
-	local prev_sell_price = f_sell_prices[item_name] or f_inactive_sell_prices[item_name]
+	local active_sell_price = f_sell_prices[item_name]
+	local inactive_sell_price = f_inactive_sell_prices[item_name]
+	local prev_sell_price = f_sell_prices[item_name] or inactive_sell_price
 	if prev_sell_price == sell_price then
+		if inactive_sell_price then
+			local count_in_storage = storages[force_index][item_name]
+			if count_in_storage and count_in_storage > 0 then
+				f_sell_prices[item_name] = sell_price
+				f_inactive_sell_prices[item_name] = nil
+				notify_sell_price(force_index, item_name, sell_price)
+			end
+		end
 		return
 	end
 
 	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
 	if sell_price < minimal_price or sell_price > maximal_price or (buy_price and sell_price < buy_price) then
 		player.print({"gui-map-generator.invalid-value-for-field", sell_price, buy_price or minimal_price, maximal_price})
-		return f_sell_prices[item_name] or f_inactive_sell_prices[item_name] or ''
+		return active_sell_price or inactive_sell_price or ''
 	end
 
-	if f_sell_prices[item_name] then
+	if active_sell_price then
 		f_sell_prices[item_name] = sell_price
 		notify_sell_price(force_index, item_name, sell_price)
-	elseif f_inactive_sell_prices[item_name] then
-		f_inactive_sell_prices[item_name] = sell_price
+	elseif inactive_sell_price then
+		local count_in_storage = storages[force_index][item_name]
+		if count_in_storage == nil or count_in_storage <= 0 then
+			f_inactive_sell_prices[item_name] = sell_price
+		else
+			f_sell_prices[item_name] = sell_price
+			f_inactive_sell_prices[item_name] = nil
+			notify_sell_price(force_index, item_name, sell_price)
+		end
 	elseif transfer_boxes[force_index][item_name] then
 		f_sell_prices[item_name] = sell_price
 		notify_sell_price(force_index, item_name, sell_price)
 	else
-		f_inactive_sell_prices[item_name] = sell_price
+		local count_in_storage = storages[force_index][item_name]
+		if count_in_storage == nil or count_in_storage <= 0 then
+			f_inactive_sell_prices[item_name] = sell_price
+		else
+			f_sell_prices[item_name] = sell_price
+			notify_sell_price(force_index, item_name, sell_price)
+		end
 	end
 end
 
