@@ -291,12 +291,14 @@ local function clear_force_data(index)
 	default_storage_limit[index] = nil
 	inactive_sell_prices[index] = nil
 	inactive_buy_prices[index] = nil
+	inactive_universal_transfer_boxes[index] = nil
 	inactive_transfer_boxes[index] = nil
 	inactive_buy_boxes[index] = nil
 	storages_limit[index] = nil
 	sell_prices[index] = nil
 	buy_prices[index] = nil
 	pull_boxes[index] = nil
+	universal_transfer_boxes[index] = nil
 	transfer_boxes[index] = nil
 	buy_boxes[index] = nil
 	embargoes[index] = nil
