@@ -1,4 +1,18 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.34.0
+Date: 2022-01-11
+  Features:
+    - Added bins (they ignore storage limits)
+  Changes:
+    - Added modififed icons using https://www.svgrepo.com/svg/89258/rubbish-bin
+    - Updated test zone
+  Bugfixes:
+    - Safer limits
+    - Fixed installation of buying chest using gui
+  Scripting:
+    - Improved stability of remote interface
+    - Refactored
+---------------------------------------------------------------------------------------------------
 Version: 0.33.6
 Date: 2022-01-10
   Changes:
@@ -41,7 +55,7 @@ Date: 2022-01-09
     - Changed price notifier gui
     - Removed auto-hiding of price notifier
     - Changed style
-    - Added modififed version of icons using https://www.svgrepo.com/svg/11042/shopping-cart-with-down-arrow-e-commerce-symbol
+    - Addde modififed icons using https://www.svgrepo.com/svg/11042/shopping-cart-with-down-arrow-e-commerce-symbol
   Bugfixes:
     - Fixed shortcut of buy boxes
   Scripting:

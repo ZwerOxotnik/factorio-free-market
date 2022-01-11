@@ -5,6 +5,8 @@ data:extend({
 	{type = "custom-input", name = "FM_set-pull-box", key_sequence = "", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-transfer-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-universal-transfer-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
+	{type = "custom-input", name = "FM_set-bin-box", key_sequence = "", consuming = "game-only"},
+	{type = "custom-input", name = "FM_set-universal-bin-box", key_sequence = "", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-buy-box",  key_sequence = "mouse-wheel-right", consuming = "game-only"}, {
 		type = "sprite",
 		name = "FM_price",
@@ -51,6 +53,18 @@ data:extend({
 		type = "sprite",
 		name = "FM_universal_transfer",
 		filename = "__iFreeMarket__/graphics/universal-transfer.png",
+		width = 64, height = 64,
+		flags = {"gui-icon"}
+	}, {
+		type = "sprite",
+		name = "FM_bin",
+		filename = "__iFreeMarket__/graphics/bin.png",
+		width = 64, height = 64,
+		flags = {"gui-icon"}
+	}, {
+		type = "sprite",
+		name = "FM_universal_bin",
+		filename = "__iFreeMarket__/graphics/universal-bin.png",
 		width = 64, height = 64,
 		flags = {"gui-icon"}
 	}, {

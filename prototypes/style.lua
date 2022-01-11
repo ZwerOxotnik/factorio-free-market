@@ -217,3 +217,73 @@ FM_universal_transfer_button.clicked_graphical_set.glow = {
 	flags = {"gui-icon"},
 	size = 64, scale = 1
 }
+
+styles.FM_bin_button = {
+	type = "button_style",
+	parent = "FM_box_button",
+	tooltip = "free-market.bin-gui",
+	default_graphical_set = deepcopy(slot_button.default_graphical_set),
+	hovered_graphical_set = deepcopy(slot_button.hovered_graphical_set),
+	clicked_graphical_set = deepcopy(slot_button.clicked_graphical_set)
+}
+local FM_bin_button = styles.FM_bin_button
+FM_bin_button.default_graphical_set.glow = {
+	top_outer_border_shift = 4,
+	bottom_outer_border_shift = -4,
+	left_outer_border_shift = 4,
+	right_outer_border_shift = -4,
+	draw_type = "outer",
+	filename = "__iFreeMarket__/graphics/bin.png",
+	flags = {"gui-icon"},
+	size = 64, scale = 1
+}
+FM_bin_button.hovered_graphical_set.glow.center = {
+	filename = "__iFreeMarket__/graphics/bin.png",
+	flags = {"gui-icon"},
+	size = 64, scale = 1
+}
+FM_bin_button.clicked_graphical_set.glow = {
+	top_outer_border_shift = 2,
+	bottom_outer_border_shift = -2,
+	left_outer_border_shift = 2,
+	right_outer_border_shift = -2,
+	draw_type = "outer",
+	filename = "__iFreeMarket__/graphics/bin.png",
+	flags = {"gui-icon"},
+	size = 64, scale = 1
+}
+
+styles.FM_universal_bin_button = {
+	type = "button_style",
+	parent = "FM_box_button",
+	tooltip = "free-market.universal-bin-gui",
+	default_graphical_set = deepcopy(slot_button.default_graphical_set),
+	hovered_graphical_set = deepcopy(slot_button.hovered_graphical_set),
+	clicked_graphical_set = deepcopy(slot_button.clicked_graphical_set)
+}
+local FM_universal_bin_button = styles.FM_universal_bin_button
+FM_universal_bin_button.default_graphical_set.glow = {
+	top_outer_border_shift = 4,
+	bottom_outer_border_shift = -4,
+	left_outer_border_shift = 4,
+	right_outer_border_shift = -4,
+	draw_type = "outer",
+	filename = "__iFreeMarket__/graphics/universal-bin.png",
+	flags = {"gui-icon"},
+	size = 64, scale = 1
+}
+FM_universal_bin_button.hovered_graphical_set.glow.center = {
+	filename = "__iFreeMarket__/graphics/universal-bin.png",
+	flags = {"gui-icon"},
+	size = 64, scale = 1
+}
+FM_universal_bin_button.clicked_graphical_set.glow = {
+	top_outer_border_shift = 2,
+	bottom_outer_border_shift = -2,
+	left_outer_border_shift = 2,
+	right_outer_border_shift = -2,
+	draw_type = "outer",
+	filename = "__iFreeMarket__/graphics/universal-bin.png",
+	flags = {"gui-icon"},
+	size = 64, scale = 1
+}

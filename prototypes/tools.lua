@@ -63,5 +63,7 @@ end
 create_FM_select_tool("FM_set_pull_boxes_tool", "green", "FM_get-pull-box-selection-tool", "pull-out")
 create_FM_select_tool("FM_set_transfer_boxes_tool", "green", "FM_get-transfer-box-selection-tool", "transfer")
 create_FM_select_tool("FM_set_universal_transfer_boxes_tool", "green", "FM_get-universal-transfer-box-selection-tool", "universal-transfer")
+create_FM_select_tool("FM_set_bin_boxes_tool", "green", "FM_get-bin-box-selection-tool", "bin")
+create_FM_select_tool("FM_set_universal_bin_boxes_tool", "green", "FM_get-universal-bin-box-selection-tool", "universal-bin")
 create_FM_select_tool("FM_set_buy_boxes_tool", "green", "FM_get-buy-box-selection-tool", "buy")
 create_FM_select_tool("FM_remove_boxes_tool", "red", "FM_get-remove-boxes-selection-tool", "embargo")
