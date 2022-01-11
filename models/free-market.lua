@@ -3138,7 +3138,10 @@ local GUIS = {
 				if not item.valid_for_read then
 					open_buy_box_gui(player, true)
 				else
-					set_buy_box_data(item.name, player, entity)
+					local box_operations = element.parent.parent.box_operations
+					local item_name = item.name
+					set_buy_box_data(item_name, player, entity)
+					check_buy_price_for_opened_chest(player, box_operations, item_name)
 				end
 			end
 			open_box[player.index] = entity
