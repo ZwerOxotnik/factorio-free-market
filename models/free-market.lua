@@ -2742,8 +2742,10 @@ local GUIS = {
 			if item_name then
 				if box_data and box_data[3] == TRANSFER_TYPE then
 					local player_force = player.force
-					remove_certain_transfer_box(entity, box_data)
 					local f_transfer_boxes = transfer_boxes[player_force.index]
+					if f_transfer_boxes[item_name] then
+						remove_certain_transfer_box(entity, box_data)
+					end
 					f_transfer_boxes[item_name] = f_transfer_boxes[item_name] or {}
 					local entities = f_transfer_boxes[item_name]
 					entities[#entities+1] = entity
@@ -2776,8 +2778,10 @@ local GUIS = {
 			if item_name then
 				if box_data and box_data[3] == BIN_TYPE then
 					local player_force = player.force
-					remove_certain_bin_box(entity, box_data)
 					local f_bin_boxes = bin_boxes[player_force.index]
+					if f_bin_boxes[item_name] then
+						remove_certain_bin_box(entity, box_data)
+					end
 					f_bin_boxes[item_name] = f_bin_boxes[item_name] or {}
 					local entities = f_bin_boxes[item_name]
 					entities[#entities+1] = entity
@@ -2810,10 +2814,12 @@ local GUIS = {
 			if item_name then
 				if box_data and box_data[3] == PULL_TYPE then
 					local player_force = player.force
-					remove_certain_pull_box(entity, box_data)
-					local force_pull_boxes = pull_boxes[player_force.index]
-					force_pull_boxes[item_name] = force_pull_boxes[item_name] or {}
-					local entities = force_pull_boxes[item_name]
+					local f_pull_boxes = pull_boxes[player_force.index]
+					if f_pull_boxes[item_name] then
+						remove_certain_pull_box(entity, box_data)
+					end
+					f_pull_boxes[item_name] = f_pull_boxes[item_name] or {}
+					local entities = f_pull_boxes[item_name]
 					entities[#entities+1] = entity
 					box_data[4] = entities
 					box_data[5] = item_name
@@ -2849,10 +2855,12 @@ local GUIS = {
 				else
 					if box_data and box_data[3] == BUY_TYPE then
 						local player_force = player.force
-						remove_certain_buy_box(entity, box_data)
-						local force_buy_boxes = buy_boxes[player_force.index]
-						force_buy_boxes[item_name] = force_buy_boxes[item_name] or {}
-						local entities = force_buy_boxes[item_name]
+						local f_buy_boxes = buy_boxes[player_force.index]
+						if f_buy_boxes[item_name] then
+							remove_certain_buy_box(entity, box_data)
+						end
+						f_buy_boxes[item_name] = f_buy_boxes[item_name] or {}
+						local entities = f_buy_boxes[item_name]
 						entities[#entities+1] = {entity, count}
 						box_data[4] = entities
 						box_data[5] = item_name
