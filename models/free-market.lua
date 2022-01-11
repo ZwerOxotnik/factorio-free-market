@@ -374,15 +374,17 @@ local function init_force_data(index)
 	end
 end
 
----@param entity LuaEntity #LuaEntity
+---@param target_entity LuaEntity #LuaEntity
 ---@param box_data all_boxes
-local function remove_certain_transfer_box(entity, box_data)
-	local force_index = entity.force.index
+local function remove_certain_transfer_box(target_entity, box_data)
+	local force_index = target_entity.force.index
 	local f_transfer_boxes = transfer_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_transfer_boxes[item_name]
 	for i = #entities, 1, -1 do
-		if entities[i] == entity then
+		local entity = entities[i]
+		if entity == target_entity then
+			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			if #entities == 0 then
 				f_transfer_boxes[item_name] = nil
@@ -404,15 +406,17 @@ local function remove_certain_transfer_box(entity, box_data)
 	end
 end
 
----@param entity LuaEntity #LuaEntity
+---@param target_entity LuaEntity #LuaEntity
 ---@param box_data all_boxes
-local function remove_certain_bin_box(entity, box_data)
-	local force_index = entity.force.index
+local function remove_certain_bin_box(target_entity, box_data)
+	local force_index = target_entity.force.index
 	local f_bin_boxes = bin_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_bin_boxes[item_name]
 	for i = #entities, 1, -1 do
-		if entities[i] == entity then
+		local entity = entities[i]
+		if entity == target_entity then
+			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			if #entities == 0 then
 				f_bin_boxes[item_name] = nil
@@ -434,42 +438,48 @@ local function remove_certain_bin_box(entity, box_data)
 	end
 end
 
----@param entity LuaEntity #LuaEntity
-local function remove_certain_universal_transfer_box(entity)
-	local force_index = entity.force.index
+---@param target_entity LuaEntity #LuaEntity
+local function remove_certain_universal_transfer_box(target_entity)
+	local force_index = target_entity.force.index
 	local entities = universal_transfer_boxes[force_index]
 	for i = #entities, 1, -1 do
-		if entities[i] == entity then
+		local entity = entities[i]
+		if entity == target_entity then
+			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			return
 		end
 	end
 end
 
----@param entity LuaEntity #LuaEntity
-local function remove_certain_universal_bin_box(entity)
-	local force_index = entity.force.index
+---@param target_entity LuaEntity #LuaEntity
+local function remove_certain_universal_bin_box(target_entity)
+	local force_index = target_entity.force.index
 	local entities = universal_bin_boxes[force_index]
 	for i = #entities, 1, -1 do
-		if entities[i] == entity then
+		local entity = entities[i]
+		if entity == target_entity then
+			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			return
 		end
 	end
 end
 
----@param entity LuaEntity #LuaEntity
+---@param target_entity LuaEntity #LuaEntity
 ---@param box_data all_boxes
-local function remove_certain_buy_box(entity, box_data)
-	local force_index = entity.force.index
+local function remove_certain_buy_box(target_entity, box_data)
+	local force_index = target_entity.force.index
 	local f_buy_boxes = buy_boxes[force_index]
 	local item_name = box_data[5]
-	local entities = f_buy_boxes[item_name]
-	for i = #entities, 1, -1 do
-		local buy_box = entities[i]
-		if buy_box[1] == entity then
-			tremove(entities, i)
-			if #entities == 0 then
+	local items_data = f_buy_boxes[item_name]
+	for i = #items_data, 1, -1 do
+		local buy_box = items_data[i]
+		local entity = buy_box[1]
+		if entity == target_entity then
+			tremove(items_data, i)
+			all_boxes[entity.unit_number] = nil
+			if #items_data == 0 then
 				f_buy_boxes[item_name] = nil
 				local f_buy_prices = buy_prices[force_index]
 				local buy_price = f_buy_prices[item_name]
@@ -483,15 +493,17 @@ local function remove_certain_buy_box(entity, box_data)
 	end
 end
 
----@param entity LuaEntity #LuaEntity
+---@param target_entity LuaEntity #LuaEntity
 ---@param box_data all_boxes
-local function remove_certain_pull_box(entity, box_data)
-	local force_index = entity.force.index
+local function remove_certain_pull_box(target_entity, box_data)
+	local force_index = target_entity.force.index
 	local f_pull_boxes = pull_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_pull_boxes[item_name]
 	for i = #entities, 1, -1 do
-		if entities[i] == entity then
+		local entity = entities[i]
+		if entity == target_entity then
+			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			if #entities == 0 then
 				f_pull_boxes[item_name] = nil
@@ -2199,7 +2211,6 @@ local function clear_box_data(event)
 	if box_data == nil then return end
 
 	REMOVE_BOX_FUNCS[box_data[3]](entity, box_data)
-	all_boxes[unit_number] = nil
 end
 
 ---@param entity LuaEntity
@@ -2208,9 +2219,8 @@ local function clear_box_data_by_entity(entity)
 	local box_data = all_boxes[unit_number]
 	if box_data == nil then return end
 
-	REMOVE_BOX_FUNCS[box_data[3]](entity, box_data)
 	rendering_destroy(box_data[2])
-	all_boxes[unit_number] = nil
+	REMOVE_BOX_FUNCS[box_data[3]](entity, box_data)
 	return true
 end
 
@@ -2326,8 +2336,8 @@ local function on_forces_merging(event)
 			if target then
 				local entity = target.entity
 				if (not (entity and entity.valid) or entity.force == source) and Rget_type(id) == "text" then
-					all_boxes[entity.unit_number] = nil
 					rendering_destroy(id)
+					all_boxes[entity.unit_number] = nil
 				end
 			end
 		end
@@ -2756,10 +2766,8 @@ local GUIS = {
 					player.print({"gui-train.invalid"})
 				end
 			else
+				rendering_destroy(all_boxes[entity.unit_number][2])
 				remove_certain_transfer_box(entity, box_data)
-				local unit_number = entity.unit_number
-				rendering_destroy(all_boxes[unit_number][2])
-				all_boxes[unit_number] = nil
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -2792,10 +2800,8 @@ local GUIS = {
 					player.print({"gui-train.invalid"})
 				end
 			else
+				rendering_destroy(all_boxes[entity.unit_number][2])
 				remove_certain_bin_box(entity, box_data)
-				local unit_number = entity.unit_number
-				rendering_destroy(all_boxes[unit_number][2])
-				all_boxes[unit_number] = nil
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -2828,10 +2834,8 @@ local GUIS = {
 					player.print({"gui-train.invalid"})
 				end
 			else
+				rendering_destroy(all_boxes[entity.unit_number][2])
 				remove_certain_pull_box(entity, box_data)
-				local unit_number = entity.unit_number
-				rendering_destroy(all_boxes[unit_number][2])
-				all_boxes[unit_number] = nil
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -2870,10 +2874,8 @@ local GUIS = {
 					end
 				end
 			else
+				rendering_destroy(all_boxes[entity.unit_number][2])
 				remove_certain_buy_box(entity, box_data)
-				local unit_number = entity.unit_number
-				rendering_destroy(all_boxes[unit_number][2])
-				all_boxes[unit_number] = nil
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -3759,9 +3761,8 @@ do
 				local unit_number = entity.unit_number
 				local box_data = all_boxes[unit_number]
 				if box_data and box_data[3] == box_type then
-					remove_box(entity, box_data)
 					rendering_destroy(box_data[2])
-					all_boxes[unit_number] = nil
+					remove_box(entity, box_data)
 				end
 			end
 		end
