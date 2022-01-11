@@ -374,16 +374,15 @@ local function init_force_data(index)
 	end
 end
 
----@param target_entity LuaEntity #LuaEntity
+---@param entity LuaEntity #LuaEntity
 ---@param box_data all_boxes
-local function remove_certain_transfer_box(target_entity, box_data)
-	local force_index = target_entity.force.index
+local function remove_certain_transfer_box(entity, box_data)
+	local force_index = entity.force.index
 	local f_transfer_boxes = transfer_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_transfer_boxes[item_name]
 	for i = #entities, 1, -1 do
-		local entity = entities[i]
-		if entity == target_entity then
+		if entities[i] == entity then
 			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			if #entities == 0 then
@@ -406,16 +405,15 @@ local function remove_certain_transfer_box(target_entity, box_data)
 	end
 end
 
----@param target_entity LuaEntity #LuaEntity
+---@param entity LuaEntity #LuaEntity
 ---@param box_data all_boxes
-local function remove_certain_bin_box(target_entity, box_data)
-	local force_index = target_entity.force.index
+local function remove_certain_bin_box(entity, box_data)
+	local force_index = entity.force.index
 	local f_bin_boxes = bin_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_bin_boxes[item_name]
 	for i = #entities, 1, -1 do
-		local entity = entities[i]
-		if entity == target_entity then
+		if entities[i] == entity then
 			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			if #entities == 0 then
@@ -438,13 +436,12 @@ local function remove_certain_bin_box(target_entity, box_data)
 	end
 end
 
----@param target_entity LuaEntity #LuaEntity
-local function remove_certain_universal_transfer_box(target_entity)
-	local force_index = target_entity.force.index
+---@param entity LuaEntity #LuaEntity
+local function remove_certain_universal_transfer_box(entity)
+	local force_index = entity.force.index
 	local entities = universal_transfer_boxes[force_index]
 	for i = #entities, 1, -1 do
-		local entity = entities[i]
-		if entity == target_entity then
+		if entities[i] == entity then
 			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			return
@@ -452,13 +449,12 @@ local function remove_certain_universal_transfer_box(target_entity)
 	end
 end
 
----@param target_entity LuaEntity #LuaEntity
-local function remove_certain_universal_bin_box(target_entity)
-	local force_index = target_entity.force.index
+---@param entity LuaEntity #LuaEntity
+local function remove_certain_universal_bin_box(entity)
+	local force_index = entity.force.index
 	local entities = universal_bin_boxes[force_index]
 	for i = #entities, 1, -1 do
-		local entity = entities[i]
-		if entity == target_entity then
+		if entities[i] == entity then
 			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			return
@@ -466,17 +462,16 @@ local function remove_certain_universal_bin_box(target_entity)
 	end
 end
 
----@param target_entity LuaEntity #LuaEntity
+---@param entity LuaEntity #LuaEntity
 ---@param box_data all_boxes
-local function remove_certain_buy_box(target_entity, box_data)
-	local force_index = target_entity.force.index
+local function remove_certain_buy_box(entity, box_data)
+	local force_index = entity.force.index
 	local f_buy_boxes = buy_boxes[force_index]
 	local item_name = box_data[5]
 	local items_data = f_buy_boxes[item_name]
 	for i = #items_data, 1, -1 do
 		local buy_box = items_data[i]
-		local entity = buy_box[1]
-		if entity == target_entity then
+		if buy_box[1] == entity then
 			tremove(items_data, i)
 			all_boxes[entity.unit_number] = nil
 			if #items_data == 0 then
@@ -493,16 +488,15 @@ local function remove_certain_buy_box(target_entity, box_data)
 	end
 end
 
----@param target_entity LuaEntity #LuaEntity
+---@param entity LuaEntity #LuaEntity
 ---@param box_data all_boxes
-local function remove_certain_pull_box(target_entity, box_data)
-	local force_index = target_entity.force.index
+local function remove_certain_pull_box(entity, box_data)
+	local force_index = entity.force.index
 	local f_pull_boxes = pull_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_pull_boxes[item_name]
 	for i = #entities, 1, -1 do
-		local entity = entities[i]
-		if entity == target_entity then
+		if entities[i] == entity then
 			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			if #entities == 0 then
