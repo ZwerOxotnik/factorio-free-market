@@ -12,6 +12,8 @@ local PROHIBIT_ITEMS_TYPES = {
 local function place_dummy_trading_boxes(player)
 	local stack = {name = "", count = 10}
 	local position = {x=0, y=0}
+	local universal_transferers_count = global.universal_transferers_count
+	local universal_bin_boxes_count = global.universal_bin_boxes_count
 	local bin_boxes_count = global.bin_boxes_count
 	local transferers_count = global.transferers_count
 	local pull_box_count = global.pull_box_count
@@ -102,9 +104,9 @@ local function place_dummy_trading_boxes(player)
 
 	i = 0
 	position.y = -10
-	for j=1, universal_transfer_count do
-		buy_box_count = buy_box_count + 1
-		position.x = j
+	for _=1, universal_transfer_count do
+		universal_transferers_count = universal_transferers_count + 1
+		position.x = universal_transferers_count
 		entity = create_entity{name="steel-chest", position=position, force=force}
 		remote.call("free-market", "set_universal_transfer_box_data", player, entity)
 		-- entity.insert(stack)
@@ -112,14 +114,16 @@ local function place_dummy_trading_boxes(player)
 
 	i = 0
 	position.y = -14
-	for j=1, universal_bin_count do
-		buy_box_count = buy_box_count + 1
-		position.x = j
+	for _=1, universal_bin_count do
+		universal_bin_boxes_count = universal_bin_boxes_count + 1
+		position.x = universal_bin_boxes_count
 		entity = create_entity{name="steel-chest", position=position, force=force}
 		remote.call("free-market", "set_universal_bin_box_data", player, entity)
 		-- entity.insert(stack)
 	end
 
+	global.universal_transferers_count = universal_transferers_count
+	global.universal_bin_boxes_count = universal_bin_boxes_count
 	global.bin_boxes_count = bin_boxes_count
 	global.transferers_count = transferers_count
 	global.pull_box_count = pull_box_count
@@ -128,6 +132,8 @@ end
 
 script.on_event(defines.events.on_player_created, function(event)
 	if event.player_index ~= 1 then return end
+	global.universal_transferers_count = 0
+	global.universal_bin_boxes_count = 0
 	global.transferers_count = 0
 	global.bin_boxes_count = 0
 	global.pull_box_count = 0
@@ -144,15 +150,17 @@ script.on_event(defines.events.on_player_created, function(event)
 		max_items = #game.item_prototypes
 	end
 
-	local bin_boxes_count = global.bin_boxes_count
+	local universal_transferers_count = global.universal_transferers_count
+	local universal_bin_boxes_count = global.universal_bin_boxes_count
 	local transferers_count = global.transferers_count
+	local bin_boxes_count = global.bin_boxes_count
 	local pull_box_count = global.pull_box_count
 	local buy_box_count  = global.buy_box_count
 	game.print("This scenario uses for testing \"Free market\".")
 	game.print("Created " .. dummy_forces_count .. " dummy forces and using " .. max_items .. " items.")
-	game.print("Created " .. universal_transfer_count * dummy_forces_count .. " universal transferers")
+	game.print("Created " .. universal_transferers_count .. " universal transferers")
 	game.print("Created " .. transferers_count .. " transferers")
-	game.print("Created " .. universal_bin_count * dummy_forces_count .. " universal bin boxes")
+	game.print("Created " .. universal_bin_boxes_count .. " universal bin boxes")
 	game.print("Created " .. bin_boxes_count .. " bin boxes")
 	game.print("Created " .. buy_box_count .. " buy boxes")
 	game.print("Created " .. pull_box_count .. " pull boxes")
