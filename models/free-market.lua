@@ -1635,7 +1635,7 @@ local function open_force_configuration(player)
 	setting_row.style.vertical_align = "center"
 	setting_row.add(LABEL).caption = {'', {"free-market.default-storage-limit"}, COLON}
 	local default_limit_textfield = setting_row.add(DEFAULT_LIMIT_TEXTFIELD)
-	local default_limit = default_storage_limit[force_index] or max_storage_threshold
+	local default_limit = default_storage_limit[force.index] or max_storage_threshold
 	default_limit_textfield.text = tostring(default_limit)
 	setting_row.add(CHECK_BUTTON).name = "FM_confirm_default_limit"
 
