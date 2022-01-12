@@ -267,6 +267,7 @@ function print_force_data(target, getter)
 	end
 
 	local print_to_target = getter.print
+	print_to_target('')
 	print_to_target("Inactive sell prices:" .. serpent.line(inactive_sell_prices[index]))
 	print_to_target("Inactive buy prices:" .. serpent.line(inactive_buy_prices[index]))
 	print_to_target("Sell prices:" .. serpent.line(sell_prices[index]))
@@ -279,6 +280,133 @@ function print_force_data(target, getter)
 	print_to_target("Buy boxes:" .. serpent.line(buy_boxes[index]))
 	print_to_target("Embargoes:" .. serpent.line(embargoes[index]))
 	print_to_target("Storage:" .. serpent.line(storages[index]))
+end
+
+--TODO: improve for inactive boxes
+---@param force_index number
+function resetBuyBoxes(force_index)
+	local f_buy_boxes = buy_boxes[force_index]
+	if f_buy_boxes == nil then return end
+
+	for _, forces_data in pairs(f_buy_boxes) do
+		for _, entities_data in pairs(forces_data) do
+			local unit_number = entities_data[1].unit_number
+			rendering_destroy(all_boxes[unit_number][2])
+			all_boxes[unit_number] = nil
+		end
+	end
+	buy_boxes[force_index] = {}
+
+	local f_buy_prices = buy_prices[force_index]
+	if f_buy_prices == nil then return end
+	local f_inactive_buy_prices = inactive_buy_prices[force_index]
+	if f_inactive_buy_prices == nil then return end
+	for item_name, price in pairs(f_buy_prices) do
+		f_inactive_buy_prices[item_name] = price
+	end
+	buy_prices[force_index] = {}
+end
+
+--TODO: improve for inactive boxes
+---@param force_index number
+function resetTransferBoxes(force_index)
+	local f_transfer_boxes = transfer_boxes[force_index]
+	if f_transfer_boxes == nil then return end
+
+	for _, entities_data in pairs(f_transfer_boxes) do
+		for i=1, #entities_data do
+			local unit_number = entities_data[i].unit_number
+			rendering_destroy(all_boxes[unit_number][2])
+			all_boxes[unit_number] = nil
+		end
+	end
+	transfer_boxes[force_index] = {}
+
+	local f_inactive_sell_prices = inactive_sell_prices[force_index]
+	if f_inactive_sell_prices == nil then return end
+	local f_sell_prices = sell_prices[force_index]
+	if f_sell_prices == nil then return end
+	local storage = storages[force_index]
+	if storage == nil then return end
+
+	for item_name, price in pairs(f_sell_prices) do
+		local count = storage[item_name]
+		if count == nil or count <= 0 then
+			f_inactive_sell_prices[item_name] = price
+			f_sell_prices[item_name] = nil
+		end
+	end
+end
+
+--TODO: improve for inactive boxes
+---@param force_index number
+function resetUniversalTransferBoxes(force_index)
+	local entities = universal_transfer_boxes[force_index]
+	if entities == nil then return end
+
+	for i=1, #entities do
+		local unit_number = entities[i].unit_number
+		rendering_destroy(all_boxes[unit_number][2])
+		all_boxes[unit_number] = nil
+	end
+	universal_transfer_boxes[force_index] = {}
+end
+
+--TODO: improve for inactive boxes
+---@param force_index number
+function resetBinBoxes(force_index)
+	local f_bin_boxes = bin_boxes[force_index]
+	if f_bin_boxes == nil then return end
+
+	for _, entities_data in pairs(f_bin_boxes) do
+		for i=1, #entities_data do
+			local unit_number = entities_data[i].unit_number
+			rendering_destroy(all_boxes[unit_number][2])
+			all_boxes[unit_number] = nil
+		end
+	end
+	bin_boxes[force_index] = {}
+end
+
+--TODO: improve for inactive boxes
+---@param force_index number
+function resetUniversalBinBoxes(force_index)
+	local entities = universal_bin_boxes[force_index]
+	if entities == nil then return end
+
+	for i=1, #entities do
+		local unit_number = entities[i].unit_number
+		rendering_destroy(all_boxes[unit_number][2])
+		all_boxes[unit_number] = nil
+	end
+	universal_bin_boxes[force_index] = {}
+end
+
+--TODO: improve for inactive boxes
+---@param force_index number
+function resetPullBoxes(force_index)
+	local f_pull_boxes = pull_boxes[force_index]
+	if f_pull_boxes == nil then return end
+
+	for _, entities_data in pairs(f_pull_boxes) do
+		for i=1, #entities_data do
+			local unit_number = entities_data[i].unit_number
+			rendering_destroy(all_boxes[unit_number][2])
+			all_boxes[unit_number] = nil
+		end
+	end
+	pull_boxes[force_index] = {}
+end
+
+--TODO: improve for inactive boxes
+---@param force_index number
+function resetAllBoxes(force_index)
+	resetTransferBoxes(force_index)
+	resetUniversalTransferBoxes(force_index)
+	resetBinBoxes(force_index)
+	resetUniversalBinBoxes(force_index)
+	resetPullBoxes(force_index)
+	resetBuyBoxes(force_index)
 end
 
 --#endregion
@@ -553,51 +681,6 @@ local function show_item_sprite_above_chest(item_name, force, entity)
 			target_offset = HINT_SPRITE_OFFSET
 		}
 	end
-end
-
----@param force_index number
-local function reset_buy_boxes(force_index)
-	for _, forces_data in pairs(buy_boxes[force_index]) do
-		for _, entities_data in pairs(forces_data) do
-			local unit_number = entities_data[1].unit_number
-			rendering_destroy(all_boxes[unit_number][2])
-			all_boxes[unit_number] = nil
-		end
-	end
-	buy_boxes[force_index] = {}
-end
-
----@param force_index number
-local function reset_transfer_boxes(force_index)
-	for _, entities_data in pairs(transfer_boxes[force_index]) do
-		for i=1, #entities_data do
-			local unit_number = entities_data[i].unit_number
-			rendering_destroy(all_boxes[unit_number][2])
-			all_boxes[unit_number] = nil
-		end
-	end
-	transfer_boxes[force_index] = {}
-
-	local entities = universal_transfer_boxes[force_index]
-	for i=1, #entities do
-		local unit_number = entities[i].unit_number
-		rendering_destroy(all_boxes[unit_number][2])
-		all_boxes[unit_number] = nil
-	end
-	universal_transfer_boxes[force_index] = {}
-end
-
---TODO: improve for inactive boxes
----@param force_index number
-local function reset_pull_boxes(force_index)
-	for _, entities_data in pairs(pull_boxes[force_index]) do
-		for i=1, #entities_data do
-			local unit_number = entities_data[i].unit_number
-			rendering_destroy(all_boxes[unit_number][2])
-			all_boxes[unit_number] = nil
-		end
-	end
-	pull_boxes[force_index] = {}
 end
 
 local function clear_invalid_prices(prices)
@@ -1500,7 +1583,7 @@ local function open_force_configuration(player)
 	end
 
 	local is_player_admin = player.admin
-	local force_index = player.force.index
+	local force = player.force
 
 	local main_frame = screen.add{type = "frame", name = "FM_force_configuration", direction = "vertical"}
 	main_frame.style.horizontally_stretchable = true
@@ -1524,7 +1607,7 @@ local function open_force_configuration(player)
 		admin_row.add{type = "button", caption = {"free-market.print-force-data-button"}, name = "FM_print_force_data"}
 	end
 
-	if is_reset_public or is_player_admin then
+	if is_reset_public or is_player_admin or #force.players == 1 then
 		if is_player_admin then
 			content.add(LABEL).caption = {'', "Attention", COLON, "reset is public"}
 		end
@@ -1539,10 +1622,13 @@ local function open_force_configuration(player)
 		local reset_boxes_row = content.add(FLOW)
 		reset_boxes_row.name = "reset_boxes_row"
 		reset_boxes_row.add(LABEL).caption = reset_caption
-		reset_boxes_row.add{type = "button", caption = {"free-market.reset-buy-requests"},  name = "FM_reset_buy_boxes"}.style.minimal_width = 10
-		reset_boxes_row.add{type = "button", caption = {"free-market.reset-transferers"},   name = "FM_reset_transfer_boxes"}.style.minimal_width = 10
-		reset_boxes_row.add{type = "button", caption = {"free-market.reset-pull-requests"}, name = "FM_reset_pull_boxes"}.style.minimal_width = 10
-		reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"},     name = "FM_reset_all_boxes"}.style.minimal_width = 10
+		reset_boxes_row.add{type = "button", style="FM_transfer_button", name = "FM_reset_transfer_boxes"}
+		reset_boxes_row.add{type = "button", style="FM_universal_transfer_button", name = "FM_reset_universal_transfer_boxes"}
+		reset_boxes_row.add{type = "button", style="FM_bin_button", name = "FM_reset_bin_boxes"}
+		reset_boxes_row.add{type = "button", style="FM_universal_bin_button", name = "FM_reset_universal_bin_boxes"}
+		reset_boxes_row.add{type = "button", style="FM_pull_out_button", name = "FM_reset_pull_boxes"}
+		reset_boxes_row.add{type = "button", style="FM_buy_button", name = "FM_reset_buy_boxes"}
+		reset_boxes_row.add{type = "button", caption = {"free-market.reset-all-types"}, name = "FM_reset_all_boxes"}.style.minimal_width = 10
 	end
 
 	local setting_row = content.add(FLOW)
@@ -3159,24 +3245,28 @@ local GUIS = {
 		end
 	end,
 	FM_reset_buy_prices = function(element, player)
-		if is_reset_public or player.admin then
+		if is_reset_public or #player.force.players == 1 or player.admin then
 			local force_index = player.force.index
 			buy_prices[force_index] = {}
+			inactive_buy_prices[force_index] = {}
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end
 	end,
 	FM_reset_sell_prices = function(element, player)
-		if is_reset_public or player.admin then
+		if is_reset_public or #player.force.players == 1 or player.admin then
 			local force_index = player.force.index
 			sell_prices[force_index] = {}
+			inactive_sell_prices[force_index] = {}
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end
 	end,
 	FM_reset_all_prices = function(element, player)
-		if is_reset_public or player.admin then
+		if is_reset_public or #player.force.players == 1 or player.admin then
 			local force_index = player.force.index
+			inactive_sell_prices[force_index] = {}
+			inactive_buy_prices[force_index] = {}
 			sell_prices[force_index] = {}
 			buy_prices[force_index] = {}
 		else
@@ -3184,32 +3274,50 @@ local GUIS = {
 		end
 	end,
 	FM_reset_buy_boxes = function(element, player)
-		if is_reset_public or player.admin then
-			reset_buy_boxes(player.force.index)
+		if is_reset_public or #player.force.players == 1 or player.admin then
+			resetBuyBoxes(player.force.index)
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end
 	end,
 	FM_reset_transfer_boxes = function(element, player)
-		if is_reset_public or player.admin then
-			reset_transfer_boxes(player.force.index)
+		if is_reset_public or #player.force.players == 1 or player.admin then
+			resetTransferBoxes(player.force.index)
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
+	FM_reset_universal_transfer_boxes = function(element, player)
+		if is_reset_public or #player.force.players == 1 or player.admin then
+			resetUniversalTransferBoxes(player.force.index)
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
+	FM_reset_bin_boxes = function(element, player)
+		if is_reset_public or #player.force.players == 1 or player.admin then
+			resetBinBoxes(player.force.index)
+		else
+			player.print({"command-output.parameters-require-admin"})
+		end
+	end,
+	FM_reset_universal_bin_boxes = function(element, player)
+		if is_reset_public or #player.force.players == 1 or player.admin then
+			resetUniversalBinBoxes(player.force.index)
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end
 	end,
 	FM_reset_pull_boxes = function(element, player)
-		if is_reset_public or player.admin then
-			reset_pull_boxes(player.force.index)
+		if is_reset_public or #player.force.players == 1 or player.admin then
+			resetPullBoxes(player.force.index)
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end
 	end,
 	FM_reset_all_boxes = function(element, player)
-		if is_reset_public or player.admin then
-			local force_index = player.force.index
-			reset_buy_boxes(force_index)
-			reset_transfer_boxes(force_index)
-			reset_pull_boxes(force_index)
+		if is_reset_public or #player.force.players == 1 or player.admin then
+			resetAllBoxes(player.force.index)
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end

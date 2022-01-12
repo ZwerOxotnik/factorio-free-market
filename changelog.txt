@@ -1,4 +1,14 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.34.7
+Date: 2022-01-11
+  Changes:
+    - Changed reset buttons
+    - Reset buttons are visible for teams with 1 player
+  Scripting:
+    - Reset functions are public now
+  Bugfixes:
+    - Reset buttons are more stable now
+---------------------------------------------------------------------------------------------------
 Version: 0.34.6
 Date: 2022-01-11
   Changes:
