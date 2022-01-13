@@ -3030,7 +3030,7 @@ local GUIS = {
 					player.print({"free-market.this-is-universal-transfer-box"})
 					return
 				elseif box_type == BIN_TYPE then
-					player.print({"free-market.this-is-universal-bin-box"})
+					player.print({"free-market.this-is-bin-box"})
 					return
 				elseif box_type == UNIVERSAL_BIN_TYPE then
 					player.print({"free-market.this-is-universal-bin-box"})
@@ -3071,7 +3071,7 @@ local GUIS = {
 					player.print({"free-market.this-is-pull-box"})
 					return
 				elseif box_type == BIN_TYPE then
-					player.print({"free-market.this-is-universal-bin-box"})
+					player.print({"free-market.this-is-bin-box"})
 					return
 				elseif box_type == UNIVERSAL_BIN_TYPE then
 					player.print({"free-market.this-is-universal-bin-box"})
@@ -3143,7 +3143,7 @@ local GUIS = {
 					player.print({"free-market.this-is-pull-box"})
 					return
 				elseif box_type == BIN_TYPE then
-					player.print({"free-market.this-is-universal-bin-box"})
+					player.print({"free-market.this-is-bin-box"})
 					return
 				end
 			else
@@ -3176,7 +3176,7 @@ local GUIS = {
 					player.print({"free-market.this-is-universal-transfer-box"})
 					return
 				elseif box_type == BIN_TYPE then
-					player.print({"free-market.this-is-universal-bin-box"})
+					player.print({"free-market.this-is-bin-box"})
 					return
 				elseif box_type == UNIVERSAL_BIN_TYPE then
 					player.print({"free-market.this-is-universal-bin-box"})
@@ -3217,7 +3217,7 @@ local GUIS = {
 					player.print({"free-market.this-is-pull-box"})
 					return
 				elseif box_type == BIN_TYPE then
-					player.print({"free-market.this-is-universal-bin-box"})
+					player.print({"free-market.this-is-bin-box"})
 					return
 				elseif box_type == UNIVERSAL_BIN_TYPE then
 					player.print({"free-market.this-is-universal-bin-box"})
