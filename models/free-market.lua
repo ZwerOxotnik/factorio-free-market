@@ -516,9 +516,10 @@ local function remove_certain_transfer_box(entity, box_data)
 	local f_transfer_boxes = transfer_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_transfer_boxes[item_name]
+	all_boxes[entity.unit_number] = nil
+	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
-			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			if #entities == 0 then
 				f_transfer_boxes[item_name] = nil
@@ -547,9 +548,10 @@ local function remove_certain_bin_box(entity, box_data)
 	local f_bin_boxes = bin_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_bin_boxes[item_name]
+	all_boxes[entity.unit_number] = nil
+	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
-			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			if #entities == 0 then
 				f_bin_boxes[item_name] = nil
@@ -575,9 +577,10 @@ end
 local function remove_certain_universal_transfer_box(entity)
 	local force_index = entity.force.index
 	local entities = universal_transfer_boxes[force_index]
+	all_boxes[entity.unit_number] = nil
+	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
-			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			return
 		end
@@ -588,9 +591,10 @@ end
 local function remove_certain_universal_bin_box(entity)
 	local force_index = entity.force.index
 	local entities = universal_bin_boxes[force_index]
+	all_boxes[entity.unit_number] = nil
+	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
-			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			return
 		end
@@ -604,11 +608,12 @@ local function remove_certain_buy_box(entity, box_data)
 	local f_buy_boxes = buy_boxes[force_index]
 	local item_name = box_data[5]
 	local items_data = f_buy_boxes[item_name]
+	all_boxes[entity.unit_number] = nil
+	if items_data == nil then return end
 	for i = #items_data, 1, -1 do
 		local buy_box = items_data[i]
 		if buy_box[1] == entity then
 			tremove(items_data, i)
-			all_boxes[entity.unit_number] = nil
 			if #items_data == 0 then
 				f_buy_boxes[item_name] = nil
 				local f_buy_prices = buy_prices[force_index]
@@ -630,9 +635,10 @@ local function remove_certain_pull_box(entity, box_data)
 	local f_pull_boxes = pull_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_pull_boxes[item_name]
+	all_boxes[entity.unit_number] = nil
+	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
-			all_boxes[entity.unit_number] = nil
 			tremove(entities, i)
 			if #entities == 0 then
 				f_pull_boxes[item_name] = nil
