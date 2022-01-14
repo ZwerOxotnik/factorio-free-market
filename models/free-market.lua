@@ -730,7 +730,8 @@ local function clear_invalid_pull_boxes_data()
 					data[item_name] = nil
 				else
 					for i=#entities, 1, -1 do
-						if entities[i].valid == false then
+						local entity = entities[i]
+						if all_boxes[entity.unit_number] == nil or entity.valid == false then
 							tremove(entities, i)
 						end
 					end
@@ -756,7 +757,8 @@ local function clear_invalid_transfer_boxes_data(_data)
 					data[item_name] = nil
 				else
 					for i=#entities, 1, -1 do
-						if entities[i].valid == false then
+						local entity = entities[i]
+						if all_boxes[entity.unit_number] == nil or entity.valid == false then
 							tremove(entities, i)
 						end
 					end
@@ -782,9 +784,13 @@ local function clear_invalid_buy_boxes_data(_data)
 					data[item_name] = nil
 				else
 					for i=#entities, 1, -1 do
-						if entities[i][1].valid == false then
+						local box_data = entities[i]
+						local entity = box_data[1]
+						if all_boxes[entity.unit_number] == nil then
 							tremove(entities, i)
-						elseif not entities[i][2] then
+						elseif entity.valid == false then
+							tremove(entities, i)
+						elseif not box_data[2] then
 							tremove(entities, i)
 						end
 					end
@@ -799,29 +805,17 @@ end
 
 ---@param data universal_bin_boxes|inactive_universal_bin_boxes|universal_transfer_boxes|inactive_universal_transfer_boxes
 local function clear_invalid_simple_boxes(data)
-	for _, force_data in pairs(data) do
-		for i=#force_data, 1, -1 do
-			if not force_data[i].valid then
-				tremove(force_data, i)
+	for _, entities in pairs(data) do
+		for i=#entities, 1, -1 do
+			local entity = entities[i]
+			if all_boxes[entity.unit_number] == nil or entity.valid == false then
+				tremove(entities, i)
 			end
 		end
 	end
 end
 
 local function clear_invalid_entities()
-	clear_invalid_storage_data()
-	clear_invalid_pull_boxes_data()
-	clear_invalid_transfer_boxes_data(transfer_boxes)
-	clear_invalid_transfer_boxes_data(inactive_transfer_boxes)
-	clear_invalid_transfer_boxes_data(bin_boxes)
-	clear_invalid_transfer_boxes_data(inactive_bin_boxes)
-	clear_invalid_buy_boxes_data(buy_boxes)
-	clear_invalid_buy_boxes_data(inactive_buy_boxes)
-	clear_invalid_simple_boxes(universal_transfer_boxes)
-	clear_invalid_simple_boxes(inactive_universal_transfer_boxes)
-	clear_invalid_simple_boxes(universal_bin_boxes)
-	clear_invalid_simple_boxes(inactive_universal_bin_boxes)
-
 	local item_prototypes = game.item_prototypes
 	for unit_number, data in pairs(all_boxes) do
 		if not data[1].valid then
@@ -834,6 +828,19 @@ local function clear_invalid_entities()
 			end
 		end
 	end
+
+	clear_invalid_storage_data()
+	clear_invalid_pull_boxes_data()
+	clear_invalid_transfer_boxes_data(transfer_boxes)
+	clear_invalid_transfer_boxes_data(inactive_transfer_boxes)
+	clear_invalid_transfer_boxes_data(bin_boxes)
+	clear_invalid_transfer_boxes_data(inactive_bin_boxes)
+	clear_invalid_buy_boxes_data(buy_boxes)
+	clear_invalid_buy_boxes_data(inactive_buy_boxes)
+	clear_invalid_simple_boxes(universal_transfer_boxes)
+	clear_invalid_simple_boxes(inactive_universal_transfer_boxes)
+	clear_invalid_simple_boxes(universal_bin_boxes)
+	clear_invalid_simple_boxes(inactive_universal_bin_boxes)
 end
 
 ---@return number
@@ -2828,12 +2835,12 @@ local GUIS = {
 		local entity = open_box[player_index]
 		local item_name = parent.FM_item.elem_value
 		if entity then
+			local player_force = player.force
+			local f_transfer_boxes = transfer_boxes[player_force.index]
 			local box_data = all_boxes[entity.unit_number]
 			if item_name then
 				if box_data and box_data[3] == TRANSFER_TYPE then
-					local player_force = player.force
-					local f_transfer_boxes = transfer_boxes[player_force.index]
-					rendering_destroy(all_boxes[entity.unit_number][2])
+					rendering_destroy(box_data[2])
 					if f_transfer_boxes[item_name] then
 						remove_certain_transfer_box(entity, box_data)
 					end
@@ -2843,8 +2850,10 @@ local GUIS = {
 					player.print({"gui-train.invalid"})
 				end
 			else
-				rendering_destroy(all_boxes[entity.unit_number][2])
-				remove_certain_transfer_box(entity, box_data)
+				rendering_destroy(box_data[2])
+				if f_transfer_boxes[item_name] then
+					remove_certain_transfer_box(entity, box_data)
+				end
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -2859,12 +2868,12 @@ local GUIS = {
 		local entity = open_box[player_index]
 		local item_name = parent.FM_item.elem_value
 		if entity then
+			local player_force = player.force
+			local f_bin_boxes = bin_boxes[player_force.index]
 			local box_data = all_boxes[entity.unit_number]
 			if item_name then
 				if box_data and box_data[3] == BIN_TYPE then
-					local player_force = player.force
-					local f_bin_boxes = bin_boxes[player_force.index]
-					rendering_destroy(all_boxes[entity.unit_number][2])
+					rendering_destroy(box_data[2])
 					if f_bin_boxes[item_name] then
 						remove_certain_bin_box(entity, box_data)
 					end
@@ -2874,8 +2883,10 @@ local GUIS = {
 					player.print({"gui-train.invalid"})
 				end
 			else
-				rendering_destroy(all_boxes[entity.unit_number][2])
-				remove_certain_bin_box(entity, box_data)
+				rendering_destroy(box_data[2])
+				if f_bin_boxes[item_name] then
+					remove_certain_bin_box(entity, box_data)
+				end
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -2890,12 +2901,12 @@ local GUIS = {
 		local entity = open_box[player_index]
 		local item_name = parent.FM_item.elem_value
 		if entity then
+			local player_force = player.force
+			local f_pull_boxes = pull_boxes[player_force.index]
 			local box_data = all_boxes[entity.unit_number]
 			if item_name then
 				if box_data and box_data[3] == PULL_TYPE then
-					local player_force = player.force
-					local f_pull_boxes = pull_boxes[player_force.index]
-					rendering_destroy(all_boxes[entity.unit_number][2])
+					rendering_destroy(box_data[2])
 					if f_pull_boxes[item_name] then
 						remove_certain_pull_box(entity, box_data)
 					end
@@ -2905,8 +2916,10 @@ local GUIS = {
 					player.print({"gui-train.invalid"})
 				end
 			else
-				rendering_destroy(all_boxes[entity.unit_number][2])
-				remove_certain_pull_box(entity, box_data)
+				rendering_destroy(box_data[2])
+				if f_pull_boxes[item_name] then
+					remove_certain_pull_box(entity, box_data)
+				end
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -2922,6 +2935,8 @@ local GUIS = {
 		local count = tonumber(parent.count.text)
 		local item_name = parent.FM_item.elem_value
 		if entity then
+			local player_force = player.force
+			local f_buy_boxes = buy_boxes[player_force.index]
 			local box_data = all_boxes[entity.unit_number]
 			if item_name and count then
 				local prev_item_name = box_data[5]
@@ -2929,9 +2944,7 @@ local GUIS = {
 					change_count_in_buy_box_data(entity, item_name, count)
 				else
 					if box_data and box_data[3] == BUY_TYPE then
-						local player_force = player.force
-						local f_buy_boxes = buy_boxes[player_force.index]
-						rendering_destroy(all_boxes[entity.unit_number][2])
+						rendering_destroy(box_data[2])
 						if f_buy_boxes[item_name] then
 							remove_certain_buy_box(entity, box_data)
 						end
@@ -2942,8 +2955,10 @@ local GUIS = {
 					end
 				end
 			else
-				rendering_destroy(all_boxes[entity.unit_number][2])
-				remove_certain_buy_box(entity, box_data)
+				rendering_destroy(box_data[2])
+				if f_buy_boxes[item_name] then
+					remove_certain_buy_box(entity, box_data)
+				end
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
