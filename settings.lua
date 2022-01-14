@@ -15,4 +15,5 @@ data:extend({
 	{type = "int-setting", name = "FM_sell_notification_size", setting_type = "runtime-per-user", default_value = 6, minimum_value = 1, maximum_value = 40},
 	{type = "int-setting", name = "FM_buy_notification_size",  setting_type = "runtime-per-user", default_value = 6, minimum_value = 1, maximum_value = 40},
 	{type = "bool-setting", name = "FM_show_item_price", setting_type = "runtime-per-user", default_value = true},
+	{type = "double-setting", name = "FM_pull_cost_per_item", setting_type = "runtime-global", default_value = 0, minimum_value = 0, maximum_value = 4000000000},
 })

@@ -1,6 +1,6 @@
 {
 	"name": "iFreeMarket",
-	"version": "0.34.14",
+	"version": "0.35.0",
 	"factorio_version": "1.1",
 	"title": "Free market",
 	"author": "ZwerOxotnik",
@@ -9,7 +9,7 @@
 	"description": "See locale/*",
 	"dependencies": [
 		"zk-lib >= 0.10.0",
-		"EasyAPI >= 0.3.8",
+		"EasyAPI >= 0.8.1",
 		"money-UI",
 		"flib",
 		"base",

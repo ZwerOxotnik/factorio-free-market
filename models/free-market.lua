@@ -140,6 +140,8 @@ local tremove = table.remove
 local find = string.find
 local sub = string.sub
 local call = remote.call
+local floor = math.floor
+local ceil = math.ceil
 local draw_sprite = rendering.draw_sprite
 local Rget_type = rendering.get_type
 local get_render_target = rendering.get_target
@@ -233,6 +235,9 @@ local skip_offline_team_chance = settings.global["FM_skip_offline_team_chance"].
 ---@type number
 local max_storage_threshold = settings.global["FM_max_storage_threshold"].value
 
+---@type number
+local pull_cost_per_item = settings.global["FM_pull_cost_per_item"].value
+
 ---@type boolean
 local is_public_titles = settings.global["FM_is-public-titles"].value
 
@@ -242,6 +247,8 @@ local is_reset_public = settings.global["FM_is_reset_public"].value
 
 
 --#region Global functions
+
+clear_invalid_data = nil
 
 ---@param target  LuaForce|LuaPlayer # From whom the data?
 ---@param getter? LuaForce|LuaPlayer # Print to whom? (game by default)
@@ -822,6 +829,26 @@ local function clear_invalid_simple_boxes(data)
 	end
 end
 
+---@param player LuaPlayer #LuaPlayer
+local function delete_item_price_HUD(player)
+	local frame = player.gui.screen.FM_item_price_frame
+	if frame then
+		frame.destroy()
+		item_HUD[player.index] = nil
+	end
+end
+
+local function clear_invalid_player_data()
+	for player_index in pairs(item_HUD) do
+		local player = game.get_player(player_index)
+		if not (player and player.valid) then
+			item_HUD[player_index] = nil
+		elseif not player.connected then
+			delete_item_price_HUD(player)
+		end
+	end
+end
+
 local function clear_invalid_entities()
 	local item_prototypes = game.item_prototypes
 	for unit_number, data in pairs(all_boxes) do
@@ -848,6 +875,17 @@ local function clear_invalid_entities()
 	clear_invalid_simple_boxes(inactive_universal_transfer_boxes)
 	clear_invalid_simple_boxes(universal_bin_boxes)
 	clear_invalid_simple_boxes(inactive_universal_bin_boxes)
+end
+
+clear_invalid_data = function()
+	clear_invalid_entities()
+	clear_invalid_prices(storages_limit) -- it works, so it's fine
+	clear_invalid_prices(inactive_sell_prices)
+	clear_invalid_prices(inactive_buy_prices)
+	clear_invalid_prices(sell_prices)
+	clear_invalid_prices(buy_prices)
+	clear_invalid_embargoes()
+	clear_invalid_player_data()
 end
 
 ---@return number
@@ -1619,6 +1657,7 @@ local function open_force_configuration(player)
 		admin_row.name = "admin_row"
 		admin_row.add(LABEL).caption = {'', {"gui-multiplayer-lobby.allow-commands-admins-only"}, COLON}
 		admin_row.add{type = "button", caption = {"free-market.print-force-data-button"}, name = "FM_print_force_data"}
+		admin_row.add{type = "button", caption = "Clear invalid data", name = "FM_clear_invalid_data"}
 	end
 
 	if is_reset_public or is_player_admin or #force.players == 1 then
@@ -2174,15 +2213,6 @@ local function check_sell_price(player, item_name)
 end
 
 ---@param player LuaPlayer #LuaPlayer
-local function delete_item_price_HUD(player)
-	local frame = player.gui.screen.FM_item_price_frame
-	if frame then
-		frame.destroy()
-		item_HUD[player.index] = nil
-	end
-end
-
----@param player LuaPlayer #LuaPlayer
 local function create_item_price_HUD(player)
 	local screen = player.gui.screen
 	local main_frame = screen.FM_item_price_frame
@@ -2234,17 +2264,6 @@ local function create_item_price_HUD(player)
 		storage_count,
 		storage_limit
 	}
-end
-
-local function clear_invalid_player_data()
-	for player_index in pairs(item_HUD) do
-		local player = game.get_player(player_index)
-		if not (player and player.valid) then
-			item_HUD[player_index] = nil
-		elseif not player.connected then
-			delete_item_price_HUD(player)
-		end
-	end
 end
 
 ---@param player LuaPlayer #LuaPlayer
@@ -3254,6 +3273,7 @@ local GUIS = {
 			player.print({"command-output.parameters-require-admin"})
 		end
 	end,
+	FM_clear_invalid_data = clear_invalid_data,
 	FM_reset_buy_prices = function(element, player)
 		if is_reset_public or #player.force.players == 1 or player.admin then
 			local force_index = player.force.index
@@ -3512,22 +3532,40 @@ local function on_gui_closed(event)
 end
 
 local function check_pull_boxes()
+	local pulled_item_count = {}
 	local stack = {name = "", count = 0}
-	for other_force_index, _items_data in pairs(pull_boxes) do
-		local storage = storages[other_force_index]
-		for item_name, force_entities in pairs(_items_data) do
-			local count_in_storage = storage[item_name]
-			if count_in_storage and count_in_storage > 0 then
-				stack["name"] = item_name
-				for i=1, #force_entities do
-					if count_in_storage <= 0 then
-						break
+	for force_index, _items_data in pairs(pull_boxes) do
+		if pull_cost_per_item == 0 or call("EasyAPI", "get_force_money", force_index) > money_treshold then
+			local inserted_count_in_total = 0
+			pulled_item_count[force_index] = 0
+			local storage = storages[force_index]
+			for item_name, force_entities in pairs(_items_data) do
+				local count_in_storage = storage[item_name]
+				if count_in_storage and count_in_storage > 0 then
+					stack["name"] = item_name
+					for i=1, #force_entities do
+						if count_in_storage <= 0 then
+							break
+						end
+						stack["count"] = count_in_storage
+						local inserted_count = force_entities[i].insert(stack)
+						inserted_count_in_total = inserted_count_in_total + inserted_count
+						count_in_storage = count_in_storage - inserted_count
 					end
-					stack["count"] = count_in_storage
-					count_in_storage = count_in_storage - force_entities[i].insert(stack)
+					storage[item_name] = count_in_storage
 				end
-				storage[item_name] = count_in_storage
 			end
+			pulled_item_count[force_index] = inserted_count_in_total
+		end
+	end
+
+	if pull_cost_per_item == 0 then return end
+	for force_index, count in pairs(pulled_item_count) do
+		if count > 0 then
+			call("EasyAPI", "deposit_force_money_by_index",
+				force_index,
+				-ceil(count * pull_cost_per_item)
+			)
 		end
 	end
 end
@@ -3633,6 +3671,7 @@ local function check_buy_boxes()
 	end
 
 	local items_data = buy_boxes[buyer_index]
+	-- TODO: improve \/
 	if items_data == nil then return end
 
 	local forces_money = call("EasyAPI", "get_forces_money")
@@ -3647,6 +3686,7 @@ local function check_buy_boxes()
 		local stack_count = 0 -- for optimization
 		local payment = 0
 		local f_buy_prices = buy_prices[buyer_index]
+		local inserted_count_in_total = 0
 		for item_name, entities in pairs(items_data) do
 			if money_treshold >= buyer_money then
 				-- TODO: improve
@@ -3660,7 +3700,7 @@ local function check_buy_boxes()
 					if purchasable_count < 1 then
 						goto skip_buy
 					else
-						purchasable_count = math.floor(purchasable_count)
+						purchasable_count = floor(purchasable_count)
 					end
 					local buy_box = buy_data[1]
 					local need_count = buy_data[2]
@@ -3721,14 +3761,18 @@ local function check_buy_boxes()
 					local found_items = need_count - stack_count
 					if found_items > 0 then
 						stack["count"] = found_items
-						buy_box.insert(stack)
+						inserted_count_in_total = inserted_count_in_total + buy_box.insert(stack)
 					end
 					:: skip_buy ::
 				end
 			end
 		end
 		:: not_enough_money ::
-		forces_money_copy[buyer_index] = buyer_money
+		if pull_cost_per_item == 0 then
+			forces_money_copy[buyer_index] = buyer_money
+		else
+			forces_money_copy[buyer_index] = buyer_money - ceil(inserted_count_in_total * pull_cost_per_item)
+		end
 	else
 		return
 	end
@@ -3739,6 +3783,7 @@ local function check_buy_boxes()
 		if prev_money ~= money then
 			local force = forces[_force_index]
 			call("EasyAPI", "set_force_money", force, money)
+			-- TODO: change because of pull_cost_per_item
 			force.item_production_statistics.on_flow("trading", money - prev_money)
 		end
 	end
@@ -3891,6 +3936,7 @@ local mod_settings = {
 	["FM_maximal-price"] = function(value) maximal_price = value end,
 	["FM_skip_offline_team_chance"] = function(value) skip_offline_team_chance = value end,
 	["FM_max_storage_threshold"] = function(value) max_storage_threshold = value end,
+	["FM_pull_cost_per_item"] = function(value) pull_cost_per_item = value end,
 	["FM_update-tick"] = function(value)
 		if CHECK_FORCES_TICK == value then
 			settings.global["FM_update-tick"] = {
@@ -4211,14 +4257,7 @@ local function update_global_data()
 
 	link_data()
 
-	clear_invalid_entities()
-	clear_invalid_prices(storages_limit) -- it works, so it's fine
-	clear_invalid_prices(inactive_sell_prices)
-	clear_invalid_prices(inactive_buy_prices)
-	clear_invalid_prices(sell_prices)
-	clear_invalid_prices(buy_prices)
-	clear_invalid_embargoes()
-	clear_invalid_player_data()
+	clear_invalid_data()
 
 	for item_name, item in pairs(game.item_prototypes) do
 		if item.stack_size <= 5 then
