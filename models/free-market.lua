@@ -731,11 +731,10 @@ local function clear_invalid_pull_boxes_data()
 				else
 					for i=#entities, 1, -1 do
 						local entity = entities[i]
-						if all_boxes[entity.unit_number] == nil then
+						if entity.valid == false then
 							tremove(entities, i)
-						elseif entity.valid == false then
+						elseif all_boxes[entity.unit_number] == nil then
 							tremove(entities, i)
-							all_boxes[entity.unit_number] = nil
 						end
 					end
 					if #entities == 0 then
@@ -761,11 +760,10 @@ local function clear_invalid_transfer_boxes_data(_data)
 				else
 					for i=#entities, 1, -1 do
 						local entity = entities[i]
-						if all_boxes[entity.unit_number] == nil then
+						if entity.valid == false then
 							tremove(entities, i)
-						elseif entity.valid == false then
+						elseif all_boxes[entity.unit_number] == nil then
 							tremove(entities, i)
-							all_boxes[entity.unit_number] = nil
 						end
 					end
 					if #entities == 0 then
@@ -792,11 +790,10 @@ local function clear_invalid_buy_boxes_data(_data)
 					for i=#entities, 1, -1 do
 						local box_data = entities[i]
 						local entity = box_data[1]
-						if all_boxes[entity.unit_number] == nil then
+						if entity.valid == false then
 							tremove(entities, i)
-						elseif entity.valid == false then
+						elseif all_boxes[entity.unit_number] == nil then
 							tremove(entities, i)
-							all_boxes[entity.unit_number] = nil
 						elseif not box_data[2] then
 							tremove(entities, i)
 							all_boxes[entity.unit_number] = nil
@@ -816,11 +813,10 @@ local function clear_invalid_simple_boxes(data)
 	for _, entities in pairs(data) do
 		for i=#entities, 1, -1 do
 			local entity = entities[i]
-			if all_boxes[entity.unit_number] == nil then
+			if entity.valid == false then
 				tremove(entities, i)
-			elseif entity.valid == false then
+			elseif all_boxes[entity.unit_number] == nil then
 				tremove(entities, i)
-				all_boxes[entity.unit_number] = nil
 			end
 		end
 	end
