@@ -746,8 +746,14 @@ local function clear_invalid_pull_boxes_data()
 						local entity = entities[i]
 						if entity.valid == false then
 							tremove(entities, i)
-						elseif all_boxes[entity.unit_number] == nil then
-							tremove(entities, i)
+						else
+							local box_data = all_boxes[entity.unit_number]
+							if box_data == nil then
+								tremove(entities, i)
+							elseif entity ~= box_data[1] then
+								all_boxes[entity.unit_number] = nil
+								tremove(entities, i)
+							end
 						end
 					end
 					if #entities == 0 then
@@ -775,8 +781,14 @@ local function clear_invalid_transfer_boxes_data(_data)
 						local entity = entities[i]
 						if entity.valid == false then
 							tremove(entities, i)
-						elseif all_boxes[entity.unit_number] == nil then
-							tremove(entities, i)
+						else
+							local box_data = all_boxes[entity.unit_number]
+							if box_data == nil then
+								tremove(entities, i)
+							elseif entity ~= box_data[1] then
+								all_boxes[entity.unit_number] = nil
+								tremove(entities, i)
+							end
 						end
 					end
 					if #entities == 0 then
@@ -805,11 +817,17 @@ local function clear_invalid_buy_boxes_data(_data)
 						local entity = box_data[1]
 						if entity.valid == false then
 							tremove(entities, i)
-						elseif all_boxes[entity.unit_number] == nil then
-							tremove(entities, i)
 						elseif not box_data[2] then
 							tremove(entities, i)
 							all_boxes[entity.unit_number] = nil
+						else
+							local _box_data = all_boxes[entity.unit_number]
+							if _box_data == nil then
+								tremove(entities, i)
+							elseif entity ~= _box_data[1] then
+								all_boxes[entity.unit_number] = nil
+								tremove(entities, i)
+							end
 						end
 					end
 					if #entities == 0 then
@@ -828,8 +846,14 @@ local function clear_invalid_simple_boxes(data)
 			local entity = entities[i]
 			if entity.valid == false then
 				tremove(entities, i)
-			elseif all_boxes[entity.unit_number] == nil then
-				tremove(entities, i)
+			else
+				local box_data = all_boxes[entity.unit_number]
+				if box_data == nil then
+					tremove(entities, i)
+				elseif entity ~= box_data[1] then
+					all_boxes[entity.unit_number] = nil
+					tremove(entities, i)
+				end
 			end
 		end
 	end
