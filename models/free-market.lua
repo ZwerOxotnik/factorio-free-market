@@ -751,6 +751,7 @@ local function clear_invalid_pull_boxes_data()
 							if box_data == nil then
 								tremove(entities, i)
 							elseif entity ~= box_data[1] then
+								rendering_destroy(box_data[2])
 								all_boxes[entity.unit_number] = nil
 								tremove(entities, i)
 							end
@@ -786,6 +787,7 @@ local function clear_invalid_transfer_boxes_data(_data)
 							if box_data == nil then
 								tremove(entities, i)
 							elseif entity ~= box_data[1] then
+								rendering_destroy(box_data[2])
 								all_boxes[entity.unit_number] = nil
 								tremove(entities, i)
 							end
@@ -825,6 +827,7 @@ local function clear_invalid_buy_boxes_data(_data)
 							if _box_data == nil then
 								tremove(entities, i)
 							elseif entity ~= _box_data[1] then
+								rendering_destroy(box_data[2])
 								all_boxes[entity.unit_number] = nil
 								tremove(entities, i)
 							end
@@ -851,6 +854,7 @@ local function clear_invalid_simple_boxes(data)
 				if box_data == nil then
 					tremove(entities, i)
 				elseif entity ~= box_data[1] then
+					rendering_destroy(box_data[2])
 					all_boxes[entity.unit_number] = nil
 					tremove(entities, i)
 				end
@@ -2892,14 +2896,11 @@ local GUIS = {
 		local item_name = parent.FM_item.elem_value
 		if entity then
 			local player_force = player.force
-			local f_transfer_boxes = transfer_boxes[player_force.index]
 			local box_data = all_boxes[entity.unit_number]
 			if item_name then
 				if box_data and box_data[3] == TRANSFER_TYPE then
 					rendering_destroy(box_data[2])
-					if f_transfer_boxes[item_name] then
-						remove_certain_transfer_box(entity, box_data)
-					end
+					remove_certain_transfer_box(entity, box_data)
 					set_transfer_box_data(item_name, player, entity)
 					show_item_sprite_above_chest(item_name, player_force, entity)
 				else
@@ -2907,9 +2908,7 @@ local GUIS = {
 				end
 			else
 				rendering_destroy(box_data[2])
-				if f_transfer_boxes[item_name] then
-					remove_certain_transfer_box(entity, box_data)
-				end
+				remove_certain_transfer_box(entity, box_data)
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -2925,14 +2924,11 @@ local GUIS = {
 		local item_name = parent.FM_item.elem_value
 		if entity then
 			local player_force = player.force
-			local f_bin_boxes = bin_boxes[player_force.index]
 			local box_data = all_boxes[entity.unit_number]
 			if item_name then
 				if box_data and box_data[3] == BIN_TYPE then
 					rendering_destroy(box_data[2])
-					if f_bin_boxes[item_name] then
-						remove_certain_bin_box(entity, box_data)
-					end
+					remove_certain_bin_box(entity, box_data)
 					set_bin_box_data(item_name, player, entity)
 					show_item_sprite_above_chest(item_name, player_force, entity)
 				else
@@ -2940,9 +2936,7 @@ local GUIS = {
 				end
 			else
 				rendering_destroy(box_data[2])
-				if f_bin_boxes[item_name] then
-					remove_certain_bin_box(entity, box_data)
-				end
+				remove_certain_bin_box(entity, box_data)
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -2958,14 +2952,11 @@ local GUIS = {
 		local item_name = parent.FM_item.elem_value
 		if entity then
 			local player_force = player.force
-			local f_pull_boxes = pull_boxes[player_force.index]
 			local box_data = all_boxes[entity.unit_number]
 			if item_name then
 				if box_data and box_data[3] == PULL_TYPE then
 					rendering_destroy(box_data[2])
-					if f_pull_boxes[item_name] then
-						remove_certain_pull_box(entity, box_data)
-					end
+					remove_certain_pull_box(entity, box_data)
 					set_pull_box_data(item_name, player, entity)
 					show_item_sprite_above_chest(item_name, player_force, entity)
 				else
@@ -2973,9 +2964,7 @@ local GUIS = {
 				end
 			else
 				rendering_destroy(box_data[2])
-				if f_pull_boxes[item_name] then
-					remove_certain_pull_box(entity, box_data)
-				end
+				remove_certain_pull_box(entity, box_data)
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
@@ -2992,7 +2981,6 @@ local GUIS = {
 		local item_name = parent.FM_item.elem_value
 		if entity then
 			local player_force = player.force
-			local f_buy_boxes = buy_boxes[player_force.index]
 			local box_data = all_boxes[entity.unit_number]
 			if item_name and count then
 				local prev_item_name = box_data[5]
@@ -3001,9 +2989,7 @@ local GUIS = {
 				else
 					if box_data and box_data[3] == BUY_TYPE then
 						rendering_destroy(box_data[2])
-						if f_buy_boxes[item_name] then
-							remove_certain_buy_box(entity, box_data)
-						end
+						remove_certain_buy_box(entity, box_data)
 						set_buy_box_data(item_name, player, entity)
 						show_item_sprite_above_chest(item_name, player_force, entity)
 					else
@@ -3012,9 +2998,7 @@ local GUIS = {
 				end
 			else
 				rendering_destroy(box_data[2])
-				if f_buy_boxes[item_name] then
-					remove_certain_buy_box(entity, box_data)
-				end
+				remove_certain_buy_box(entity, box_data)
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
