@@ -3507,10 +3507,10 @@ local GUIS = {
 
 		local content_flow = search_row.parent
 		local drop_down = content_flow.team_row.FM_force_price_list
-		local force = game.forces[drop_down.items[drop_down.selected_index]]
-		if force == nil then
-			return
-		end
+		local dp_selected_index = drop_down.selected_index
+		if dp_selected_index == nil or dp_selected_index == 0 then return end
+		local force = game.forces[drop_down.items[dp_selected_index]]
+		if not (force and force.valid) then return end
 
 		local search_text = search_row.FM_search_text.text
 		if #search_text > 50 then
