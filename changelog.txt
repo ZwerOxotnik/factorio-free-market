@@ -1,4 +1,10 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.35.6
+Date: 2022-01-16
+  Locale:
+    - Added Norwegian translation (thanks to @Eerrikki (Robin Braathen) on crowdin)
+    - Translations: https://crowdin.com/project/factorio-mods-localization (thank you for contributions, I really appreciate it)
+---------------------------------------------------------------------------------------------------
 Version: 0.35.5
 Date: 2022-01-15
   Bugfixes:
