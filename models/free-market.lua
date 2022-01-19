@@ -2690,6 +2690,7 @@ end
 
 local GUIS = {
 	[''] = function(element, player)
+		if element.type ~= "sprite-button" then return end
 		local parent_name = element.parent.name
 		if parent_name == "price_list_table" then
 			local item_name = sub(element.sprite, 6)
