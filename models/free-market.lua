@@ -1135,10 +1135,10 @@ local function update_embargo_table(embargo_table, player)
 	embargo_table.add(EMPTY_WIDGET)
 	embargo_table.add(LABEL).caption = {"free-market.with-embargo-title"}
 
-	local force_index = player.index
+	local force_index = player.force.index
 	local embargoes_items = {}
 	local forces_items = {}
-	local f_embargoes = embargoes[player.index]
+	local f_embargoes = embargoes[force_index]
 	for force_name, force in pairs(game.forces) do
 		if #force.players > 0 and force.index ~= force_index then
 			if f_embargoes[force.index] then
