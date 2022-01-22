@@ -2373,6 +2373,7 @@ end
 
 local function on_player_created(event)
 	local player = game.get_player(event.player_index)
+	if not (player and player.valid) then return end
 	create_item_price_HUD(player)
 	create_top_relative_gui(player)
 	create_left_relative_gui(player)
