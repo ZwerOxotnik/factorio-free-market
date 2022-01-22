@@ -54,3 +54,12 @@ jobs:
         mod_name: ${{steps.mod_name.outputs.prop}}
         asset_path: ./${{steps.mod_name.outputs.prop}}_${{steps.version.outputs.prop}}.zip
         asset_name: ${{steps.mod_name.outputs.prop}}_${{steps.version.outputs.prop}}.zip
+    - uses: marvinpinto/action-automatic-releases@latest
+      id: aar
+      with:
+        automatic_release_tag: "${{steps.version.outputs.prop}}"
+        title: "For factorio ${{steps.factorio_version.outputs.prop}}"
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          ./${{steps.mod_name.outputs.prop}}_${{steps.version.outputs.prop}}.zip
