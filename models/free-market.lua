@@ -1136,26 +1136,26 @@ local function update_embargo_table(embargo_table, player)
 	embargo_table.add(LABEL).caption = {"free-market.with-embargo-title"}
 
 	local force_index = player.force.index
-	local embargoes_items = {}
-	local forces_items = {}
+	local in_embargo_list = {}
+	local no_embargo_list = {}
 	local f_embargoes = embargoes[force_index]
 	for force_name, force in pairs(game.forces) do
 		if #force.players > 0 and force.index ~= force_index then
 			if f_embargoes[force.index] then
-				embargoes_items[#embargoes_items+1] = force_name
+				in_embargo_list[#in_embargo_list+1] = force_name
 			else
-				forces_items[#forces_items+1] = force_name
+				no_embargo_list[#no_embargo_list+1] = force_name
 			end
 		end
 	end
 
-	local forces_list = embargo_table.add{type = "list-box", name = "forces_list", items = forces_items}
+	local forces_list = embargo_table.add{type = "list-box", name = "forces_list", items = no_embargo_list}
 	forces_list.style.horizontally_stretchable = true
 	forces_list.style.height = 200
 	local buttons_flow = embargo_table.add(VERTICAL_FLOW)
 	buttons_flow.add{type = "sprite-button", name = "FM_cancel_embargo", style = "tool_button", sprite = "utility/left_arrow"}
 	buttons_flow.add{type = "sprite-button", name = "FM_declare_embargo", style = "tool_button", sprite = "utility/right_arrow"}
-	local embargo_list = embargo_table.add{type = "list-box", name = "embargo_list", items = embargoes_items}
+	local embargo_list = embargo_table.add{type = "list-box", name = "embargo_list", items = in_embargo_list}
 	embargo_list.style.horizontally_stretchable = true
 	embargo_list.style.height = 200
 end
