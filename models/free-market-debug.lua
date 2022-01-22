@@ -1202,8 +1202,13 @@ local function switch_sell_prices_gui(player, location) -- models/free-market.ca
 				["style"] = "FM_prices_table", -- models/free-market.can:1381
 				["column_count"] = column_count -- models/free-market.can:1381
 			}) -- models/free-market.can:1381
-		end -- models/free-market.can:1381
-	else -- models/free-market.can:1381
+			local cost = 0 -- models/free-market.can:1383
+			for item_name in pairs(game["item_prototypes"]) do -- models/free-market.can:1384
+				cost = cost + 1 -- models/free-market.can:1385
+				add_item_in_sell_prices(player, item_name, cost, player["index"]) -- models/free-market.can:1386
+			end -- models/free-market.can:1386
+		end -- models/free-market.can:1386
+	else -- models/free-market.can:1386
 		local column_count = 2 * player["mod_settings"]["FM_sell_notification_column_count"]["value"] -- models/free-market.can:1391
 		local is_vertical = (column_count == 2) -- models/free-market.can:1392
 		if is_vertical then -- models/free-market.can:1393
@@ -1258,8 +1263,13 @@ local function switch_buy_prices_gui(player, location) -- models/free-market.can
 				["style"] = "FM_prices_table", -- models/free-market.can:1419
 				["column_count"] = column_count -- models/free-market.can:1419
 			}) -- models/free-market.can:1419
-		end -- models/free-market.can:1419
-	else -- models/free-market.can:1419
+			local cost = 0 -- models/free-market.can:1421
+			for item_name in pairs(game["item_prototypes"]) do -- models/free-market.can:1422
+				cost = cost + 1 -- models/free-market.can:1423
+				add_item_in_buy_prices(player, item_name, cost, player["index"]) -- models/free-market.can:1424
+			end -- models/free-market.can:1424
+		end -- models/free-market.can:1424
+	else -- models/free-market.can:1424
 		local column_count = 2 * player["mod_settings"]["FM_buy_notification_column_count"]["value"] -- models/free-market.can:1429
 		local is_vertical = (column_count == 2) -- models/free-market.can:1430
 		if is_vertical then -- models/free-market.can:1431
@@ -2535,7 +2545,21 @@ local function on_player_joined_game(event) -- models/free-market.can:2403
 	destroy_prices_gui(player) -- models/free-market.can:2412
 	destroy_price_list_gui(player) -- models/free-market.can:2413
 	create_item_price_HUD(player) -- models/free-market.can:2414
-end -- models/free-market.can:2414
+	switch_sell_prices_gui(player) -- models/free-market.can:2417
+	switch_sell_prices_gui(player) -- models/free-market.can:2418
+	switch_buy_prices_gui(player) -- models/free-market.can:2419
+	switch_buy_prices_gui(player) -- models/free-market.can:2420
+	open_embargo_gui(player) -- models/free-market.can:2422
+	open_force_configuration(player) -- models/free-market.can:2423
+	open_storage_gui(player) -- models/free-market.can:2424
+	open_price_list_gui(player) -- models/free-market.can:2425
+	switch_prices_gui(player) -- models/free-market.can:2427
+	switch_prices_gui(player) -- models/free-market.can:2428
+	switch_prices_gui(player) -- models/free-market.can:2429
+	for item_name in pairs(game["item_prototypes"]) do -- models/free-market.can:2430
+		switch_prices_gui(player, item_name) -- models/free-market.can:2431
+	end -- models/free-market.can:2431
+end -- models/free-market.can:2431
 local function on_player_cursor_stack_changed(event) -- models/free-market.can:2436
 	local player = game["get_player"](event["player_index"]) -- models/free-market.can:2437
 	local cursor_stack = player["cursor_stack"] -- models/free-market.can:2438
@@ -2594,7 +2618,8 @@ local function check_forces() -- models/free-market.can:2462
 		mod_data["active_forces"] = {} -- models/free-market.can:2497
 		active_forces = mod_data["active_forces"] -- models/free-market.can:2498
 	end -- models/free-market.can:2498
-end -- models/free-market.can:2498
+	game["print"]("Active forces: " .. serpent["line"](active_forces)) -- models/free-market.can:2502
+end -- models/free-market.can:2502
 local function on_forces_merging(event) -- models/free-market.can:2506
 	local source = event["source"] -- models/free-market.can:2507
 	local source_index = source["index"] -- models/free-market.can:2508

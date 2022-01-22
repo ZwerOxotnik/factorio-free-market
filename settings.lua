@@ -17,3 +17,15 @@ data:extend({
 	{type = "bool-setting", name = "FM_show_item_price", setting_type = "runtime-per-user", default_value = true},
 	{type = "double-setting", name = "FM_pull_cost_per_item", setting_type = "runtime-global", default_value = 0, minimum_value = 0, maximum_value = 4000000000},
 })
+
+data:extend({
+	{
+			type = "string-setting",
+			name = "free_market-version",
+			setting_type = "startup",
+			default_value = "stable",
+			localised_name = {"gui-mod-info.version"},
+			-- see locale in zk-lib (gui-mod-info.status-*)
+			allowed_values = {"debug", "stable"}
+	}
+})
