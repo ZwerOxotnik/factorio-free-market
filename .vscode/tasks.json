@@ -19,6 +19,13 @@
 			"group": "build"
 		},
 		{
+			"label": "Luacheck",
+			"type": "shell",
+			"command": "luacheck",
+			"args": ["${file}"],
+			"group": "test"
+		},
+		{
 			"label": "Cancheck",
 			"type": "shell",
 			"command": "cancheck",
