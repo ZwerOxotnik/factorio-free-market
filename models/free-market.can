@@ -148,16 +148,27 @@ local get_render_target = rendering.get_target
 local is_render_valid = rendering.is_valid
 local rendering_destroy = rendering.destroy
 local print_to_rcon = rcon.print
-#define("UNIVERSAL_BIN_TYPE", "7")
-#define("BIN_TYPE", "6")
-#define("UNIVERSAL_TRANSFER_TYPE", "5")
-#define("TRANSFER_TYPE", "4")
-#define("PULL_TYPE", "3")
-#define("SELL_TYPE", "2")
-#define("BUY_TYPE", "1")
+--#if IGNORE_MACROSES then
+	local UNIVERSAL_BIN_TYPE = 7
+	local BIN_TYPE = 6
+	local UNIVERSAL_TRANSFER_TYPE = 5
+	local TRANSFER_TYPE = 4
+	local PULL_TYPE = 3
+	local SELL_TYPE = 2
+	local BUY_TYPE = 1
+	local chest_inventory_type = defines.inventory.chest
+--#else
+	--#define("UNIVERSAL_BIN_TYPE", "7")
+	--#define("BIN_TYPE", "6")
+	--#define("UNIVERSAL_TRANSFER_TYPE", "5")
+	--#define("TRANSFER_TYPE", "4")
+	--#define("PULL_TYPE", "3")
+	--#define("SELL_TYPE", "2")
+	--#define("BUY_TYPE", "1")
+	--#define("chest_inventory_type", "1") -- defines.inventory.chest
+--#end
 local CHECK_FORCES_TICK = 60 * 60 * 1.5
 local CHECK_TEAMS_DATA_TICK = 60 * 60 * 25
-#define("chest_inventory_type", "1") -- defines.inventory.chest
 local EMPTY_TABLE = {}
 local WHITE_COLOR = {1, 1, 1}
 local BOX_TYPE_SPRITE_OFFSET = {0, 0.2}
@@ -1379,13 +1390,13 @@ local function switch_sell_prices_gui(player, location)
 			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
 			local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
-			#if DEBUG then
+			--#if DEBUG then
 				local cost = 0
 				for item_name in pairs(game.item_prototypes) do
 					cost = cost + 1
 					add_item_in_sell_prices(player, item_name, cost, player.index)
 				end
-			#end
+			--#end
 		end
 else
 		local column_count = 2 * player.mod_settings["FM_sell_notification_column_count"].value
@@ -1417,13 +1428,13 @@ local function switch_buy_prices_gui(player, location)
 			local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
 			local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
-			#if DEBUG then
+			--#if DEBUG then
 				local cost = 0
 				for item_name in pairs(game.item_prototypes) do
 					cost = cost + 1
 					add_item_in_buy_prices(player, item_name, cost, player.index)
 				end
-			#end
+			--#end
 		end
 	else
 		local column_count = 2 * player.mod_settings["FM_buy_notification_column_count"].value
@@ -2413,7 +2424,7 @@ local function on_player_joined_game(event)
 	destroy_price_list_gui(player)
 	create_item_price_HUD(player)
 
-	#if DEBUG then
+	--#if DEBUG then
 		switch_sell_prices_gui(player)
 		switch_sell_prices_gui(player)
 		switch_buy_prices_gui(player)
@@ -2430,7 +2441,7 @@ local function on_player_joined_game(event)
 		for item_name in pairs(game.item_prototypes) do
 			switch_prices_gui(player, item_name)
 		end
-	#end
+	--#end
 end
 
 local function on_player_cursor_stack_changed(event)
@@ -2498,9 +2509,9 @@ local function check_forces()
 		active_forces = mod_data.active_forces
 	end
 
-	#if DEBUG then
+	--#if DEBUG then
 		game.print("Active forces: " .. serpent.line(active_forces))
-	#end
+	--#end
 end
 
 local function on_forces_merging(event)

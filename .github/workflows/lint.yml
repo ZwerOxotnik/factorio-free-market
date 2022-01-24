@@ -9,6 +9,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - uses: leafo/gh-actions-lua@v8
+        with:
+          luaVersion: "5.4.3"
+      - uses: leafo/gh-actions-luarocks@v4
+        with:
+          luarocksVersion: "3.7.0"
+      - name: install candran
+        run: luarocks install candran
+      - name: install lpeg
+        run: luarocks install lpeg
+      - name: install 7z, jq
+        run: sudo apt install p7zip-full jq -y
+      - name: Candran to Lua
+        run: lua ./.scripts/CandranToLua.lua
       - name: lint
         uses: Roang-zero1/factorio-mod-luacheck@master
         with:

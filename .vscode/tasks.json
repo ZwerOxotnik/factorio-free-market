@@ -26,17 +26,10 @@
 			"group": "test"
 		},
 		{
-			"label": "Cancheck",
-			"type": "shell",
-			"command": "cancheck",
-			"args": ["${file}"],
-			"group": "test"
-		},
-		{
 			"label": "Candran to Lua",
 			"type": "shell",
-			"command": "bash",
-			"args": [".scripts/CandranToLua.sh"],
+			"command": "lua",
+			"args": [".scripts/CandranToLua.lua"],
 			"group": "build"
 		}
 	]
