@@ -257,6 +257,10 @@ local is_reset_public = settings.global["FM_is_reset_public"].value
 --#endregion
 
 
+--- It's not safe to set count above ~4000000000
+local stack = {name = "", count = 0}
+
+
 --#region Global functions
 
 clear_invalid_data = nil
@@ -3598,7 +3602,6 @@ end
 
 local function check_pull_boxes()
 	local pulled_item_count = {}
-	local stack = {name = "", count = 0}
 	for force_index, _items_data in pairs(pull_boxes) do
 		if pull_cost_per_item == 0 or call("EasyAPI", "get_force_money", force_index) > money_treshold then
 			local inserted_count_in_total = 0
@@ -3636,9 +3639,7 @@ local function check_pull_boxes()
 end
 
 local function check_transfer_boxes()
-	local stack = {name = "", count = 4000000000}
-	-- It's not safe to set count above ~4000000000
-
+	stack.count = 4000000000
 	for force_index, force_entities in pairs(universal_bin_boxes) do
 		local storage = storages[force_index]
 		for i=1, #force_entities do
@@ -3747,7 +3748,6 @@ local function check_buy_boxes()
 
 	local buyer_money = forces_money_copy[buyer_index]
 	if buyer_money and buyer_money > money_treshold then
-		local stack = {name = "", count = 0}
 		local stack_count = 0 -- for optimization
 		local payment = 0
 		local f_buy_prices = buy_prices[buyer_index]
