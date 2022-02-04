@@ -2523,9 +2523,11 @@ local function on_forces_merging(event)
 	local source_index = source.index
 
 	local source_storage = storages[source_index]
-	local destination_storage = storages[event.destination.index]
-	for item_name, count in pairs(source_storage) do
-		destination_storage[item_name] = count + (destination_storage[item_name] or 0)
+	if source_storage then
+		local destination_storage = storages[event.destination.index]
+		for item_name, count in pairs(source_storage) do
+			destination_storage[item_name] = count + (destination_storage[item_name] or 0)
+		end
 	end
 	clear_force_data(source_index)
 
