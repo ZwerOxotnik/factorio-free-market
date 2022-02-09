@@ -1,3 +1,5 @@
+require("models/BetterCommands/control"):create_settings() -- Adds switchable commands
+
 data:extend({
 	{type = "int-setting", name = "FM_money-treshold", setting_type = "runtime-global", default_value = 100, minimum_value = 1, maximum_value = 1e18},
 	{type = "int-setting", name = "FM_update-tick", setting_type = "runtime-global", default_value = 60, minimum_value = 1, maximum_value = 8e4},
@@ -25,7 +27,6 @@ data:extend({
 			setting_type = "startup",
 			default_value = "stable",
 			localised_name = {"gui-mod-info.version"},
-			-- see locale in zk-lib (gui-mod-info.status-*)
 			allowed_values = {"debug", "stable"}
 	}
 })
