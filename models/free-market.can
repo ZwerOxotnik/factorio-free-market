@@ -4575,6 +4575,7 @@ M.events = {
 		
 		local destination = event.destination
 		if not (destination and destination.valid) then return end
+		if destination.force ~= source.force then return end
 		if not ALLOWED_TYPES[destination.type] then return end
 
 		local player = game.get_player(event.player_index)
