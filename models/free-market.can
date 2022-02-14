@@ -4555,9 +4555,7 @@ M.events = {
 	[defines.events.on_player_mined_entity] = clear_box_data,
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
-	[defines.events.on_gui_click] = function(event)
-		on_gui_click(event)
-	end,
+	[defines.events.on_gui_click] = on_gui_click,
 	[defines.events.on_gui_closed] = on_gui_closed,
 	[defines.events.on_selected_entity_changed] = on_selected_entity_changed,
 	[defines.events.on_force_created] = on_force_created,
@@ -4567,6 +4565,49 @@ M.events = {
 		-- TODO: refactor
 		if is_auto_embargo then
 			pcall(on_force_cease_fire_changed, event)
+		end
+	end,
+	[defines.events.on_entity_settings_pasted] = function(event)
+		local source = event.source
+		if not (source and source.valid) then return end
+		local box_data = all_boxes[source.unit_number]
+		if box_data == nil then return end
+		
+		local destination = event.destination
+		if not (destination and destination.valid) then return end
+		if not ALLOWED_TYPES[destination.type] then return end
+
+		local player = game.get_player(event.player_index)
+		if not (player and player.valid) then return end
+
+		local destination_box_data = all_boxes[destination.unit_number]
+		if destination_box_data then
+			rendering_destroy(destination_box_data[2])
+			REMOVE_BOX_FUNCS[destination_box_data[3]](destination, destination_box_data)
+		end
+
+		local box_type = box_data[3]
+		if box_type == PULL_TYPE then
+			set_pull_box_data(box_data[5], player, destination)
+		elseif box_type == BUY_TYPE then
+			local count
+			local items = box_data[4]
+			for i=1, #items do
+				local buy_data = items[i]
+				if buy_data[1] == source then
+					count = buy_data[2]
+					break
+				end
+			end
+			set_buy_box_data(box_data[5], player, destination, count)
+		elseif box_type == TRANSFER_TYPE then
+			set_transfer_box_data(box_data[5], player, destination)
+		elseif box_type == UNIVERSAL_TRANSFER_TYPE then
+			set_universal_transfer_box_data(player, destination)
+		elseif box_type == BIN_TYPE then
+			set_bin_box_data(box_data[5], player, destination)
+		elseif box_type == UNIVERSAL_BIN_TYPE then
+			set_universal_bin_box_data(player, destination)
 		end
 	end,
 	[defines.events.on_robot_mined_entity] = clear_box_data,

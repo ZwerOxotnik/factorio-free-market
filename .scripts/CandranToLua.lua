@@ -19,7 +19,7 @@ local PATTERN = "'--#'!(('region')/('endregion'))"
 
 ---@param source string
 ---@param destination string
-local function preprocess_file(source, destination)
+local function candran_to_lua(source, destination)
 	-- Reads text
 	local f = io.open(source)
 	local contents = f:read("*a")
@@ -43,7 +43,7 @@ local function preprocess_file(source, destination)
 end
 
 
-preprocess_file("./models/free-market.can", "./models/free-market.lua")
+candran_to_lua("./models/free-market.can", "./models/free-market.lua")
 
 options.preprocessorEnv = {DEBUG = true}
-preprocess_file("./models/free-market.can", "./models/free-market-debug.lua")
+candran_to_lua("./models/free-market.can", "./models/free-market-debug.lua")
