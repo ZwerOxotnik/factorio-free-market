@@ -39,8 +39,20 @@ data:extend({
 		flags = {"gui-icon"}
 	}, {
 		type = "sprite",
+		name = "FM_transparent-buy",
+		filename = "__iFreeMarket__/graphics/transparent-buy.png",
+		width = 64, height = 64,
+		flags = {"gui-icon"}
+	}, {
+		type = "sprite",
 		name = "FM_pull_out",
 		filename = "__iFreeMarket__/graphics/pull-out.png",
+		width = 64, height = 64,
+		flags = {"gui-icon"}
+	}, {
+		type = "sprite",
+		name = "FM_transparent-pull-out",
+		filename = "__iFreeMarket__/graphics/transparent-pull-out.png",
 		width = 64, height = 64,
 		flags = {"gui-icon"}
 	}, {
@@ -51,8 +63,20 @@ data:extend({
 		flags = {"gui-icon"}
 	}, {
 		type = "sprite",
+		name = "FM_transparent-transfer",
+		filename = "__iFreeMarket__/graphics/transparent-transfer.png",
+		width = 64, height = 64,
+		flags = {"gui-icon"}
+	}, {
+		type = "sprite",
 		name = "FM_universal_transfer",
 		filename = "__iFreeMarket__/graphics/universal-transfer.png",
+		width = 64, height = 64,
+		flags = {"gui-icon"}
+	}, {
+		type = "sprite",
+		name = "FM_transparent-universal-transfer",
+		filename = "__iFreeMarket__/graphics/transparent-universal-transfer.png",
 		width = 64, height = 64,
 		flags = {"gui-icon"}
 	}, {
@@ -63,8 +87,20 @@ data:extend({
 		flags = {"gui-icon"}
 	}, {
 		type = "sprite",
+		name = "FM_transparent-bin",
+		filename = "__iFreeMarket__/graphics/transparent-bin.png",
+		width = 64, height = 64,
+		flags = {"gui-icon"}
+	}, {
+		type = "sprite",
 		name = "FM_universal_bin",
 		filename = "__iFreeMarket__/graphics/universal-bin.png",
+		width = 64, height = 64,
+		flags = {"gui-icon"}
+	}, {
+		type = "sprite",
+		name = "FM_transparent-universal-bin",
+		filename = "__iFreeMarket__/graphics/transparent-universal-bin.png",
 		width = 64, height = 64,
 		flags = {"gui-icon"}
 	}, {

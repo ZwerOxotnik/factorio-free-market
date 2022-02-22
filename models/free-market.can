@@ -1508,7 +1508,7 @@ local function set_transfer_box_data(item_name, player, entity)
 	local entities = f_transfer_boxes[item_name]
 	entities[#entities+1] = entity
 	local sprite_data = {
-		sprite = "FM_transfer",
+		sprite = "FM_transparent-transfer",
 		target = entity,
 		surface = entity.surface,
 		target_offset = BOX_TYPE_SPRITE_OFFSET,
@@ -1536,7 +1536,7 @@ local function set_universal_transfer_box_data(player, entity)
 	local entities = universal_transfer_boxes[force_index]
 	entities[#entities+1] = entity
 	local sprite_data = {
-		sprite = "FM_universal_transfer",
+		sprite = "FM_transparent-universal-transfer",
 		target = entity,
 		surface = entity.surface,
 		target_offset = BOX_TYPE_SPRITE_OFFSET,
@@ -1566,7 +1566,7 @@ local function set_bin_box_data(item_name, player, entity)
 	local entities = f_bin_boxes[item_name]
 	entities[#entities+1] = entity
 	local sprite_data = {
-		sprite = "FM_bin",
+		sprite = "FM_transparent-bin",
 		target = entity,
 		surface = entity.surface,
 		target_offset = BOX_TYPE_SPRITE_OFFSET,
@@ -1592,7 +1592,7 @@ local function set_universal_bin_box_data(player, entity)
 	local entities = universal_bin_boxes[force_index]
 	entities[#entities+1] = entity
 	local sprite_data = {
-		sprite = "FM_universal_bin",
+		sprite = "FM_transparent-universal-bin",
 		target = entity,
 		surface = entity.surface,
 		target_offset = BOX_TYPE_SPRITE_OFFSET,
@@ -1620,7 +1620,7 @@ local function set_pull_box_data(item_name, player, entity)
 	local items = force_pull_boxes[item_name]
 	items[#items+1] = entity
 	local sprite_data = {
-		sprite = "FM_pull_out",
+		sprite = "FM_transparent-pull-out",
 		target = entity,
 		surface = entity.surface,
 		target_offset = BOX_TYPE_SPRITE_OFFSET,
@@ -1663,7 +1663,7 @@ local function set_buy_box_data(item_name, player, entity, count)
 	local items = f_buy_boxes[item_name]
 	items[#items+1] = {entity, count}
 	local sprite_data = {
-		sprite = "FM_buy",
+		sprite = "FM_transparent-buy",
 		target = entity,
 		surface = entity.surface,
 		target_offset = BOX_TYPE_SPRITE_OFFSET,
@@ -4412,11 +4412,11 @@ local function on_configuration_changed(event)
 			local box_type = box_data[3]
 			if box_type == SELL_TYPE then
 				box_data[3] = TRANSFER_TYPE
-				sprite_data.sprite = "FM_transfer"
+				sprite_data.sprite = "FM_transparent-transfer"
 			elseif box_type == PULL_TYPE then
-				sprite_data.sprite = "FM_pull_out"
+				sprite_data.sprite = "FM_transparent-pull-out"
 			elseif box_type == BUY_TYPE then
-				sprite_data.sprite = "FM_buy"
+				sprite_data.sprite = "FM_transparent-buy"
 			end
 
 			box_data[2] = draw_sprite(sprite_data)

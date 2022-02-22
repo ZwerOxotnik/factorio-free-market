@@ -12,8 +12,7 @@
    style="enable-background:new 0 0 408.483 408.483;"
    xml:space="preserve"
    sodipodi:docname="bin.svg"
-   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
-   inkscape:export-filename="C:\Users\zwero\AppData\Roaming\Factorio\mods\iFreeMarket\graphics\bin.png"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04, custom)"
    inkscape:export-xdpi="15.041018"
    inkscape:export-ydpi="15.041018"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -31,7 +30,7 @@
    showgrid="false"
    inkscape:zoom="0.71728811"
    inkscape:cx="55.765597"
-   inkscape:cy="225.1536"
+   inkscape:cy="225.85067"
    inkscape:window-width="1366"
    inkscape:window-height="745"
    inkscape:window-x="-8"
@@ -40,7 +39,7 @@
    inkscape:current-layer="Capa_1" />
 <g
    id="g8"
-   style="display:inline">
+   style="display:inline;opacity:1">
 	<g
    id="g6">
 		<path
@@ -70,7 +69,8 @@
 
 <g
    id="g5599"
-   transform="matrix(4.7579171,0,0,4.7579171,-112.22889,97.80962)"><path
+   transform="matrix(4.7579171,0,0,4.7579171,-112.22889,97.80962)"
+   style="display:inline;opacity:1"><path
      id="path5360"
      style="fill:#780000;fill-opacity:1"
      d="m 61.000468,32.475228 v 24.168 h 11.258 v -24.168 h 12.064 L 66.629,10.113227 48.937468,32.475228 Z m 1.239,-26.2740006 c 1.043,-1.317 2.707532,-2.088 4.389532,-2.088 1.682,0 3.714968,1.4295 4.236468,2.088 0.5215,0.6585 17.695,22.3610006 17.695,22.3610006 1.309,1.654 1.555,3.91 0.637,5.809 -0.918,1.899 -2.842,3.104 -4.951,3.104 h -6.564 v 18.668 c 0,3.037 -2.463,5.5 -5.5,5.5 h -11.259 c -3.037,0 -5.5,-2.463 -5.5,-5.5 l 0.151,-18.668 h -6.561 c -1.264273,0 -4.211589,-0.728606 -5.226,-3.104 -1.014411,-2.375394 -0.345819,-4.319078 0.637,-5.809"
