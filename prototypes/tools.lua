@@ -43,8 +43,8 @@ local function create_FM_select_tool(name, style, hotkey_name, icon)
 			type = "shortcut",
 			name = name,
 			action = "spawn-item",
-			associated_control_input = hotkey_name,
 			item_to_spawn = name,
+			associated_control_input = hotkey_name,
 			icon = {
 				filename = "__iFreeMarket__/graphics/" .. icon .. ".png",
 				priority = "low",

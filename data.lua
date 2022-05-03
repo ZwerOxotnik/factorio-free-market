@@ -7,7 +7,7 @@ data:extend({
 	{type = "custom-input", name = "FM_set-universal-transfer-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-bin-box", key_sequence = "", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-universal-bin-box", key_sequence = "", consuming = "game-only"},
-	{type = "custom-input", name = "FM_set-buy-box",  key_sequence = "mouse-wheel-right", consuming = "game-only"}, {
+	{type = "custom-input", name = "FM_set-buy-box", key_sequence = "mouse-wheel-right", consuming = "game-only"}, {
 		type = "sprite",
 		name = "FM_price",
 		filename = "__iFreeMarket__/graphics/price.png",
