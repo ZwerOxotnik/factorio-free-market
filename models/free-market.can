@@ -4340,7 +4340,6 @@ local function update_global_data()
 		end
 	end
 
-
 	for _, player in pairs(game.players) do
 		if player.valid then
 			local relative = player.gui.relative
@@ -4349,6 +4348,10 @@ local function update_global_data()
 			end
 			if relative.FM_boxes_frame == nil then
 				create_top_relative_gui(player)
+			end
+			local frame = player.gui.screen.FM_item_price_frame
+			if frame == nil then
+				create_item_price_HUD(player)
 			end
 		end
 	end
