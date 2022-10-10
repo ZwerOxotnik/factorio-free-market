@@ -12,6 +12,8 @@ if version == "stable" then
 	modules.free_market = require("models/free-market")
 elseif version == "debug" then
 	modules.free_market = require("models/free-market-debug")
+elseif version == "extra-stable" then
+	modules.free_market = require("models/free-market-extra-stability")
 end
 
 

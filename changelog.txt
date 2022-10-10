@@ -1,4 +1,15 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.36.13
+Date: 2022-10-10
+  Features:
+    - Added new version "extra-stable" in the mod settings (please change it manually, if you used a previous version)
+  Changes:
+    - Everything works (very) sligtly different (priority of system is different now)
+  Bugfixes:
+    - Removed additional top chest gui for inappropriate entities
+    - Extra-stable version is more stable with other unstable/incorrect mods and with some stuff! (some of them delete entities without firing events, which causes bugs)
+    - Please change it manually! /\
+---------------------------------------------------------------------------------------------------
 Version: 0.36.12
 Date: 2022-08-29
   Changes:

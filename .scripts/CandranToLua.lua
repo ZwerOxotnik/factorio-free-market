@@ -47,3 +47,5 @@ candran_to_lua("./models/free-market.can", "./models/free-market.lua")
 
 options.preprocessorEnv = {DEBUG = true}
 candran_to_lua("./models/free-market.can", "./models/free-market-debug.lua")
+options.preprocessorEnv = {EXTRA_STABILITY = true}
+candran_to_lua("./models/free-market.can", "./models/free-market-extra-stability.lua")

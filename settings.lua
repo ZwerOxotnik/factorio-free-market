@@ -20,13 +20,14 @@ data:extend({
 	{type = "double-setting", name = "FM_pull_cost_per_item", setting_type = "runtime-global", default_value = 0, minimum_value = 0, maximum_value = 4000000000},
 })
 
+--TODO: change setting_type!
 data:extend({
 	{
-			type = "string-setting",
-			name = "free_market-version",
-			setting_type = "startup",
-			default_value = "stable",
-			localised_name = {"gui-mod-info.version"},
-			allowed_values = {"debug", "stable"}
+		type = "string-setting",
+		name = "free_market-version",
+		setting_type = "startup",
+		default_value = "extra-stable",
+		localised_name = {"gui-mod-info.version"},
+		allowed_values = {"debug", "stable", "extra-stable"}
 	}
 })
