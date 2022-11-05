@@ -3618,7 +3618,8 @@ end
 local function check_pull_boxes()
 	local pulled_item_count = {}
 	for force_index, _items_data in pairs(pull_boxes) do
-		if pull_cost_per_item == 0 or call("EasyAPI", "get_force_money", force_index) > money_treshold then
+		local force_money = call("EasyAPI", "get_force_money", force_index)
+		if force_money and (pull_cost_per_item == 0 or call("EasyAPI", "get_force_money", force_index) > money_treshold) then
 			local inserted_count_in_total = 0
 			pulled_item_count[force_index] = 0
 			local storage = storages[force_index]
