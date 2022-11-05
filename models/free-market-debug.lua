@@ -87,7 +87,7 @@ local BUY_PRICE_BUTTON = { -- models/free-market.can:187
 	["style"] = "slot_button", -- models/free-market.can:187
 	["name"] = "FM_open_buy_price" -- models/free-market.can:187
 } -- models/free-market.can:187
-local ALLOWED_TYPES = { -- models/free-market.can:188
+local ALLOWED_CHEST_TYPES = { -- models/free-market.can:188
 	["container"] = true, -- models/free-market.can:188
 	["logistic-container"] = true -- models/free-market.can:188
 } -- models/free-market.can:188
@@ -1363,7 +1363,7 @@ local function set_transfer_box_data(item_name, player, entity) -- models/free-m
 	local entities = f_transfer_boxes[item_name] -- models/free-market.can:1508
 	entities[# entities + 1] = entity -- models/free-market.can:1509
 	local sprite_data = { -- models/free-market.can:1510
-		["sprite"] = "FM_transfer", -- models/free-market.can:1511
+		["sprite"] = "FM_transparent-transfer", -- models/free-market.can:1511
 		["target"] = entity, -- models/free-market.can:1512
 		["surface"] = entity["surface"], -- models/free-market.can:1513
 		["target_offset"] = BOX_TYPE_SPRITE_OFFSET, -- models/free-market.can:1514
@@ -1391,7 +1391,7 @@ local function set_universal_transfer_box_data(player, entity) -- models/free-ma
 	local entities = universal_transfer_boxes[force_index] -- models/free-market.can:1536
 	entities[# entities + 1] = entity -- models/free-market.can:1537
 	local sprite_data = { -- models/free-market.can:1538
-		["sprite"] = "FM_universal_transfer", -- models/free-market.can:1539
+		["sprite"] = "FM_transparent-universal-transfer", -- models/free-market.can:1539
 		["target"] = entity, -- models/free-market.can:1540
 		["surface"] = entity["surface"], -- models/free-market.can:1541
 		["target_offset"] = BOX_TYPE_SPRITE_OFFSET, -- models/free-market.can:1542
@@ -1421,7 +1421,7 @@ local function set_bin_box_data(item_name, player, entity) -- models/free-market
 	local entities = f_bin_boxes[item_name] -- models/free-market.can:1566
 	entities[# entities + 1] = entity -- models/free-market.can:1567
 	local sprite_data = { -- models/free-market.can:1568
-		["sprite"] = "FM_bin", -- models/free-market.can:1569
+		["sprite"] = "FM_transparent-bin", -- models/free-market.can:1569
 		["target"] = entity, -- models/free-market.can:1570
 		["surface"] = entity["surface"], -- models/free-market.can:1571
 		["target_offset"] = BOX_TYPE_SPRITE_OFFSET, -- models/free-market.can:1572
@@ -1448,7 +1448,7 @@ local function set_universal_bin_box_data(player, entity) -- models/free-market.
 	local entities = universal_bin_boxes[force_index] -- models/free-market.can:1592
 	entities[# entities + 1] = entity -- models/free-market.can:1593
 	local sprite_data = { -- models/free-market.can:1594
-		["sprite"] = "FM_universal_bin", -- models/free-market.can:1595
+		["sprite"] = "FM_transparent-universal-bin", -- models/free-market.can:1595
 		["target"] = entity, -- models/free-market.can:1596
 		["surface"] = entity["surface"], -- models/free-market.can:1597
 		["target_offset"] = BOX_TYPE_SPRITE_OFFSET, -- models/free-market.can:1598
@@ -1476,7 +1476,7 @@ local function set_pull_box_data(item_name, player, entity) -- models/free-marke
 	local items = force_pull_boxes[item_name] -- models/free-market.can:1620
 	items[# items + 1] = entity -- models/free-market.can:1621
 	local sprite_data = { -- models/free-market.can:1622
-		["sprite"] = "FM_pull_out", -- models/free-market.can:1623
+		["sprite"] = "FM_transparent-pull-out", -- models/free-market.can:1623
 		["target"] = entity, -- models/free-market.can:1624
 		["surface"] = entity["surface"], -- models/free-market.can:1625
 		["target_offset"] = BOX_TYPE_SPRITE_OFFSET, -- models/free-market.can:1626
@@ -1519,7 +1519,7 @@ local function set_buy_box_data(item_name, player, entity, count) -- models/free
 		count -- models/free-market.can:1664
 	} -- models/free-market.can:1664
 	local sprite_data = { -- models/free-market.can:1665
-		["sprite"] = "FM_buy", -- models/free-market.can:1666
+		["sprite"] = "FM_transparent-buy", -- models/free-market.can:1666
 		["target"] = entity, -- models/free-market.can:1667
 		["surface"] = entity["surface"], -- models/free-market.can:1668
 		["target_offset"] = BOX_TYPE_SPRITE_OFFSET, -- models/free-market.can:1669
@@ -1706,7 +1706,7 @@ local function open_force_configuration(player) -- models/free-market.can:1693
 		"Translators", -- models/free-market.can:1766
 		COLON, -- models/free-market.can:1766
 		" ", -- models/free-market.can:1766
-		"Eerrikki (Robin Braathen), eifel (Eifel87), zszzlzm (刘泽民), Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik" -- models/free-market.can:1766
+		"Xman1109, Eerrikki (Robin Braathen), eifel (Eifel87), zszzlzm (刘泽民), Spielen01231 (TheFakescribtx2), Drilzxx_ (Kévin), eifel (Eifel87), Felix_Manning (Felix Manning), ZwerOxotnik" -- models/free-market.can:1766
 	} -- models/free-market.can:1766
 	content["add"](LABEL)["caption"] = { -- models/free-market.can:1767
 		"", -- models/free-market.can:1767
@@ -2669,7 +2669,7 @@ local function set_transfer_box_key_pressed(event) -- models/free-market.can:256
 	if not entity["operable"] then -- models/free-market.can:2565
 		return  -- models/free-market.can:2565
 	end -- models/free-market.can:2565
-	if not ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:2566
+	if not ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:2566
 		return  -- models/free-market.can:2566
 	end -- models/free-market.can:2566
 	if get_distance(player["position"], entity["position"]) > 30 then -- models/free-market.can:2567
@@ -2705,7 +2705,7 @@ local function set_bin_box_key_pressed(event) -- models/free-market.can:2590
 	if not entity["operable"] then -- models/free-market.can:2594
 		return  -- models/free-market.can:2594
 	end -- models/free-market.can:2594
-	if not ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:2595
+	if not ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:2595
 		return  -- models/free-market.can:2595
 	end -- models/free-market.can:2595
 	if get_distance(player["position"], entity["position"]) > 30 then -- models/free-market.can:2596
@@ -2733,7 +2733,7 @@ local function set_universal_transfer_box_key_pressed(event) -- models/free-mark
 	if not entity["operable"] then -- models/free-market.can:2615
 		return  -- models/free-market.can:2615
 	end -- models/free-market.can:2615
-	if not ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:2616
+	if not ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:2616
 		return  -- models/free-market.can:2616
 	end -- models/free-market.can:2616
 	if get_distance(player["position"], entity["position"]) > 30 then -- models/free-market.can:2617
@@ -2761,7 +2761,7 @@ local function set_universal_bin_box_key_pressed(event) -- models/free-market.ca
 	if not entity["operable"] then -- models/free-market.can:2637
 		return  -- models/free-market.can:2637
 	end -- models/free-market.can:2637
-	if not ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:2638
+	if not ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:2638
 		return  -- models/free-market.can:2638
 	end -- models/free-market.can:2638
 	if get_distance(player["position"], entity["position"]) > 30 then -- models/free-market.can:2639
@@ -2780,7 +2780,7 @@ local function set_pull_box_key_pressed(event) -- models/free-market.can:2646
 	if not entity["operable"] then -- models/free-market.can:2650
 		return  -- models/free-market.can:2650
 	end -- models/free-market.can:2650
-	if not ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:2651
+	if not ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:2651
 		return  -- models/free-market.can:2651
 	end -- models/free-market.can:2651
 	if get_distance(player["position"], entity["position"]) > 30 then -- models/free-market.can:2652
@@ -2808,7 +2808,7 @@ local function set_buy_box_key_pressed(event) -- models/free-market.can:2667
 	if not entity["operable"] then -- models/free-market.can:2671
 		return  -- models/free-market.can:2671
 	end -- models/free-market.can:2671
-	if not ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:2672
+	if not ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:2672
 		return  -- models/free-market.can:2672
 	end -- models/free-market.can:2672
 	if get_distance(player["position"], entity["position"]) > 30 then -- models/free-market.can:2673
@@ -3299,7 +3299,7 @@ local GUIS = { -- models/free-market.can:2747
 	end, -- models/free-market.can:3107
 	["FM_set_transfer_box"] = function(element, player) -- models/free-market.can:3109
 		local entity = player["opened"] -- models/free-market.can:3110
-		if ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:3112
+		if ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:3112
 			if player["force"] ~= entity["force"] then -- models/free-market.can:3113
 				player["print"]({ "free-market.you-cant-change" }) -- models/free-market.can:3114
 				return  -- models/free-market.can:3115
@@ -3340,7 +3340,7 @@ local GUIS = { -- models/free-market.can:2747
 	end, -- models/free-market.can:3149
 	["FM_set_universal_transfer_box"] = function(element, player) -- models/free-market.can:3152
 		local entity = player["opened"] -- models/free-market.can:3153
-		if ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:3155
+		if ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:3155
 			if player["force"] ~= entity["force"] then -- models/free-market.can:3156
 				player["print"]({ "free-market.you-cant-change" }) -- models/free-market.can:3157
 				return  -- models/free-market.can:3158
@@ -3372,7 +3372,7 @@ local GUIS = { -- models/free-market.can:2747
 	end, -- models/free-market.can:3183
 	["FM_set_bin_box"] = function(element, player) -- models/free-market.can:3186
 		local entity = player["opened"] -- models/free-market.can:3187
-		if ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:3189
+		if ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:3189
 			if player["force"] ~= entity["force"] then -- models/free-market.can:3190
 				player["print"]({ "free-market.you-cant-change" }) -- models/free-market.can:3191
 				return  -- models/free-market.can:3192
@@ -3408,7 +3408,7 @@ local GUIS = { -- models/free-market.can:2747
 	end, -- models/free-market.can:3221
 	["FM_set_universal_bin_box"] = function(element, player) -- models/free-market.can:3224
 		local entity = player["opened"] -- models/free-market.can:3225
-		if ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:3227
+		if ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:3227
 			if player["force"] ~= entity["force"] then -- models/free-market.can:3228
 				player["print"]({ "free-market.you-cant-change" }) -- models/free-market.can:3229
 				return  -- models/free-market.can:3230
@@ -3437,7 +3437,7 @@ local GUIS = { -- models/free-market.can:2747
 	end, -- models/free-market.can:3252
 	["FM_set_pull_box"] = function(element, player) -- models/free-market.can:3255
 		local entity = player["opened"] -- models/free-market.can:3256
-		if ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:3258
+		if ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:3258
 			if player["force"] ~= entity["force"] then -- models/free-market.can:3259
 				player["print"]({ "free-market.you-cant-change" }) -- models/free-market.can:3260
 				return  -- models/free-market.can:3261
@@ -3476,7 +3476,7 @@ local GUIS = { -- models/free-market.can:2747
 	end, -- models/free-market.can:3293
 	["FM_set_buy_box"] = function(element, player) -- models/free-market.can:3296
 		local entity = player["opened"] -- models/free-market.can:3297
-		if ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:3299
+		if ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:3299
 			if player["force"] ~= entity["force"] then -- models/free-market.can:3300
 				player["print"]({ "free-market.you-cant-change" }) -- models/free-market.can:3301
 				return  -- models/free-market.can:3302
@@ -3801,385 +3801,399 @@ local GUIS = { -- models/free-market.can:2747
 } -- models/free-market.can:3586
 local function on_gui_click(event) -- models/free-market.can:3590
 	local element = event["element"] -- models/free-market.can:3591
-	local f = GUIS[element["name"]] -- models/free-market.can:3592
-	if f then -- models/free-market.can:3593
-		f(element, game["get_player"](event["player_index"]), event) -- models/free-market.can:3593
-	end -- models/free-market.can:3593
-end -- models/free-market.can:3593
-local function on_gui_closed(event) -- models/free-market.can:3596
-	local entity = event["entity"] -- models/free-market.can:3597
-	if not (entity and entity["valid"]) then -- models/free-market.can:3598
-		return  -- models/free-market.can:3598
-	end -- models/free-market.can:3598
-	if not ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:3599
-		return  -- models/free-market.can:3599
-	end -- models/free-market.can:3599
-	local player = game["get_player"](event["player_index"]) -- models/free-market.can:3600
-	if not (player and player["valid"]) then -- models/free-market.can:3601
-		return  -- models/free-market.can:3601
-	end -- models/free-market.can:3601
-	player["gui"]["relative"]["FM_boxes_frame"]["content"]["main_flow"]["box_operations"]["clear"]() -- models/free-market.can:3602
-end -- models/free-market.can:3602
-local function check_pull_boxes() -- models/free-market.can:3605
-	local pulled_item_count = {} -- models/free-market.can:3606
-	for force_index, _items_data in pairs(pull_boxes) do -- models/free-market.can:3607
-		if pull_cost_per_item == 0 or call("EasyAPI", "get_force_money", force_index) > money_treshold then -- models/free-market.can:3608
-			local inserted_count_in_total = 0 -- models/free-market.can:3609
-			pulled_item_count[force_index] = 0 -- models/free-market.can:3610
-			local storage = storages[force_index] -- models/free-market.can:3611
-			for item_name, force_entities in pairs(_items_data) do -- models/free-market.can:3612
-				local count_in_storage = storage[item_name] -- models/free-market.can:3613
-				if count_in_storage and count_in_storage > 0 then -- models/free-market.can:3614
-					stack["name"] = item_name -- models/free-market.can:3615
-					for i = 1, # force_entities do -- models/free-market.can:3616
-						if count_in_storage <= 0 then -- models/free-market.can:3617
-							break -- models/free-market.can:3618
-						end -- models/free-market.can:3618
-						stack["count"] = count_in_storage -- models/free-market.can:3620
-						local inserted_count = force_entities[i]["insert"](stack) -- models/free-market.can:3621
-						inserted_count_in_total = inserted_count_in_total + inserted_count -- models/free-market.can:3622
-						count_in_storage = count_in_storage - inserted_count -- models/free-market.can:3623
-					end -- models/free-market.can:3623
-					storage[item_name] = count_in_storage -- models/free-market.can:3625
-				end -- models/free-market.can:3625
-			end -- models/free-market.can:3625
-			pulled_item_count[force_index] = inserted_count_in_total -- models/free-market.can:3628
-		end -- models/free-market.can:3628
-	end -- models/free-market.can:3628
-	if pull_cost_per_item == 0 then -- models/free-market.can:3632
-		return  -- models/free-market.can:3632
-	end -- models/free-market.can:3632
-	for force_index, count in pairs(pulled_item_count) do -- models/free-market.can:3633
-		if count > 0 then -- models/free-market.can:3634
-			call("EasyAPI", "deposit_force_money_by_index", force_index, - ceil(count * pull_cost_per_item)) -- models/free-market.can:3637
-		end -- models/free-market.can:3637
-	end -- models/free-market.can:3637
-end -- models/free-market.can:3637
-local function check_transfer_boxes() -- models/free-market.can:3643
-	stack["count"] = 4000000000 -- models/free-market.can:3644
-	for force_index, force_entities in pairs(universal_bin_boxes) do -- models/free-market.can:3645
-		local storage = storages[force_index] -- models/free-market.can:3646
-		for i = 1, # force_entities do -- models/free-market.can:3647
-			local entity = force_entities[i] -- models/free-market.can:3648
-			local contents = entity["get_inventory"](1)["get_contents"]() -- models/free-market.can:3649
-			for item_name in pairs(contents) do -- models/free-market.can:3650
-				local count = storage[item_name] or 0 -- models/free-market.can:3651
-				stack["name"] = item_name -- models/free-market.can:3652
-				local sum = entity["remove_item"](stack) -- models/free-market.can:3653
-				if sum > 0 then -- models/free-market.can:3654
-					storage[item_name] = count + sum -- models/free-market.can:3655
-				end -- models/free-market.can:3655
-			end -- models/free-market.can:3655
-		end -- models/free-market.can:3655
-	end -- models/free-market.can:3655
-	for force_index, _items_data in pairs(bin_boxes) do -- models/free-market.can:3661
-		local storage = storages[force_index] -- models/free-market.can:3662
-		for item_name, force_entities in pairs(_items_data) do -- models/free-market.can:3663
-			local count = storage[item_name] or 0 -- models/free-market.can:3664
-			stack["name"] = item_name -- models/free-market.can:3665
-			local sum = 0 -- models/free-market.can:3666
-			for i = 1, # force_entities do -- models/free-market.can:3667
-				sum = sum + force_entities[i]["remove_item"](stack) -- models/free-market.can:3668
-			end -- models/free-market.can:3668
-			if sum > 0 then -- models/free-market.can:3670
-				storage[item_name] = count + sum -- models/free-market.can:3671
-			end -- models/free-market.can:3671
-		end -- models/free-market.can:3671
-	end -- models/free-market.can:3671
-	for force_index, force_entities in pairs(universal_transfer_boxes) do -- models/free-market.can:3677
-		local default_limit = default_storage_limit[force_index] -- models/free-market.can:3678
-		local storage_limit = storages_limit[force_index] -- models/free-market.can:3679
-		local storage = storages[force_index] -- models/free-market.can:3680
-		for i = 1, # force_entities do -- models/free-market.can:3681
-			local entity = force_entities[i] -- models/free-market.can:3682
-			local contents = entity["get_inventory"](1)["get_contents"]() -- models/free-market.can:3683
-			for item_name in pairs(contents) do -- models/free-market.can:3684
-				local count = storage[item_name] or 0 -- models/free-market.can:3685
-				local max_count = (storage_limit[item_name] or default_limit or max_storage_threshold) - count -- models/free-market.can:3686
-				if max_count > 0 then -- models/free-market.can:3687
-					stack["count"] = max_count -- models/free-market.can:3688
-					stack["name"] = item_name -- models/free-market.can:3689
-					local sum = entity["remove_item"](stack) -- models/free-market.can:3690
-					if sum > 0 then -- models/free-market.can:3691
-						storage[item_name] = count + sum -- models/free-market.can:3692
-					end -- models/free-market.can:3692
-				end -- models/free-market.can:3692
-			end -- models/free-market.can:3692
-		end -- models/free-market.can:3692
-	end -- models/free-market.can:3692
-	for force_index, _items_data in pairs(transfer_boxes) do -- models/free-market.can:3699
-		local default_limit = default_storage_limit[force_index] -- models/free-market.can:3700
-		local storage_limit = storages_limit[force_index] -- models/free-market.can:3701
-		local storage = storages[force_index] -- models/free-market.can:3702
-		for item_name, force_entities in pairs(_items_data) do -- models/free-market.can:3703
-			local count = storage[item_name] or 0 -- models/free-market.can:3704
-			local max_count = (storage_limit[item_name] or default_limit or max_storage_threshold) - count -- models/free-market.can:3705
-			if max_count > 0 then -- models/free-market.can:3706
-				stack["count"] = max_count -- models/free-market.can:3707
-				stack["name"] = item_name -- models/free-market.can:3708
-				local sum = 0 -- models/free-market.can:3709
-				for i = 1, # force_entities do -- models/free-market.can:3710
-					sum = sum + force_entities[i]["remove_item"](stack) -- models/free-market.can:3711
-				end -- models/free-market.can:3711
-				if sum > 0 then -- models/free-market.can:3713
-					storage[item_name] = count + sum -- models/free-market.can:3714
-				end -- models/free-market.can:3714
+	if not (element and element["valid"]) then -- models/free-market.can:3592
+		return  -- models/free-market.can:3592
+	end -- models/free-market.can:3592
+	local f = GUIS[element["name"]] -- models/free-market.can:3593
+	if f then -- models/free-market.can:3594
+		f(element, game["get_player"](event["player_index"]), event) -- models/free-market.can:3595
+	end -- models/free-market.can:3595
+end -- models/free-market.can:3595
+local function on_gui_opened(event) -- models/free-market.can:3600
+	local entity = event["entity"] -- models/free-market.can:3601
+	if not (entity and entity["valid"]) then -- models/free-market.can:3602
+		return  -- models/free-market.can:3602
+	end -- models/free-market.can:3602
+	local player = game["get_player"](event["player_index"]) -- models/free-market.can:3603
+	if not (player and player["valid"]) then -- models/free-market.can:3604
+		return  -- models/free-market.can:3604
+	end -- models/free-market.can:3604
+	player["gui"]["relative"]["FM_boxes_frame"]["visible"] = ALLOWED_CHEST_TYPES[entity["type"]] == true -- models/free-market.can:3606
+end -- models/free-market.can:3606
+local function on_gui_closed(event) -- models/free-market.can:3609
+	local entity = event["entity"] -- models/free-market.can:3610
+	if not (entity and entity["valid"]) then -- models/free-market.can:3611
+		return  -- models/free-market.can:3611
+	end -- models/free-market.can:3611
+	if not ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:3612
+		return  -- models/free-market.can:3612
+	end -- models/free-market.can:3612
+	local player = game["get_player"](event["player_index"]) -- models/free-market.can:3613
+	if not (player and player["valid"]) then -- models/free-market.can:3614
+		return  -- models/free-market.can:3614
+	end -- models/free-market.can:3614
+	player["gui"]["relative"]["FM_boxes_frame"]["content"]["main_flow"]["box_operations"]["clear"]() -- models/free-market.can:3615
+end -- models/free-market.can:3615
+local function check_pull_boxes() -- models/free-market.can:3618
+	local pulled_item_count = {} -- models/free-market.can:3619
+	for force_index, _items_data in pairs(pull_boxes) do -- models/free-market.can:3620
+		local force_money = call("EasyAPI", "get_force_money", force_index) -- models/free-market.can:3621
+		if force_money and (pull_cost_per_item == 0 or call("EasyAPI", "get_force_money", force_index) > money_treshold) then -- models/free-market.can:3622
+			local inserted_count_in_total = 0 -- models/free-market.can:3623
+			pulled_item_count[force_index] = 0 -- models/free-market.can:3624
+			local storage = storages[force_index] -- models/free-market.can:3625
+			for item_name, force_entities in pairs(_items_data) do -- models/free-market.can:3626
+				local count_in_storage = storage[item_name] -- models/free-market.can:3627
+				if count_in_storage and count_in_storage > 0 then -- models/free-market.can:3628
+					stack["name"] = item_name -- models/free-market.can:3629
+					for i = # force_entities, 1, - 1 do -- models/free-market.can:3630
+						if count_in_storage <= 0 then -- models/free-market.can:3631
+							break -- models/free-market.can:3632
+						end -- models/free-market.can:3632
+						local entity = force_entities[i] -- models/free-market.can:3634
+						stack["count"] = count_in_storage -- models/free-market.can:3641
+						local inserted_count = entity["insert"](stack) -- models/free-market.can:3642
+						inserted_count_in_total = inserted_count_in_total + inserted_count -- models/free-market.can:3643
+						count_in_storage = count_in_storage - inserted_count -- models/free-market.can:3644
+					end -- models/free-market.can:3644
+					storage[item_name] = count_in_storage -- models/free-market.can:3649
+				end -- models/free-market.can:3649
+			end -- models/free-market.can:3649
+			pulled_item_count[force_index] = inserted_count_in_total -- models/free-market.can:3652
+		end -- models/free-market.can:3652
+	end -- models/free-market.can:3652
+	if pull_cost_per_item == 0 then -- models/free-market.can:3656
+		return  -- models/free-market.can:3656
+	end -- models/free-market.can:3656
+	for force_index, count in pairs(pulled_item_count) do -- models/free-market.can:3657
+		if count > 0 then -- models/free-market.can:3658
+			call("EasyAPI", "deposit_force_money_by_index", force_index, - ceil(count * pull_cost_per_item)) -- models/free-market.can:3661
+		end -- models/free-market.can:3661
+	end -- models/free-market.can:3661
+end -- models/free-market.can:3661
+local function check_transfer_boxes() -- models/free-market.can:3667
+	stack["count"] = 4000000000 -- models/free-market.can:3668
+	for force_index, force_entities in pairs(universal_bin_boxes) do -- models/free-market.can:3669
+		local storage = storages[force_index] -- models/free-market.can:3670
+		for i = # force_entities, 1, - 1 do -- models/free-market.can:3671
+			local entity = force_entities[i] -- models/free-market.can:3672
+			local contents = entity["get_inventory"](1)["get_contents"]() -- models/free-market.can:3679
+			for item_name in pairs(contents) do -- models/free-market.can:3680
+				local count = storage[item_name] or 0 -- models/free-market.can:3681
+				stack["name"] = item_name -- models/free-market.can:3682
+				local sum = entity["remove_item"](stack) -- models/free-market.can:3683
+				if sum > 0 then -- models/free-market.can:3684
+					storage[item_name] = count + sum -- models/free-market.can:3685
+				end -- models/free-market.can:3685
+			end -- models/free-market.can:3685
+		end -- models/free-market.can:3685
+	end -- models/free-market.can:3685
+	for force_index, _items_data in pairs(bin_boxes) do -- models/free-market.can:3694
+		local storage = storages[force_index] -- models/free-market.can:3695
+		for item_name, force_entities in pairs(_items_data) do -- models/free-market.can:3696
+			local count = storage[item_name] or 0 -- models/free-market.can:3697
+			stack["name"] = item_name -- models/free-market.can:3698
+			local sum = 0 -- models/free-market.can:3699
+			for i = # force_entities, 1, - 1 do -- models/free-market.can:3700
+				local entity = force_entities[i] -- models/free-market.can:3701
+				sum = sum + entity["remove_item"](stack) -- models/free-market.can:3708
+			end -- models/free-market.can:3708
+			if sum > 0 then -- models/free-market.can:3713
+				storage[item_name] = count + sum -- models/free-market.can:3714
 			end -- models/free-market.can:3714
 		end -- models/free-market.can:3714
 	end -- models/free-market.can:3714
-end -- models/free-market.can:3714
-local function check_buy_boxes() -- models/free-market.can:3721
-	local last_checked_index = mod_data["last_checked_index"] -- models/free-market.can:3722
-	local buyer_index -- models/free-market.can:3723
-	if last_checked_index then -- models/free-market.can:3724
-		buyer_index = active_forces[last_checked_index] -- models/free-market.can:3725
-		if buyer_index then -- models/free-market.can:3726
-			mod_data["last_checked_index"] = last_checked_index + 1 -- models/free-market.can:3727
-		else -- models/free-market.can:3727
-			mod_data["last_checked_index"] = nil -- models/free-market.can:3729
-			return  -- models/free-market.can:3730
-		end -- models/free-market.can:3730
-	else -- models/free-market.can:3730
-		last_checked_index, buyer_index = next(active_forces) -- models/free-market.can:3733
-		if last_checked_index then -- models/free-market.can:3734
-			mod_data["last_checked_index"] = last_checked_index -- models/free-market.can:3735
-		else -- models/free-market.can:3735
-			return  -- models/free-market.can:3737
-		end -- models/free-market.can:3737
-	end -- models/free-market.can:3737
-	local items_data = buy_boxes[buyer_index] -- models/free-market.can:3741
-	if items_data == nil then -- models/free-market.can:3743
-		return  -- models/free-market.can:3743
-	end -- models/free-market.can:3743
-	local forces_money = call("EasyAPI", "get_forces_money") -- models/free-market.can:3745
-	local forces_money_copy = {} -- models/free-market.can:3746
-	for _force_index, value in pairs(forces_money) do -- models/free-market.can:3747
-		forces_money_copy[_force_index] = value -- models/free-market.can:3748
-	end -- models/free-market.can:3748
-	local buyer_money = forces_money_copy[buyer_index] -- models/free-market.can:3751
-	if buyer_money and buyer_money > money_treshold then -- models/free-market.can:3752
-		local stack_count = 0 -- models/free-market.can:3753
-		local payment = 0 -- models/free-market.can:3754
-		local f_buy_prices = buy_prices[buyer_index] -- models/free-market.can:3755
-		local inserted_count_in_total = 0 -- models/free-market.can:3756
-		for item_name, entities in pairs(items_data) do -- models/free-market.can:3757
-			if money_treshold >= buyer_money then -- models/free-market.can:3758
-				goto not_enough_money -- models/free-market.can:3760
-			end -- models/free-market.can:3760
-			local buy_price = f_buy_prices[item_name] -- models/free-market.can:3762
-			if buy_price and buyer_money >= buy_price then -- models/free-market.can:3763
-				for i = 1, # entities do -- models/free-market.can:3764
-					local buy_data = entities[i] -- models/free-market.can:3765
-					local purchasable_count = buyer_money / buy_price -- models/free-market.can:3766
-					if purchasable_count < 1 then -- models/free-market.can:3767
-						goto skip_buy -- models/free-market.can:3768
-					else -- models/free-market.can:3768
-						purchasable_count = floor(purchasable_count) -- models/free-market.can:3770
-					end -- models/free-market.can:3770
-					local buy_box = buy_data[1] -- models/free-market.can:3772
-					local need_count = buy_data[2] -- models/free-market.can:3773
-					if purchasable_count < need_count then -- models/free-market.can:3774
-						need_count = purchasable_count -- models/free-market.can:3775
-					end -- models/free-market.can:3775
-					local count = buy_box["get_item_count"](item_name) -- models/free-market.can:3777
-					stack["name"] = item_name -- models/free-market.can:3778
-					if need_count < count then -- models/free-market.can:3779
-						stack_count = count -- models/free-market.can:3780
-					else -- models/free-market.can:3780
-						need_count = need_count - count -- models/free-market.can:3782
-						if need_count <= 0 then -- models/free-market.can:3783
-							goto skip_buy -- models/free-market.can:3784
-						end -- models/free-market.can:3784
-						local buyer_storage = storages[buyer_index] -- models/free-market.can:3787
-						local count_in_storage = buyer_storage[item_name] -- models/free-market.can:3788
-						if count_in_storage and count_in_storage > 0 then -- models/free-market.can:3789
-							stack_count = need_count - count_in_storage -- models/free-market.can:3790
-							if stack_count <= 0 then -- models/free-market.can:3791
-								buyer_storage[item_name] = count_in_storage - need_count -- models/free-market.can:3792
-								stack_count = 0 -- models/free-market.can:3793
-								goto fulfilled_needs -- models/free-market.can:3794
-							else -- models/free-market.can:3794
-								buyer_storage[item_name] = count_in_storage + (stack_count - need_count) -- models/free-market.can:3796
-							end -- models/free-market.can:3796
-						else -- models/free-market.can:3796
-							stack_count = need_count -- models/free-market.can:3799
-						end -- models/free-market.can:3799
-						for seller_index, seller_storage in pairs(storages) do -- models/free-market.can:3802
-							if buyer_index ~= seller_index and forces_money[seller_index] and not embargoes[seller_index][buyer_index] then -- models/free-market.can:3803
-								local sell_price = sell_prices[seller_index][item_name] -- models/free-market.can:3804
-								if sell_price and buy_price >= sell_price then -- models/free-market.can:3805
-									count_in_storage = seller_storage[item_name] -- models/free-market.can:3806
-									if count_in_storage then -- models/free-market.can:3807
-										if count_in_storage > stack_count then -- models/free-market.can:3808
-											seller_storage[item_name] = count_in_storage - stack_count -- models/free-market.can:3809
-											stack_count = 0 -- models/free-market.can:3810
-											payment = need_count * sell_price -- models/free-market.can:3811
-											buyer_money = buyer_money - payment -- models/free-market.can:3812
-											forces_money_copy[seller_index] = forces_money_copy[seller_index] + payment -- models/free-market.can:3813
-											goto fulfilled_needs -- models/free-market.can:3814
-										else -- models/free-market.can:3814
-											stack_count = stack_count - count_in_storage -- models/free-market.can:3816
-											seller_storage[item_name] = 0 -- models/free-market.can:3817
-											payment = (need_count - stack_count) * sell_price -- models/free-market.can:3818
-											buyer_money = buyer_money - payment -- models/free-market.can:3819
-											forces_money_copy[seller_index] = forces_money_copy[seller_index] + payment -- models/free-market.can:3820
-										end -- models/free-market.can:3820
-									end -- models/free-market.can:3820
-								end -- models/free-market.can:3820
-							end -- models/free-market.can:3820
-						end -- models/free-market.can:3820
-					end -- models/free-market.can:3820
-					::fulfilled_needs:: -- models/free-market.can:3827
-					local found_items = need_count - stack_count -- models/free-market.can:3828
-					if found_items > 0 then -- models/free-market.can:3829
-						stack["count"] = found_items -- models/free-market.can:3830
-						inserted_count_in_total = inserted_count_in_total + buy_box["insert"](stack) -- models/free-market.can:3831
-					end -- models/free-market.can:3831
-					::skip_buy:: -- models/free-market.can:3833
-				end -- models/free-market.can:3833
-			end -- models/free-market.can:3833
-		end -- models/free-market.can:3833
-		::not_enough_money:: -- models/free-market.can:3837
-		if pull_cost_per_item == 0 then -- models/free-market.can:3838
-			forces_money_copy[buyer_index] = buyer_money -- models/free-market.can:3839
-		else -- models/free-market.can:3839
-			forces_money_copy[buyer_index] = buyer_money - ceil(inserted_count_in_total * pull_cost_per_item) -- models/free-market.can:3841
-		end -- models/free-market.can:3841
-	else -- models/free-market.can:3841
-		return  -- models/free-market.can:3844
-	end -- models/free-market.can:3844
-	local forces = game["forces"] -- models/free-market.can:3847
-	for _force_index, money in pairs(forces_money_copy) do -- models/free-market.can:3848
-		local prev_money = forces_money[_force_index] -- models/free-market.can:3849
-		if prev_money ~= money then -- models/free-market.can:3850
-			local force = forces[_force_index] -- models/free-market.can:3851
-			call("EasyAPI", "set_force_money", force, money) -- models/free-market.can:3852
-			force["item_production_statistics"]["on_flow"]("trading", money - prev_money) -- models/free-market.can:3854
-		end -- models/free-market.can:3854
-	end -- models/free-market.can:3854
-end -- models/free-market.can:3854
-local function on_player_changed_force(event) -- models/free-market.can:3859
-	local player_index = event["player_index"] -- models/free-market.can:3860
-	local player = game["get_player"](player_index) -- models/free-market.can:3861
-	if not (player and player["valid"]) then -- models/free-market.can:3862
-		return  -- models/free-market.can:3862
-	end -- models/free-market.can:3862
-	if open_box[player_index] then -- models/free-market.can:3864
-		clear_boxes_gui(player) -- models/free-market.can:3865
-	end -- models/free-market.can:3865
-	local index = player["force"]["index"] -- models/free-market.can:3868
-	if transfer_boxes[index] == nil then -- models/free-market.can:3869
-		init_force_data(index) -- models/free-market.can:3870
-	end -- models/free-market.can:3870
-end -- models/free-market.can:3870
-local function on_player_changed_surface(event) -- models/free-market.can:3874
-	local player_index = event["player_index"] -- models/free-market.can:3875
-	local player = game["get_player"](event["player_index"]) -- models/free-market.can:3876
-	if not (player and player["valid"]) then -- models/free-market.can:3877
-		return  -- models/free-market.can:3877
-	end -- models/free-market.can:3877
-	if open_box[player_index] then -- models/free-market.can:3879
-		clear_boxes_gui(player) -- models/free-market.can:3880
-	end -- models/free-market.can:3880
-end -- models/free-market.can:3880
-local function on_player_left_game(event) -- models/free-market.can:3884
-	local player = game["get_player"](event["player_index"]) -- models/free-market.can:3885
-	if not (player and player["valid"]) then -- models/free-market.can:3886
-		return  -- models/free-market.can:3886
-	end -- models/free-market.can:3886
-	clear_boxes_gui(player) -- models/free-market.can:3888
-	destroy_prices_gui(player) -- models/free-market.can:3889
-	delete_item_price_HUD(player) -- models/free-market.can:3890
-	destroy_price_list_gui(player) -- models/free-market.can:3891
-	destroy_force_configuration(player) -- models/free-market.can:3892
-end -- models/free-market.can:3892
-local function on_selected_entity_changed(event) -- models/free-market.can:3895
-	local player = game["get_player"](event["player_index"]) -- models/free-market.can:3896
-	if not (player and player["valid"]) then -- models/free-market.can:3897
-		return  -- models/free-market.can:3897
-	end -- models/free-market.can:3897
-	local entity = player["selected"] -- models/free-market.can:3898
-	if not (entity and entity["valid"]) then -- models/free-market.can:3899
-		return  -- models/free-market.can:3899
-	end -- models/free-market.can:3899
-	if not ALLOWED_TYPES[entity["type"]] then -- models/free-market.can:3900
-		return  -- models/free-market.can:3900
-	end -- models/free-market.can:3900
-	if entity["force"] ~= player["force"] then -- models/free-market.can:3901
-		return  -- models/free-market.can:3901
-	end -- models/free-market.can:3901
-	local box_data = all_boxes[entity["unit_number"]] -- models/free-market.can:3902
-	if box_data == nil then -- models/free-market.can:3903
-		return  -- models/free-market.can:3903
-	end -- models/free-market.can:3903
-	local item_name = box_data[5] -- models/free-market.can:3904
-	if item_name == nil then -- models/free-market.can:3905
-		return  -- models/free-market.can:3905
-	end -- models/free-market.can:3905
-	show_item_info_HUD(player, item_name) -- models/free-market.can:3907
-end -- models/free-market.can:3907
-local SELECT_TOOLS = { -- models/free-market.can:3911
-	["FM_set_pull_boxes_tool"] = set_pull_box_data, -- models/free-market.can:3912
-	["FM_set_bin_boxes_tool"] = set_bin_box_data, -- models/free-market.can:3913
-	["FM_set_transfer_boxes_tool"] = set_transfer_box_data, -- models/free-market.can:3914
-	["FM_set_buy_boxes_tool"] = set_buy_box_data -- models/free-market.can:3915
-} -- models/free-market.can:3915
-local function on_player_selected_area(event) -- models/free-market.can:3917
-	local tool_name = event["item"] -- models/free-market.can:3918
-	local func = SELECT_TOOLS[tool_name] -- models/free-market.can:3919
-	if func then -- models/free-market.can:3920
-		local entities = event["entities"] -- models/free-market.can:3921
-		local player = game["get_player"](event["player_index"]) -- models/free-market.can:3922
-		for i = 1, # entities do -- models/free-market.can:3923
-			local entity = entities[i] -- models/free-market.can:3924
-			if all_boxes[entity["unit_number"]] == nil then -- models/free-market.can:3925
-				local item = entity["get_inventory"](1)[1] -- models/free-market.can:3926
-				if item["valid_for_read"] then -- models/free-market.can:3927
-					func(item["name"], player, entity) -- models/free-market.can:3928
-				end -- models/free-market.can:3928
-			end -- models/free-market.can:3928
-		end -- models/free-market.can:3928
-	elseif tool_name == "FM_set_universal_transfer_boxes_tool" then -- models/free-market.can:3932
-		local entities = event["entities"] -- models/free-market.can:3933
-		local player = game["get_player"](event["player_index"]) -- models/free-market.can:3934
-		for i = 1, # entities do -- models/free-market.can:3935
-			local entity = entities[i] -- models/free-market.can:3936
-			if all_boxes[entity["unit_number"]] == nil then -- models/free-market.can:3937
-				set_universal_transfer_box_data(player, entity) -- models/free-market.can:3938
-			end -- models/free-market.can:3938
-		end -- models/free-market.can:3938
-	elseif tool_name == "FM_set_universal_bin_boxes_tool" then -- models/free-market.can:3941
-		local entities = event["entities"] -- models/free-market.can:3942
-		local player = game["get_player"](event["player_index"]) -- models/free-market.can:3943
-		for i = 1, # entities do -- models/free-market.can:3944
-			local entity = entities[i] -- models/free-market.can:3945
-			if all_boxes[entity["unit_number"]] == nil then -- models/free-market.can:3946
-				set_universal_bin_box_data(player, entity) -- models/free-market.can:3947
-			end -- models/free-market.can:3947
-		end -- models/free-market.can:3947
-	elseif tool_name == "FM_remove_boxes_tool" then -- models/free-market.can:3950
-		local entities = event["entities"] -- models/free-market.can:3951
-		local player = game["get_player"](event["player_index"]) -- models/free-market.can:3952
-		local count = 0 -- models/free-market.can:3953
-		for i = 1, # entities do -- models/free-market.can:3954
-			local is_deleted = clear_box_data_by_entity(entities[i]) -- models/free-market.can:3955
-			if is_deleted then -- models/free-market.can:3956
-				count = count + 1 -- models/free-market.can:3957
-			end -- models/free-market.can:3957
-		end -- models/free-market.can:3957
-		if count > 0 then -- models/free-market.can:3960
-			player["print"]({ -- models/free-market.can:3961
-				"", -- models/free-market.can:3961
-				{ "gui-migrated-content.removed-entity" }, -- models/free-market.can:3961
-				COLON, -- models/free-market.can:3961
-				" ", -- models/free-market.can:3961
-				count -- models/free-market.can:3961
-			}) -- models/free-market.can:3961
-		end -- models/free-market.can:3961
+	for force_index, force_entities in pairs(universal_transfer_boxes) do -- models/free-market.can:3720
+		local default_limit = default_storage_limit[force_index] -- models/free-market.can:3721
+		local storage_limit = storages_limit[force_index] -- models/free-market.can:3722
+		local storage = storages[force_index] -- models/free-market.can:3723
+		for i = # force_entities, 1, - 1 do -- models/free-market.can:3724
+			local entity = force_entities[i] -- models/free-market.can:3725
+			local contents = entity["get_inventory"](1)["get_contents"]() -- models/free-market.can:3732
+			for item_name in pairs(contents) do -- models/free-market.can:3733
+				local count = storage[item_name] or 0 -- models/free-market.can:3734
+				local max_count = (storage_limit[item_name] or default_limit or max_storage_threshold) - count -- models/free-market.can:3735
+				if max_count > 0 then -- models/free-market.can:3736
+					stack["count"] = max_count -- models/free-market.can:3737
+					stack["name"] = item_name -- models/free-market.can:3738
+					local sum = entity["remove_item"](stack) -- models/free-market.can:3739
+					if sum > 0 then -- models/free-market.can:3740
+						storage[item_name] = count + sum -- models/free-market.can:3741
+					end -- models/free-market.can:3741
+				end -- models/free-market.can:3741
+			end -- models/free-market.can:3741
+		end -- models/free-market.can:3741
+	end -- models/free-market.can:3741
+	for force_index, _items_data in pairs(transfer_boxes) do -- models/free-market.can:3751
+		local default_limit = default_storage_limit[force_index] -- models/free-market.can:3752
+		local storage_limit = storages_limit[force_index] -- models/free-market.can:3753
+		local storage = storages[force_index] -- models/free-market.can:3754
+		for item_name, force_entities in pairs(_items_data) do -- models/free-market.can:3755
+			local count = storage[item_name] or 0 -- models/free-market.can:3756
+			local max_count = (storage_limit[item_name] or default_limit or max_storage_threshold) - count -- models/free-market.can:3757
+			if max_count > 0 then -- models/free-market.can:3758
+				stack["count"] = max_count -- models/free-market.can:3759
+				stack["name"] = item_name -- models/free-market.can:3760
+				local sum = 0 -- models/free-market.can:3761
+				for i = # force_entities, 1, - 1 do -- models/free-market.can:3762
+					local entity = force_entities[i] -- models/free-market.can:3763
+					sum = sum + entity["remove_item"](stack) -- models/free-market.can:3771
+				end -- models/free-market.can:3771
+				if sum > 0 then -- models/free-market.can:3776
+					storage[item_name] = count + sum -- models/free-market.can:3777
+				end -- models/free-market.can:3777
+			end -- models/free-market.can:3777
+		end -- models/free-market.can:3777
+	end -- models/free-market.can:3777
+end -- models/free-market.can:3777
+local function check_buy_boxes() -- models/free-market.can:3784
+	local last_checked_index = mod_data["last_checked_index"] -- models/free-market.can:3785
+	local buyer_index -- models/free-market.can:3786
+	if last_checked_index then -- models/free-market.can:3787
+		buyer_index = active_forces[last_checked_index] -- models/free-market.can:3788
+		if buyer_index then -- models/free-market.can:3789
+			mod_data["last_checked_index"] = last_checked_index + 1 -- models/free-market.can:3790
+		else -- models/free-market.can:3790
+			mod_data["last_checked_index"] = nil -- models/free-market.can:3792
+			return  -- models/free-market.can:3793
+		end -- models/free-market.can:3793
+	else -- models/free-market.can:3793
+		last_checked_index, buyer_index = next(active_forces) -- models/free-market.can:3796
+		if last_checked_index then -- models/free-market.can:3797
+			mod_data["last_checked_index"] = last_checked_index -- models/free-market.can:3798
+		else -- models/free-market.can:3798
+			return  -- models/free-market.can:3800
+		end -- models/free-market.can:3800
+	end -- models/free-market.can:3800
+	local items_data = buy_boxes[buyer_index] -- models/free-market.can:3804
+	if items_data == nil then -- models/free-market.can:3806
+		return  -- models/free-market.can:3806
+	end -- models/free-market.can:3806
+	local forces_money = call("EasyAPI", "get_forces_money") -- models/free-market.can:3808
+	local buyer_money = forces_money[buyer_index] -- models/free-market.can:3809
+	if buyer_money and buyer_money > money_treshold then -- models/free-market.can:3810
+		local stack_count = 0 -- models/free-market.can:3811
+		local payment = 0 -- models/free-market.can:3812
+		local f_buy_prices = buy_prices[buyer_index] -- models/free-market.can:3813
+		local inserted_count_in_total = 0 -- models/free-market.can:3814
+		for item_name, entities in pairs(items_data) do -- models/free-market.can:3815
+			if money_treshold >= buyer_money then -- models/free-market.can:3816
+				goto not_enough_money -- models/free-market.can:3818
+			end -- models/free-market.can:3818
+			local buy_price = f_buy_prices[item_name] -- models/free-market.can:3820
+			if buy_price and buyer_money >= buy_price then -- models/free-market.can:3821
+				for i = # entities, 1, - 1 do -- models/free-market.can:3822
+					local buy_data = entities[i] -- models/free-market.can:3823
+					local purchasable_count = buyer_money / buy_price -- models/free-market.can:3824
+					if purchasable_count < 1 then -- models/free-market.can:3825
+						goto skip_buy -- models/free-market.can:3826
+					else -- models/free-market.can:3826
+						purchasable_count = floor(purchasable_count) -- models/free-market.can:3828
+					end -- models/free-market.can:3828
+					local buy_box = buy_data[1] -- models/free-market.can:3830
+					local need_count = buy_data[2] -- models/free-market.can:3837
+					if purchasable_count < need_count then -- models/free-market.can:3838
+						need_count = purchasable_count -- models/free-market.can:3839
+					end -- models/free-market.can:3839
+					local count = buy_box["get_item_count"](item_name) -- models/free-market.can:3841
+					stack["name"] = item_name -- models/free-market.can:3842
+					if need_count < count then -- models/free-market.can:3843
+						stack_count = count -- models/free-market.can:3844
+					else -- models/free-market.can:3844
+						need_count = need_count - count -- models/free-market.can:3846
+						if need_count <= 0 then -- models/free-market.can:3847
+							goto skip_buy -- models/free-market.can:3848
+						end -- models/free-market.can:3848
+						local buyer_storage = storages[buyer_index] -- models/free-market.can:3851
+						local count_in_storage = buyer_storage[item_name] -- models/free-market.can:3852
+						if count_in_storage and count_in_storage > 0 then -- models/free-market.can:3853
+							stack_count = need_count - count_in_storage -- models/free-market.can:3854
+							if stack_count <= 0 then -- models/free-market.can:3855
+								buyer_storage[item_name] = count_in_storage - need_count -- models/free-market.can:3856
+								stack_count = 0 -- models/free-market.can:3857
+								goto fulfilled_needs -- models/free-market.can:3858
+							else -- models/free-market.can:3858
+								buyer_storage[item_name] = count_in_storage + (stack_count - need_count) -- models/free-market.can:3860
+							end -- models/free-market.can:3860
+						else -- models/free-market.can:3860
+							stack_count = need_count -- models/free-market.can:3863
+						end -- models/free-market.can:3863
+						for seller_index, seller_storage in pairs(storages) do -- models/free-market.can:3866
+							if buyer_index ~= seller_index and forces_money[seller_index] and not embargoes[seller_index][buyer_index] then -- models/free-market.can:3867
+								local sell_price = sell_prices[seller_index][item_name] -- models/free-market.can:3868
+								if sell_price and buy_price >= sell_price then -- models/free-market.can:3869
+									count_in_storage = seller_storage[item_name] -- models/free-market.can:3870
+									if count_in_storage then -- models/free-market.can:3871
+										if count_in_storage > stack_count then -- models/free-market.can:3872
+											seller_storage[item_name] = count_in_storage - stack_count -- models/free-market.can:3873
+											stack_count = 0 -- models/free-market.can:3874
+											payment = need_count * sell_price -- models/free-market.can:3875
+											buyer_money = buyer_money - payment -- models/free-market.can:3876
+											forces_money[seller_index] = forces_money[seller_index] + payment -- models/free-market.can:3877
+											goto fulfilled_needs -- models/free-market.can:3878
+										else -- models/free-market.can:3878
+											stack_count = stack_count - count_in_storage -- models/free-market.can:3880
+											seller_storage[item_name] = 0 -- models/free-market.can:3881
+											payment = (need_count - stack_count) * sell_price -- models/free-market.can:3882
+											buyer_money = buyer_money - payment -- models/free-market.can:3883
+											forces_money[seller_index] = forces_money[seller_index] + payment -- models/free-market.can:3884
+										end -- models/free-market.can:3884
+									end -- models/free-market.can:3884
+								end -- models/free-market.can:3884
+							end -- models/free-market.can:3884
+						end -- models/free-market.can:3884
+					end -- models/free-market.can:3884
+					::fulfilled_needs:: -- models/free-market.can:3891
+					local found_items = need_count - stack_count -- models/free-market.can:3892
+					if found_items > 0 then -- models/free-market.can:3893
+						stack["count"] = found_items -- models/free-market.can:3894
+						inserted_count_in_total = inserted_count_in_total + buy_box["insert"](stack) -- models/free-market.can:3895
+					end -- models/free-market.can:3895
+					::skip_buy:: -- models/free-market.can:3897
+				end -- models/free-market.can:3897
+			end -- models/free-market.can:3897
+		end -- models/free-market.can:3897
+		::not_enough_money:: -- models/free-market.can:3901
+		if pull_cost_per_item == 0 then -- models/free-market.can:3902
+			forces_money[buyer_index] = buyer_money -- models/free-market.can:3903
+		else -- models/free-market.can:3903
+			forces_money[buyer_index] = buyer_money - ceil(inserted_count_in_total * pull_cost_per_item) -- models/free-market.can:3905
+		end -- models/free-market.can:3905
+	else -- models/free-market.can:3905
+		return  -- models/free-market.can:3908
+	end -- models/free-market.can:3908
+	local forces = game["forces"] -- models/free-market.can:3911
+	call("EasyAPI", "set_forces_money", forces_money) -- models/free-market.can:3912
+	for _force_index, money in pairs(forces_money) do -- models/free-market.can:3913
+		local prev_money = forces_money[_force_index] -- models/free-market.can:3914
+		if prev_money ~= money then -- models/free-market.can:3915
+			local force = forces[_force_index] -- models/free-market.can:3916
+			force["item_production_statistics"]["on_flow"]("trading", money - prev_money) -- models/free-market.can:3918
+		end -- models/free-market.can:3918
+	end -- models/free-market.can:3918
+end -- models/free-market.can:3918
+local function on_player_changed_force(event) -- models/free-market.can:3923
+	local player_index = event["player_index"] -- models/free-market.can:3924
+	local player = game["get_player"](player_index) -- models/free-market.can:3925
+	if not (player and player["valid"]) then -- models/free-market.can:3926
+		return  -- models/free-market.can:3926
+	end -- models/free-market.can:3926
+	if open_box[player_index] then -- models/free-market.can:3928
+		clear_boxes_gui(player) -- models/free-market.can:3929
+	end -- models/free-market.can:3929
+	local index = player["force"]["index"] -- models/free-market.can:3932
+	if transfer_boxes[index] == nil then -- models/free-market.can:3933
+		init_force_data(index) -- models/free-market.can:3934
+	end -- models/free-market.can:3934
+end -- models/free-market.can:3934
+local function on_player_changed_surface(event) -- models/free-market.can:3938
+	local player_index = event["player_index"] -- models/free-market.can:3939
+	local player = game["get_player"](event["player_index"]) -- models/free-market.can:3940
+	if not (player and player["valid"]) then -- models/free-market.can:3941
+		return  -- models/free-market.can:3941
+	end -- models/free-market.can:3941
+	if open_box[player_index] then -- models/free-market.can:3943
+		clear_boxes_gui(player) -- models/free-market.can:3944
+	end -- models/free-market.can:3944
+end -- models/free-market.can:3944
+local function on_player_left_game(event) -- models/free-market.can:3948
+	local player = game["get_player"](event["player_index"]) -- models/free-market.can:3949
+	if not (player and player["valid"]) then -- models/free-market.can:3950
+		return  -- models/free-market.can:3950
+	end -- models/free-market.can:3950
+	clear_boxes_gui(player) -- models/free-market.can:3952
+	destroy_prices_gui(player) -- models/free-market.can:3953
+	delete_item_price_HUD(player) -- models/free-market.can:3954
+	destroy_price_list_gui(player) -- models/free-market.can:3955
+	destroy_force_configuration(player) -- models/free-market.can:3956
+end -- models/free-market.can:3956
+local function on_selected_entity_changed(event) -- models/free-market.can:3959
+	local player = game["get_player"](event["player_index"]) -- models/free-market.can:3960
+	if not (player and player["valid"]) then -- models/free-market.can:3961
+		return  -- models/free-market.can:3961
 	end -- models/free-market.can:3961
-end -- models/free-market.can:3961
-do -- models/free-market.can:3968
-	local TOOL_TO_TYPE = { -- models/free-market.can:3968
+	local entity = player["selected"] -- models/free-market.can:3962
+	if not (entity and entity["valid"]) then -- models/free-market.can:3963
+		return  -- models/free-market.can:3963
+	end -- models/free-market.can:3963
+	if not ALLOWED_CHEST_TYPES[entity["type"]] then -- models/free-market.can:3964
+		return  -- models/free-market.can:3964
+	end -- models/free-market.can:3964
+	if entity["force"] ~= player["force"] then -- models/free-market.can:3965
+		return  -- models/free-market.can:3965
+	end -- models/free-market.can:3965
+	local box_data = all_boxes[entity["unit_number"]] -- models/free-market.can:3966
+	if box_data == nil then -- models/free-market.can:3967
+		return  -- models/free-market.can:3967
+	end -- models/free-market.can:3967
+	local item_name = box_data[5] -- models/free-market.can:3968
+	if item_name == nil then -- models/free-market.can:3969
+		return  -- models/free-market.can:3969
+	end -- models/free-market.can:3969
+	show_item_info_HUD(player, item_name) -- models/free-market.can:3971
+end -- models/free-market.can:3971
+local SELECT_TOOLS = { -- models/free-market.can:3975
+	["FM_set_pull_boxes_tool"] = set_pull_box_data, -- models/free-market.can:3976
+	["FM_set_bin_boxes_tool"] = set_bin_box_data, -- models/free-market.can:3977
+	["FM_set_transfer_boxes_tool"] = set_transfer_box_data, -- models/free-market.can:3978
+	["FM_set_buy_boxes_tool"] = set_buy_box_data -- models/free-market.can:3979
+} -- models/free-market.can:3979
+local function on_player_selected_area(event) -- models/free-market.can:3981
+	local tool_name = event["item"] -- models/free-market.can:3982
+	local func = SELECT_TOOLS[tool_name] -- models/free-market.can:3983
+	if func then -- models/free-market.can:3984
+		local entities = event["entities"] -- models/free-market.can:3985
+		local player = game["get_player"](event["player_index"]) -- models/free-market.can:3986
+		for i = 1, # entities do -- models/free-market.can:3987
+			local entity = entities[i] -- models/free-market.can:3988
+			if all_boxes[entity["unit_number"]] == nil then -- models/free-market.can:3989
+				local item = entity["get_inventory"](1)[1] -- models/free-market.can:3990
+				if item["valid_for_read"] then -- models/free-market.can:3991
+					func(item["name"], player, entity) -- models/free-market.can:3992
+				end -- models/free-market.can:3992
+			end -- models/free-market.can:3992
+		end -- models/free-market.can:3992
+	elseif tool_name == "FM_set_universal_transfer_boxes_tool" then -- models/free-market.can:3996
+		local entities = event["entities"] -- models/free-market.can:3997
+		local player = game["get_player"](event["player_index"]) -- models/free-market.can:3998
+		for i = 1, # entities do -- models/free-market.can:3999
+			local entity = entities[i] -- models/free-market.can:4000
+			if all_boxes[entity["unit_number"]] == nil then -- models/free-market.can:4001
+				set_universal_transfer_box_data(player, entity) -- models/free-market.can:4002
+			end -- models/free-market.can:4002
+		end -- models/free-market.can:4002
+	elseif tool_name == "FM_set_universal_bin_boxes_tool" then -- models/free-market.can:4005
+		local entities = event["entities"] -- models/free-market.can:4006
+		local player = game["get_player"](event["player_index"]) -- models/free-market.can:4007
+		for i = 1, # entities do -- models/free-market.can:4008
+			local entity = entities[i] -- models/free-market.can:4009
+			if all_boxes[entity["unit_number"]] == nil then -- models/free-market.can:4010
+				set_universal_bin_box_data(player, entity) -- models/free-market.can:4011
+			end -- models/free-market.can:4011
+		end -- models/free-market.can:4011
+	elseif tool_name == "FM_remove_boxes_tool" then -- models/free-market.can:4014
+		local entities = event["entities"] -- models/free-market.can:4015
+		local player = game["get_player"](event["player_index"]) -- models/free-market.can:4016
+		local count = 0 -- models/free-market.can:4017
+		for i = 1, # entities do -- models/free-market.can:4018
+			local is_deleted = clear_box_data_by_entity(entities[i]) -- models/free-market.can:4019
+			if is_deleted then -- models/free-market.can:4020
+				count = count + 1 -- models/free-market.can:4021
+			end -- models/free-market.can:4021
+		end -- models/free-market.can:4021
+		if count > 0 then -- models/free-market.can:4024
+			player["print"]({ -- models/free-market.can:4025
+				"", -- models/free-market.can:4025
+				{ "gui-migrated-content.removed-entity" }, -- models/free-market.can:4025
+				COLON, -- models/free-market.can:4025
+				" ", -- models/free-market.can:4025
+				count -- models/free-market.can:4025
+			}) -- models/free-market.can:4025
+		end -- models/free-market.can:4025
+	end -- models/free-market.can:4025
+end -- models/free-market.can:4025
+do -- models/free-market.can:4032
+	local TOOL_TO_TYPE = { -- models/free-market.can:4032
 		["FM_set_pull_boxes_tool"] = 3, -- models/free-market.can:1
 		["FM_set_transfer_boxes_tool"] = 4, -- models/free-market.can:1
 		["FM_set_universal_transfer_boxes_tool"] = 5, -- models/free-market.can:1
@@ -4187,713 +4201,718 @@ do -- models/free-market.can:3968
 		["FM_set_bin_boxes_tool"] = 6, -- models/free-market.can:1
 		["FM_set_buy_boxes_tool"] = 1 -- models/free-market.can:1
 	} -- models/free-market.can:1
-	on_player_alt_selected_area = function(event) -- models/free-market.can:3976
-		local box_type = TOOL_TO_TYPE[event["item"]] -- models/free-market.can:3977
-		if box_type == nil then -- models/free-market.can:3978
-			return  -- models/free-market.can:3978
-		end -- models/free-market.can:3978
-		local remove_box = REMOVE_BOX_FUNCS[box_type] -- models/free-market.can:3980
-		local entities = event["entities"] -- models/free-market.can:3981
-		for i = # entities, 1, - 1 do -- models/free-market.can:3982
-			local entity = entities[i] -- models/free-market.can:3983
-			if entity["valid"] then -- models/free-market.can:3984
-				local unit_number = entity["unit_number"] -- models/free-market.can:3985
-				local box_data = all_boxes[unit_number] -- models/free-market.can:3986
-				if box_data and box_data[3] == box_type then -- models/free-market.can:3987
-					rendering_destroy(box_data[2]) -- models/free-market.can:3988
-					remove_box(entity, box_data) -- models/free-market.can:3989
-				end -- models/free-market.can:3989
-			end -- models/free-market.can:3989
-		end -- models/free-market.can:3989
-	end -- models/free-market.can:3989
-end -- models/free-market.can:3989
-local mod_settings = { -- models/free-market.can:3997
-	["FM_enable-auto-embargo"] = function(value) -- models/free-market.can:3998
-		is_auto_embargo = value -- models/free-market.can:3998
-	end, -- models/free-market.can:3998
-	["FM_is-public-titles"] = function(value) -- models/free-market.can:3999
-		is_public_titles = value -- models/free-market.can:3999
-	end, -- models/free-market.can:3999
-	["FM_is_reset_public"] = function(value) -- models/free-market.can:4000
-		is_reset_public = value -- models/free-market.can:4000
-	end, -- models/free-market.can:4000
-	["FM_money-treshold"] = function(value) -- models/free-market.can:4001
-		money_treshold = value -- models/free-market.can:4001
-	end, -- models/free-market.can:4001
-	["FM_minimal-price"] = function(value) -- models/free-market.can:4002
-		minimal_price = value -- models/free-market.can:4002
-	end, -- models/free-market.can:4002
-	["FM_maximal-price"] = function(value) -- models/free-market.can:4003
-		maximal_price = value -- models/free-market.can:4003
-	end, -- models/free-market.can:4003
-	["FM_skip_offline_team_chance"] = function(value) -- models/free-market.can:4004
-		skip_offline_team_chance = value -- models/free-market.can:4004
-	end, -- models/free-market.can:4004
-	["FM_max_storage_threshold"] = function(value) -- models/free-market.can:4005
-		max_storage_threshold = value -- models/free-market.can:4005
-	end, -- models/free-market.can:4005
-	["FM_pull_cost_per_item"] = function(value) -- models/free-market.can:4006
-		pull_cost_per_item = value -- models/free-market.can:4006
-	end, -- models/free-market.can:4006
-	["FM_update-tick"] = function(value) -- models/free-market.can:4007
-		if CHECK_FORCES_TICK == value then -- models/free-market.can:4008
-			settings["global"]["FM_update-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4010
-			return  -- models/free-market.can:4012
-		elseif CHECK_TEAMS_DATA_TICK == value then -- models/free-market.can:4013
-			settings["global"]["FM_update-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4015
-			return  -- models/free-market.can:4017
-		elseif update_pull_tick == value then -- models/free-market.can:4018
-			settings["global"]["FM_update-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4020
-			return  -- models/free-market.can:4022
-		elseif update_transfer_tick == value then -- models/free-market.can:4023
-			settings["global"]["FM_update-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4025
-			return  -- models/free-market.can:4027
-		end -- models/free-market.can:4027
-		script["on_nth_tick"](update_buy_tick, nil) -- models/free-market.can:4029
-		update_buy_tick = value -- models/free-market.can:4030
-		script["on_nth_tick"](value, check_buy_boxes) -- models/free-market.can:4031
-	end, -- models/free-market.can:4031
-	["FM_update-transfer-tick"] = function(value) -- models/free-market.can:4033
-		if CHECK_FORCES_TICK == value then -- models/free-market.can:4034
-			settings["global"]["FM_update-transfer-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4036
-			return  -- models/free-market.can:4038
-		elseif CHECK_TEAMS_DATA_TICK == value then -- models/free-market.can:4039
-			settings["global"]["FM_update-transfer-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4041
-			return  -- models/free-market.can:4043
-		elseif update_pull_tick == value then -- models/free-market.can:4044
-			settings["global"]["FM_update-transfer-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4046
-			return  -- models/free-market.can:4048
-		elseif update_buy_tick == value then -- models/free-market.can:4049
-			settings["global"]["FM_update-transfer-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4051
-			return  -- models/free-market.can:4053
+	on_player_alt_selected_area = function(event) -- models/free-market.can:4040
+		local box_type = TOOL_TO_TYPE[event["item"]] -- models/free-market.can:4041
+		if box_type == nil then -- models/free-market.can:4042
+			return  -- models/free-market.can:4042
+		end -- models/free-market.can:4042
+		local remove_box = REMOVE_BOX_FUNCS[box_type] -- models/free-market.can:4044
+		local entities = event["entities"] -- models/free-market.can:4045
+		for i = # entities, 1, - 1 do -- models/free-market.can:4046
+			local entity = entities[i] -- models/free-market.can:4047
+			if entity["valid"] then -- models/free-market.can:4048
+				local unit_number = entity["unit_number"] -- models/free-market.can:4049
+				local box_data = all_boxes[unit_number] -- models/free-market.can:4050
+				if box_data and box_data[3] == box_type then -- models/free-market.can:4051
+					rendering_destroy(box_data[2]) -- models/free-market.can:4052
+					remove_box(entity, box_data) -- models/free-market.can:4053
+				end -- models/free-market.can:4053
+			end -- models/free-market.can:4053
 		end -- models/free-market.can:4053
-		script["on_nth_tick"](update_transfer_tick, nil) -- models/free-market.can:4055
-		update_transfer_tick = value -- models/free-market.can:4056
-		script["on_nth_tick"](value, check_buy_boxes) -- models/free-market.can:4057
-	end, -- models/free-market.can:4057
-	["FM_update-pull-tick"] = function(value) -- models/free-market.can:4059
-		if CHECK_FORCES_TICK == value then -- models/free-market.can:4060
-			settings["global"]["FM_update-pull-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4062
-			return  -- models/free-market.can:4064
-		elseif CHECK_TEAMS_DATA_TICK == value then -- models/free-market.can:4065
-			settings["global"]["FM_update-pull-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4067
-			return  -- models/free-market.can:4069
-		elseif update_transfer_tick == value then -- models/free-market.can:4070
-			settings["global"]["FM_update-pull-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4072
-			return  -- models/free-market.can:4074
-		elseif update_buy_tick == value then -- models/free-market.can:4075
-			settings["global"]["FM_update-pull-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4077
-			return  -- models/free-market.can:4079
-		end -- models/free-market.can:4079
-		script["on_nth_tick"](update_pull_tick, nil) -- models/free-market.can:4081
-		update_pull_tick = value -- models/free-market.can:4082
-		script["on_nth_tick"](value, check_buy_boxes) -- models/free-market.can:4083
-	end, -- models/free-market.can:4083
-	["FM_show_item_price"] = function(player) -- models/free-market.can:4085
-		if player["mod_settings"]["FM_show_item_price"]["value"] then -- models/free-market.can:4086
-			create_item_price_HUD(player) -- models/free-market.can:4087
-		else -- models/free-market.can:4087
-			delete_item_price_HUD(player) -- models/free-market.can:4089
-		end -- models/free-market.can:4089
-	end, -- models/free-market.can:4089
-	["FM_sell_notification_column_count"] = function(player) -- models/free-market.can:4092
-		local column_count = 2 * player["mod_settings"]["FM_sell_notification_column_count"]["value"] -- models/free-market.can:4093
-		local is_vertical = (column_count == 2) -- models/free-market.can:4094
-		local frame = player["gui"]["screen"]["FM_sell_prices_frame"] -- models/free-market.can:4095
-		local is_frame_vertical = (frame["direction"] == "vertical") -- models/free-market.can:4096
-		if is_vertical ~= is_frame_vertical then -- models/free-market.can:4097
-			local last_location = frame["location"] -- models/free-market.can:4098
-			frame["destroy"]() -- models/free-market.can:4099
-			switch_sell_prices_gui(player, last_location) -- models/free-market.can:4100
-		end -- models/free-market.can:4100
-	end, -- models/free-market.can:4100
-	["FM_buy_notification_column_count"] = function(player) -- models/free-market.can:4103
-		local column_count = 2 * player["mod_settings"]["FM_buy_notification_column_count"]["value"] -- models/free-market.can:4104
-		local is_vertical = (column_count == 2) -- models/free-market.can:4105
-		local frame = player["gui"]["screen"]["FM_buy_prices_frame"] -- models/free-market.can:4106
-		local is_frame_vertical = (frame["direction"] == "vertical") -- models/free-market.can:4107
-		if is_vertical ~= is_frame_vertical then -- models/free-market.can:4108
-			local last_location = frame["location"] -- models/free-market.can:4109
-			frame["destroy"]() -- models/free-market.can:4110
-			switch_buy_prices_gui(player, last_location) -- models/free-market.can:4111
-		end -- models/free-market.can:4111
-	end -- models/free-market.can:4111
-} -- models/free-market.can:4111
-on_runtime_mod_setting_changed = function(event) -- models/free-market.can:4115
-	local setting_name = event["setting"] -- models/free-market.can:4116
-	local f = mod_settings[setting_name] -- models/free-market.can:4117
-	if f == nil then -- models/free-market.can:4118
-		return  -- models/free-market.can:4118
-	end -- models/free-market.can:4118
-	if event["setting_type"] == "runtime-global" then -- models/free-market.can:4120
-		f(settings["global"][setting_name]["value"]) -- models/free-market.can:4121
-	else -- models/free-market.can:4121
-		local player = game["get_player"](event["player_index"]) -- models/free-market.can:4123
-		if player and player["valid"] then -- models/free-market.can:4124
-			f(player) -- models/free-market.can:4125
-		end -- models/free-market.can:4125
-	end -- models/free-market.can:4125
-end -- models/free-market.can:4125
-local function add_remote_interface() -- models/free-market.can:4135
-	remote["remove_interface"]("free-market") -- models/free-market.can:4137
-	remote["add_interface"]("free-market", { -- models/free-market.can:4138
-		["get_mod_data"] = function() -- models/free-market.can:4139
-			return mod_data -- models/free-market.can:4139
-		end, -- models/free-market.can:4139
-		["get_internal_data"] = function(name) -- models/free-market.can:4140
-			return mod_data[name] -- models/free-market.can:4140
-		end, -- models/free-market.can:4140
-		["change_count_in_buy_box_data"] = change_count_in_buy_box_data, -- models/free-market.can:4141
-		["remove_certain_pull_box"] = remove_certain_pull_box, -- models/free-market.can:4142
-		["remove_certain_transfer_box"] = remove_certain_transfer_box, -- models/free-market.can:4143
-		["remove_certain_universal_transfer_box"] = remove_certain_universal_transfer_box, -- models/free-market.can:4144
-		["remove_certain_bin_box"] = remove_certain_bin_box, -- models/free-market.can:4145
-		["remove_certain_universal_bin_box"] = remove_certain_universal_bin_box, -- models/free-market.can:4146
-		["remove_certain_buy_box"] = remove_certain_buy_box, -- models/free-market.can:4147
-		["clear_box_data_by_entity"] = clear_box_data_by_entity, -- models/free-market.can:4148
-		["resetTransferBoxes"] = resetTransferBoxes, -- models/free-market.can:4149
-		["resetUniversalTransferBoxes"] = resetUniversalTransferBoxes, -- models/free-market.can:4150
-		["resetBinBoxes"] = resetBinBoxes, -- models/free-market.can:4151
-		["resetUniversalBinBoxes"] = resetUniversalBinBoxes, -- models/free-market.can:4152
-		["resetPullBoxes"] = resetPullBoxes, -- models/free-market.can:4153
-		["resetBuyBoxes"] = resetBuyBoxes, -- models/free-market.can:4154
-		["resetAllBoxes"] = resetAllBoxes, -- models/free-market.can:4155
-		["clear_force_data"] = clear_force_data, -- models/free-market.can:4156
-		["init_force_data"] = init_force_data, -- models/free-market.can:4157
-		["set_universal_transfer_box_data"] = set_universal_transfer_box_data, -- models/free-market.can:4158
-		["set_universal_bin_box_data"] = set_universal_bin_box_data, -- models/free-market.can:4159
-		["set_transfer_box_data"] = set_transfer_box_data, -- models/free-market.can:4160
-		["set_bin_box_data"] = set_bin_box_data, -- models/free-market.can:4161
-		["set_pull_box_data"] = set_pull_box_data, -- models/free-market.can:4162
-		["set_buy_box_data"] = set_buy_box_data, -- models/free-market.can:4163
-		["set_item_limit"] = function(item_name, force_index, count) -- models/free-market.can:4164
-			local f_storages_limit = storages_limit[force_index] -- models/free-market.can:4165
-			if f_storages_limit == nil then -- models/free-market.can:4166
-				return  -- models/free-market.can:4166
-			end -- models/free-market.can:4166
-			f_storages_limit[item_name] = count -- models/free-market.can:4167
-		end, -- models/free-market.can:4167
-		["set_default_storage_limit"] = function(force_index, count) -- models/free-market.can:4169
-			local f_default_storage_limit = default_storage_limit[force_index] -- models/free-market.can:4170
-			if f_default_storage_limit == nil then -- models/free-market.can:4171
-				return  -- models/free-market.can:4171
-			end -- models/free-market.can:4171
-			default_storage_limit[force_index] = count -- models/free-market.can:4172
-		end, -- models/free-market.can:4172
-		["set_sell_price"] = function(item_name, force_index, price) -- models/free-market.can:4174
-			local f_sell_prices = sell_prices[force_index] -- models/free-market.can:4175
-			if f_sell_prices == nil then -- models/free-market.can:4176
-				return  -- models/free-market.can:4176
-			end -- models/free-market.can:4176
-			local transferers = transfer_boxes[force_index][item_name] -- models/free-market.can:4178
-			local count_in_storage = storages[force_index][item_name] -- models/free-market.can:4179
-			if f_sell_prices[item_name] or transferers ~= nil or (count_in_storage and count_in_storage > 0) then -- models/free-market.can:4180
-				f_sell_prices[item_name] = price -- models/free-market.can:4181
-				inactive_sell_prices[force_index] = nil -- models/free-market.can:4182
-			else -- models/free-market.can:4182
-				f_sell_prices[item_name] = nil -- models/free-market.can:4184
-				inactive_sell_prices[force_index][item_name] = price -- models/free-market.can:4185
-			end -- models/free-market.can:4185
-		end, -- models/free-market.can:4185
-		["set_buy_price"] = function(item_name, force_index, price) -- models/free-market.can:4188
-			local f_buy_prices = buy_prices[force_index] -- models/free-market.can:4189
-			if f_buy_prices == nil then -- models/free-market.can:4190
-				return  -- models/free-market.can:4190
-			end -- models/free-market.can:4190
-			local f_buy_boxes = buy_boxes[force_index][item_name] -- models/free-market.can:4192
-			if f_buy_prices[item_name] or f_buy_boxes ~= nil then -- models/free-market.can:4193
-				f_buy_prices[item_name] = price -- models/free-market.can:4194
-				inactive_buy_prices[force_index] = nil -- models/free-market.can:4195
-			else -- models/free-market.can:4195
-				f_buy_prices[item_name] = nil -- models/free-market.can:4197
-				inactive_buy_prices[force_index][item_name] = price -- models/free-market.can:4198
-			end -- models/free-market.can:4198
-		end, -- models/free-market.can:4198
-		["force_set_sell_price"] = function(item_name, force_index, price) -- models/free-market.can:4201
-			local f_sell_prices = sell_prices[force_index] -- models/free-market.can:4202
-			if f_sell_prices == nil then -- models/free-market.can:4203
-				return  -- models/free-market.can:4203
-			end -- models/free-market.can:4203
-			f_sell_prices[item_name] = price -- models/free-market.can:4204
-			inactive_sell_prices[force_index][item_name] = nil -- models/free-market.can:4205
-		end, -- models/free-market.can:4205
-		["force_set_buy_price"] = function(item_name, force_index, price) -- models/free-market.can:4207
-			local f_buy_prices = buy_prices[force_index] -- models/free-market.can:4208
-			if f_buy_prices == nil then -- models/free-market.can:4209
-				return  -- models/free-market.can:4209
-			end -- models/free-market.can:4209
-			f_buy_prices[item_name] = price -- models/free-market.can:4210
-			inactive_buy_prices[force_index][item_name] = nil -- models/free-market.can:4211
-		end, -- models/free-market.can:4211
-		["reset_AI_force_storage"] = function(force_index) -- models/free-market.can:4213
-			local f_sell_prices = sell_prices[force_index] -- models/free-market.can:4214
-			if f_sell_prices == nil then -- models/free-market.can:4215
-				return  -- models/free-market.can:4215
-			end -- models/free-market.can:4215
-			local f_inactive_sell_prices = inactive_sell_prices[force_index] -- models/free-market.can:4217
-			for item_name, price in pairs(f_inactive_sell_prices) do -- models/free-market.can:4218
-				f_sell_prices[item_name] = price -- models/free-market.can:4219
-				f_inactive_sell_prices[item_name] = nil -- models/free-market.can:4220
-			end -- models/free-market.can:4220
-			local f_buy_prices = buy_prices[force_index] -- models/free-market.can:4222
-			local f_inactive_buy_prices = inactive_buy_prices[force_index] -- models/free-market.can:4223
-			for item_name, price in pairs(f_inactive_buy_prices) do -- models/free-market.can:4224
-				f_buy_prices[item_name] = price -- models/free-market.can:4225
-				f_inactive_buy_prices[item_name] = nil -- models/free-market.can:4226
-			end -- models/free-market.can:4226
-			local f_storages_limit = storages_limit[force_index] -- models/free-market.can:4230
-			local f_storage = storages[force_index] -- models/free-market.can:4231
-			for item_name in pairs(f_buy_prices) do -- models/free-market.can:4232
-				f_storage[item_name] = 2000000000 -- models/free-market.can:4233
-				f_storages_limit[item_name] = 4000000000 -- models/free-market.can:4234
-			end -- models/free-market.can:4234
-			for item_name in pairs(f_sell_prices) do -- models/free-market.can:4236
-				f_storage[item_name] = 2000000000 -- models/free-market.can:4237
-				f_storages_limit[item_name] = 4000000000 -- models/free-market.can:4238
-			end -- models/free-market.can:4238
-		end, -- models/free-market.can:4238
-		["get_item_limit"] = function(item_name, force_index) -- models/free-market.can:4241
-			local f_storages_limit = storages_limit[force_index] -- models/free-market.can:4242
-			if f_storages_limit == nil then -- models/free-market.can:4243
-				return  -- models/free-market.can:4243
-			end -- models/free-market.can:4243
-			return f_storages_limit[item_name] -- models/free-market.can:4244
-		end, -- models/free-market.can:4244
-		["get_default_storage_limit"] = function(force_index) -- models/free-market.can:4246
-			return default_storage_limit[force_index] -- models/free-market.can:4247
-		end, -- models/free-market.can:4247
-		["get_inactive_universal_transfer_boxes"] = function() -- models/free-market.can:4249
-			return inactive_universal_transfer_boxes -- models/free-market.can:4249
+	end -- models/free-market.can:4053
+end -- models/free-market.can:4053
+local mod_settings = { -- models/free-market.can:4061
+	["FM_enable-auto-embargo"] = function(value) -- models/free-market.can:4062
+		is_auto_embargo = value -- models/free-market.can:4062
+	end, -- models/free-market.can:4062
+	["FM_is-public-titles"] = function(value) -- models/free-market.can:4063
+		is_public_titles = value -- models/free-market.can:4063
+	end, -- models/free-market.can:4063
+	["FM_is_reset_public"] = function(value) -- models/free-market.can:4064
+		is_reset_public = value -- models/free-market.can:4064
+	end, -- models/free-market.can:4064
+	["FM_money-treshold"] = function(value) -- models/free-market.can:4065
+		money_treshold = value -- models/free-market.can:4065
+	end, -- models/free-market.can:4065
+	["FM_minimal-price"] = function(value) -- models/free-market.can:4066
+		minimal_price = value -- models/free-market.can:4066
+	end, -- models/free-market.can:4066
+	["FM_maximal-price"] = function(value) -- models/free-market.can:4067
+		maximal_price = value -- models/free-market.can:4067
+	end, -- models/free-market.can:4067
+	["FM_skip_offline_team_chance"] = function(value) -- models/free-market.can:4068
+		skip_offline_team_chance = value -- models/free-market.can:4068
+	end, -- models/free-market.can:4068
+	["FM_max_storage_threshold"] = function(value) -- models/free-market.can:4069
+		max_storage_threshold = value -- models/free-market.can:4069
+	end, -- models/free-market.can:4069
+	["FM_pull_cost_per_item"] = function(value) -- models/free-market.can:4070
+		pull_cost_per_item = value -- models/free-market.can:4070
+	end, -- models/free-market.can:4070
+	["FM_update-tick"] = function(value) -- models/free-market.can:4071
+		if CHECK_FORCES_TICK == value then -- models/free-market.can:4072
+			settings["global"]["FM_update-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4074
+			return  -- models/free-market.can:4076
+		elseif CHECK_TEAMS_DATA_TICK == value then -- models/free-market.can:4077
+			settings["global"]["FM_update-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4079
+			return  -- models/free-market.can:4081
+		elseif update_pull_tick == value then -- models/free-market.can:4082
+			settings["global"]["FM_update-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4084
+			return  -- models/free-market.can:4086
+		elseif update_transfer_tick == value then -- models/free-market.can:4087
+			settings["global"]["FM_update-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4089
+			return  -- models/free-market.can:4091
+		end -- models/free-market.can:4091
+		script["on_nth_tick"](update_buy_tick, nil) -- models/free-market.can:4093
+		update_buy_tick = value -- models/free-market.can:4094
+		script["on_nth_tick"](value, check_buy_boxes) -- models/free-market.can:4095
+	end, -- models/free-market.can:4095
+	["FM_update-transfer-tick"] = function(value) -- models/free-market.can:4097
+		if CHECK_FORCES_TICK == value then -- models/free-market.can:4098
+			settings["global"]["FM_update-transfer-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4100
+			return  -- models/free-market.can:4102
+		elseif CHECK_TEAMS_DATA_TICK == value then -- models/free-market.can:4103
+			settings["global"]["FM_update-transfer-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4105
+			return  -- models/free-market.can:4107
+		elseif update_pull_tick == value then -- models/free-market.can:4108
+			settings["global"]["FM_update-transfer-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4110
+			return  -- models/free-market.can:4112
+		elseif update_buy_tick == value then -- models/free-market.can:4113
+			settings["global"]["FM_update-transfer-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4115
+			return  -- models/free-market.can:4117
+		end -- models/free-market.can:4117
+		script["on_nth_tick"](update_transfer_tick, nil) -- models/free-market.can:4119
+		update_transfer_tick = value -- models/free-market.can:4120
+		script["on_nth_tick"](value, check_buy_boxes) -- models/free-market.can:4121
+	end, -- models/free-market.can:4121
+	["FM_update-pull-tick"] = function(value) -- models/free-market.can:4123
+		if CHECK_FORCES_TICK == value then -- models/free-market.can:4124
+			settings["global"]["FM_update-pull-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4126
+			return  -- models/free-market.can:4128
+		elseif CHECK_TEAMS_DATA_TICK == value then -- models/free-market.can:4129
+			settings["global"]["FM_update-pull-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4131
+			return  -- models/free-market.can:4133
+		elseif update_transfer_tick == value then -- models/free-market.can:4134
+			settings["global"]["FM_update-pull-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4136
+			return  -- models/free-market.can:4138
+		elseif update_buy_tick == value then -- models/free-market.can:4139
+			settings["global"]["FM_update-pull-tick"] = { ["value"] = value + 1 } -- models/free-market.can:4141
+			return  -- models/free-market.can:4143
+		end -- models/free-market.can:4143
+		script["on_nth_tick"](update_pull_tick, nil) -- models/free-market.can:4145
+		update_pull_tick = value -- models/free-market.can:4146
+		script["on_nth_tick"](value, check_buy_boxes) -- models/free-market.can:4147
+	end, -- models/free-market.can:4147
+	["FM_show_item_price"] = function(player) -- models/free-market.can:4149
+		if player["mod_settings"]["FM_show_item_price"]["value"] then -- models/free-market.can:4150
+			create_item_price_HUD(player) -- models/free-market.can:4151
+		else -- models/free-market.can:4151
+			delete_item_price_HUD(player) -- models/free-market.can:4153
+		end -- models/free-market.can:4153
+	end, -- models/free-market.can:4153
+	["FM_sell_notification_column_count"] = function(player) -- models/free-market.can:4156
+		local column_count = 2 * player["mod_settings"]["FM_sell_notification_column_count"]["value"] -- models/free-market.can:4157
+		local is_vertical = (column_count == 2) -- models/free-market.can:4158
+		local frame = player["gui"]["screen"]["FM_sell_prices_frame"] -- models/free-market.can:4159
+		local is_frame_vertical = (frame["direction"] == "vertical") -- models/free-market.can:4160
+		if is_vertical ~= is_frame_vertical then -- models/free-market.can:4161
+			local last_location = frame["location"] -- models/free-market.can:4162
+			frame["destroy"]() -- models/free-market.can:4163
+			switch_sell_prices_gui(player, last_location) -- models/free-market.can:4164
+		end -- models/free-market.can:4164
+	end, -- models/free-market.can:4164
+	["FM_buy_notification_column_count"] = function(player) -- models/free-market.can:4167
+		local column_count = 2 * player["mod_settings"]["FM_buy_notification_column_count"]["value"] -- models/free-market.can:4168
+		local is_vertical = (column_count == 2) -- models/free-market.can:4169
+		local frame = player["gui"]["screen"]["FM_buy_prices_frame"] -- models/free-market.can:4170
+		local is_frame_vertical = (frame["direction"] == "vertical") -- models/free-market.can:4171
+		if is_vertical ~= is_frame_vertical then -- models/free-market.can:4172
+			local last_location = frame["location"] -- models/free-market.can:4173
+			frame["destroy"]() -- models/free-market.can:4174
+			switch_buy_prices_gui(player, last_location) -- models/free-market.can:4175
+		end -- models/free-market.can:4175
+	end -- models/free-market.can:4175
+} -- models/free-market.can:4175
+on_runtime_mod_setting_changed = function(event) -- models/free-market.can:4179
+	local setting_name = event["setting"] -- models/free-market.can:4180
+	local f = mod_settings[setting_name] -- models/free-market.can:4181
+	if f == nil then -- models/free-market.can:4182
+		return  -- models/free-market.can:4182
+	end -- models/free-market.can:4182
+	if event["setting_type"] == "runtime-global" then -- models/free-market.can:4184
+		f(settings["global"][setting_name]["value"]) -- models/free-market.can:4185
+	else -- models/free-market.can:4185
+		local player = game["get_player"](event["player_index"]) -- models/free-market.can:4187
+		if player and player["valid"] then -- models/free-market.can:4188
+			f(player) -- models/free-market.can:4189
+		end -- models/free-market.can:4189
+	end -- models/free-market.can:4189
+end -- models/free-market.can:4189
+local function add_remote_interface() -- models/free-market.can:4199
+	remote["remove_interface"]("free-market") -- models/free-market.can:4201
+	remote["add_interface"]("free-market", { -- models/free-market.can:4202
+		["get_mod_data"] = function() -- models/free-market.can:4203
+			return mod_data -- models/free-market.can:4203
+		end, -- models/free-market.can:4203
+		["get_internal_data"] = function(name) -- models/free-market.can:4204
+			return mod_data[name] -- models/free-market.can:4204
+		end, -- models/free-market.can:4204
+		["change_count_in_buy_box_data"] = change_count_in_buy_box_data, -- models/free-market.can:4205
+		["remove_certain_pull_box"] = remove_certain_pull_box, -- models/free-market.can:4206
+		["remove_certain_transfer_box"] = remove_certain_transfer_box, -- models/free-market.can:4207
+		["remove_certain_universal_transfer_box"] = remove_certain_universal_transfer_box, -- models/free-market.can:4208
+		["remove_certain_bin_box"] = remove_certain_bin_box, -- models/free-market.can:4209
+		["remove_certain_universal_bin_box"] = remove_certain_universal_bin_box, -- models/free-market.can:4210
+		["remove_certain_buy_box"] = remove_certain_buy_box, -- models/free-market.can:4211
+		["clear_box_data_by_entity"] = clear_box_data_by_entity, -- models/free-market.can:4212
+		["resetTransferBoxes"] = resetTransferBoxes, -- models/free-market.can:4213
+		["resetUniversalTransferBoxes"] = resetUniversalTransferBoxes, -- models/free-market.can:4214
+		["resetBinBoxes"] = resetBinBoxes, -- models/free-market.can:4215
+		["resetUniversalBinBoxes"] = resetUniversalBinBoxes, -- models/free-market.can:4216
+		["resetPullBoxes"] = resetPullBoxes, -- models/free-market.can:4217
+		["resetBuyBoxes"] = resetBuyBoxes, -- models/free-market.can:4218
+		["resetAllBoxes"] = resetAllBoxes, -- models/free-market.can:4219
+		["clear_force_data"] = clear_force_data, -- models/free-market.can:4220
+		["init_force_data"] = init_force_data, -- models/free-market.can:4221
+		["set_universal_transfer_box_data"] = set_universal_transfer_box_data, -- models/free-market.can:4222
+		["set_universal_bin_box_data"] = set_universal_bin_box_data, -- models/free-market.can:4223
+		["set_transfer_box_data"] = set_transfer_box_data, -- models/free-market.can:4224
+		["set_bin_box_data"] = set_bin_box_data, -- models/free-market.can:4225
+		["set_pull_box_data"] = set_pull_box_data, -- models/free-market.can:4226
+		["set_buy_box_data"] = set_buy_box_data, -- models/free-market.can:4227
+		["set_item_limit"] = function(item_name, force_index, count) -- models/free-market.can:4228
+			local f_storages_limit = storages_limit[force_index] -- models/free-market.can:4229
+			if f_storages_limit == nil then -- models/free-market.can:4230
+				return  -- models/free-market.can:4230
+			end -- models/free-market.can:4230
+			f_storages_limit[item_name] = count -- models/free-market.can:4231
+		end, -- models/free-market.can:4231
+		["set_default_storage_limit"] = function(force_index, count) -- models/free-market.can:4233
+			local f_default_storage_limit = default_storage_limit[force_index] -- models/free-market.can:4234
+			if f_default_storage_limit == nil then -- models/free-market.can:4235
+				return  -- models/free-market.can:4235
+			end -- models/free-market.can:4235
+			default_storage_limit[force_index] = count -- models/free-market.can:4236
+		end, -- models/free-market.can:4236
+		["set_sell_price"] = function(item_name, force_index, price) -- models/free-market.can:4238
+			local f_sell_prices = sell_prices[force_index] -- models/free-market.can:4239
+			if f_sell_prices == nil then -- models/free-market.can:4240
+				return  -- models/free-market.can:4240
+			end -- models/free-market.can:4240
+			local transferers = transfer_boxes[force_index][item_name] -- models/free-market.can:4242
+			local count_in_storage = storages[force_index][item_name] -- models/free-market.can:4243
+			if f_sell_prices[item_name] or transferers ~= nil or (count_in_storage and count_in_storage > 0) then -- models/free-market.can:4244
+				f_sell_prices[item_name] = price -- models/free-market.can:4245
+				inactive_sell_prices[force_index] = nil -- models/free-market.can:4246
+			else -- models/free-market.can:4246
+				f_sell_prices[item_name] = nil -- models/free-market.can:4248
+				inactive_sell_prices[force_index][item_name] = price -- models/free-market.can:4249
+			end -- models/free-market.can:4249
 		end, -- models/free-market.can:4249
-		["get_inactive_universal_bin_boxes"] = function() -- models/free-market.can:4250
-			return inactive_universal_bin_boxes -- models/free-market.can:4250
-		end, -- models/free-market.can:4250
-		["get_inactive_bin_boxes"] = function() -- models/free-market.can:4251
-			return inactive_bin_boxes -- models/free-market.can:4251
-		end, -- models/free-market.can:4251
-		["get_inactive_transfer_boxes"] = function() -- models/free-market.can:4252
-			return inactive_transfer_boxes -- models/free-market.can:4252
-		end, -- models/free-market.can:4252
-		["get_inactive_sell_prices"] = function() -- models/free-market.can:4253
-			return inactive_sell_prices -- models/free-market.can:4253
-		end, -- models/free-market.can:4253
-		["get_inactive_buy_prices"] = function() -- models/free-market.can:4254
-			return inactive_buy_prices -- models/free-market.can:4254
-		end, -- models/free-market.can:4254
-		["get_inactive_buy_boxes"] = function() -- models/free-market.can:4255
-			return inactive_buy_boxes -- models/free-market.can:4255
-		end, -- models/free-market.can:4255
-		["get_universal_bin_boxes"] = function() -- models/free-market.can:4256
-			return universal_bin_boxes -- models/free-market.can:4256
-		end, -- models/free-market.can:4256
-		["get_transfer_boxes"] = function() -- models/free-market.can:4257
-			return transfer_boxes -- models/free-market.can:4257
-		end, -- models/free-market.can:4257
-		["get_bin_boxes"] = function() -- models/free-market.can:4258
-			return bin_boxes -- models/free-market.can:4258
-		end, -- models/free-market.can:4258
-		["get_pull_boxes"] = function() -- models/free-market.can:4259
-			return pull_boxes -- models/free-market.can:4259
-		end, -- models/free-market.can:4259
-		["get_buy_boxes"] = function() -- models/free-market.can:4260
-			return buy_boxes -- models/free-market.can:4260
-		end, -- models/free-market.can:4260
-		["get_sell_prices"] = function() -- models/free-market.can:4261
-			return sell_prices -- models/free-market.can:4261
-		end, -- models/free-market.can:4261
-		["get_buy_prices"] = function() -- models/free-market.can:4262
-			return buy_prices -- models/free-market.can:4262
+		["set_buy_price"] = function(item_name, force_index, price) -- models/free-market.can:4252
+			local f_buy_prices = buy_prices[force_index] -- models/free-market.can:4253
+			if f_buy_prices == nil then -- models/free-market.can:4254
+				return  -- models/free-market.can:4254
+			end -- models/free-market.can:4254
+			local f_buy_boxes = buy_boxes[force_index][item_name] -- models/free-market.can:4256
+			if f_buy_prices[item_name] or f_buy_boxes ~= nil then -- models/free-market.can:4257
+				f_buy_prices[item_name] = price -- models/free-market.can:4258
+				inactive_buy_prices[force_index] = nil -- models/free-market.can:4259
+			else -- models/free-market.can:4259
+				f_buy_prices[item_name] = nil -- models/free-market.can:4261
+				inactive_buy_prices[force_index][item_name] = price -- models/free-market.can:4262
+			end -- models/free-market.can:4262
 		end, -- models/free-market.can:4262
-		["get_embargoes"] = function() -- models/free-market.can:4263
-			return embargoes -- models/free-market.can:4263
-		end, -- models/free-market.can:4263
-		["get_open_box"] = function() -- models/free-market.can:4264
-			return open_box -- models/free-market.can:4264
-		end, -- models/free-market.can:4264
-		["get_all_boxes"] = function() -- models/free-market.can:4265
-			return all_boxes -- models/free-market.can:4265
-		end, -- models/free-market.can:4265
-		["get_active_forces"] = function() -- models/free-market.can:4266
-			return active_forces -- models/free-market.can:4266
-		end, -- models/free-market.can:4266
-		["get_storages"] = function() -- models/free-market.can:4267
-			return storages -- models/free-market.can:4267
-		end -- models/free-market.can:4267
-	}) -- models/free-market.can:4267
-end -- models/free-market.can:4267
-local function link_data() -- models/free-market.can:4271
-	mod_data = global["free_market"] -- models/free-market.can:4272
-	bin_boxes = mod_data["bin_boxes"] -- models/free-market.can:4273
-	inactive_bin_boxes = mod_data["inactive_bin_boxes"] -- models/free-market.can:4274
-	universal_bin_boxes = mod_data["universal_bin_boxes"] -- models/free-market.can:4275
-	inactive_universal_bin_boxes = mod_data["universal_inactive_bin_boxes"] -- models/free-market.can:4276
-	pull_boxes = mod_data["pull_boxes"] -- models/free-market.can:4277
-	inactive_universal_transfer_boxes = mod_data["inactive_universal_transfer_boxes"] -- models/free-market.can:4278
-	inactive_transfer_boxes = mod_data["inactive_transfer_boxes"] -- models/free-market.can:4279
-	inactive_buy_boxes = mod_data["inactive_buy_boxes"] -- models/free-market.can:4280
-	universal_transfer_boxes = mod_data["universal_transfer_boxes"] -- models/free-market.can:4281
-	transfer_boxes = mod_data["transfer_boxes"] -- models/free-market.can:4282
-	buy_boxes = mod_data["buy_boxes"] -- models/free-market.can:4283
-	embargoes = mod_data["embargoes"] -- models/free-market.can:4284
-	inactive_sell_prices = mod_data["inactive_sell_prices"] -- models/free-market.can:4285
-	inactive_buy_prices = mod_data["inactive_buy_prices"] -- models/free-market.can:4286
-	sell_prices = mod_data["sell_prices"] -- models/free-market.can:4287
-	buy_prices = mod_data["buy_prices"] -- models/free-market.can:4288
-	item_HUD = mod_data["item_hinter"] -- models/free-market.can:4289
-	open_box = mod_data["open_box"] -- models/free-market.can:4290
-	all_boxes = mod_data["all_boxes"] -- models/free-market.can:4291
-	active_forces = mod_data["active_forces"] -- models/free-market.can:4292
-	default_storage_limit = mod_data["default_storage_limit"] -- models/free-market.can:4293
-	storages_limit = mod_data["storages_limit"] -- models/free-market.can:4294
-	storages = mod_data["storages"] -- models/free-market.can:4295
-end -- models/free-market.can:4295
-local function update_global_data() -- models/free-market.can:4298
-	global["free_market"] = global["free_market"] or {} -- models/free-market.can:4299
-	mod_data = global["free_market"] -- models/free-market.can:4300
-	mod_data["item_hinter"] = mod_data["item_hinter"] or {} -- models/free-market.can:4301
-	mod_data["open_box"] = {} -- models/free-market.can:4302
-	mod_data["active_forces"] = mod_data["active_forces"] or {} -- models/free-market.can:4303
-	mod_data["bin_boxes"] = mod_data["bin_boxes"] or {} -- models/free-market.can:4304
-	mod_data["inactive_bin_boxes"] = mod_data["inactive_bin_boxes"] or {} -- models/free-market.can:4305
-	mod_data["universal_bin_boxes"] = mod_data["universal_bin_boxes"] or {} -- models/free-market.can:4306
-	mod_data["universal_inactive_bin_boxes"] = mod_data["universal_inactive_bin_boxes"] or {} -- models/free-market.can:4307
-	mod_data["inactive_universal_transfer_boxes"] = mod_data["inactive_universal_transfer_boxes"] or {} -- models/free-market.can:4308
-	mod_data["inactive_transfer_boxes"] = mod_data["inactive_transfer_boxes"] or {} -- models/free-market.can:4309
-	mod_data["inactive_buy_boxes"] = mod_data["inactive_buy_boxes"] or {} -- models/free-market.can:4310
-	mod_data["universal_transfer_boxes"] = mod_data["universal_transfer_boxes"] or {} -- models/free-market.can:4311
-	mod_data["transfer_boxes"] = mod_data["transfer_boxes"] or {} -- models/free-market.can:4312
-	mod_data["pull_boxes"] = mod_data["pull_boxes"] or {} -- models/free-market.can:4313
-	mod_data["buy_boxes"] = mod_data["buy_boxes"] or {} -- models/free-market.can:4314
-	mod_data["inactive_sell_prices"] = mod_data["inactive_sell_prices"] or {} -- models/free-market.can:4315
-	mod_data["inactive_buy_prices"] = mod_data["inactive_buy_prices"] or {} -- models/free-market.can:4316
-	mod_data["sell_prices"] = mod_data["sell_prices"] or {} -- models/free-market.can:4317
-	mod_data["buy_prices"] = mod_data["buy_prices"] or {} -- models/free-market.can:4318
-	mod_data["embargoes"] = mod_data["embargoes"] or {} -- models/free-market.can:4319
-	mod_data["all_boxes"] = mod_data["all_boxes"] or {} -- models/free-market.can:4320
-	mod_data["default_storage_limit"] = mod_data["default_storage_limit"] or {} -- models/free-market.can:4321
-	mod_data["storages_limit"] = mod_data["storages_limit"] or {} -- models/free-market.can:4322
-	mod_data["storages"] = mod_data["storages"] or {} -- models/free-market.can:4323
-	link_data() -- models/free-market.can:4325
-	clear_invalid_data() -- models/free-market.can:4327
-	for item_name, item in pairs(game["item_prototypes"]) do -- models/free-market.can:4329
-		if item["stack_size"] <= 5 then -- models/free-market.can:4330
-			for _, f_storage_limit in pairs(storages_limit) do -- models/free-market.can:4331
-				f_storage_limit[item_name] = f_storage_limit[item_name] or 1 -- models/free-market.can:4332
-			end -- models/free-market.can:4332
-		end -- models/free-market.can:4332
-	end -- models/free-market.can:4332
-	init_force_data(game["forces"]["player"]["index"]) -- models/free-market.can:4337
-	for _, force in pairs(game["forces"]) do -- models/free-market.can:4339
-		if # force["players"] > 0 then -- models/free-market.can:4340
-			init_force_data(force["index"]) -- models/free-market.can:4341
-		end -- models/free-market.can:4341
-	end -- models/free-market.can:4341
-	for _, player in pairs(game["players"]) do -- models/free-market.can:4346
-		if player["valid"] then -- models/free-market.can:4347
-			local relative = player["gui"]["relative"] -- models/free-market.can:4348
-			if relative["FM_buttons"] == nil then -- models/free-market.can:4349
-				create_left_relative_gui(player) -- models/free-market.can:4350
-			end -- models/free-market.can:4350
-			if relative["FM_boxes_frame"] == nil then -- models/free-market.can:4352
-				create_top_relative_gui(player) -- models/free-market.can:4353
-			end -- models/free-market.can:4353
-		end -- models/free-market.can:4353
-	end -- models/free-market.can:4353
-end -- models/free-market.can:4353
-local function on_configuration_changed(event) -- models/free-market.can:4359
-	update_global_data() -- models/free-market.can:4360
-	local mod_changes = event["mod_changes"]["iFreeMarket"] -- models/free-market.can:4362
-	if not (mod_changes and mod_changes["old_version"]) then -- models/free-market.can:4363
-		return  -- models/free-market.can:4363
-	end -- models/free-market.can:4363
-	local version = tonumber(string["gmatch"](mod_changes["old_version"], "%d+.%d+")()) -- models/free-market.can:4365
-	if version < 0.34 then -- models/free-market.can:4367
-		for _, force in pairs(game["forces"]) do -- models/free-market.can:4368
-			local index = force["index"] -- models/free-market.can:4369
-			if sell_prices[index] then -- models/free-market.can:4370
-				init_force_data(index) -- models/free-market.can:4371
-			end -- models/free-market.can:4371
-		end -- models/free-market.can:4371
-		for _, player in pairs(game["players"]) do -- models/free-market.can:4375
-			if player["valid"] then -- models/free-market.can:4376
-				create_top_relative_gui(player) -- models/free-market.can:4377
-			end -- models/free-market.can:4377
-		end -- models/free-market.can:4377
-	end -- models/free-market.can:4377
-	if version < 0.33 then -- models/free-market.can:4382
-		for _, force in pairs(game["forces"]) do -- models/free-market.can:4383
-			local index = force["index"] -- models/free-market.can:4384
-			if sell_prices[index] and mod_data["sell_boxes"] then -- models/free-market.can:4386
-				transfer_boxes[index] = mod_data["sell_boxes"][index] -- models/free-market.can:4387
-				inactive_transfer_boxes[index] = mod_data["inactive_sell_boxes"][index] -- models/free-market.can:4388
-			end -- models/free-market.can:4388
-			mod_data["sell_boxes"] = nil -- models/free-market.can:4390
-			mod_data["inactive_sell_boxes"] = nil -- models/free-market.can:4391
-		end -- models/free-market.can:4391
-		local sprite_data = { -- models/free-market.can:4394
-			["target_offset"] = BOX_TYPE_SPRITE_OFFSET, -- models/free-market.can:4395
-			["only_in_alt_mode"] = true, -- models/free-market.can:4396
-			["x_scale"] = 0.4, -- models/free-market.can:4397
-			["y_scale"] = 0.4 -- models/free-market.can:4397
-		} -- models/free-market.can:4397
-		for _, box_data in pairs(all_boxes) do -- models/free-market.can:4399
-			rendering_destroy(box_data[2]) -- models/free-market.can:4400
-			local entity = box_data[1] -- models/free-market.can:4402
-			sprite_data["target"] = entity -- models/free-market.can:4403
-			sprite_data["surface"] = entity["surface"] -- models/free-market.can:4404
-			if is_public_titles == false then -- models/free-market.can:4405
-				sprite_data["forces"] = { entity["force"] } -- models/free-market.can:4406
-			end -- models/free-market.can:4406
-			local box_type = box_data[3] -- models/free-market.can:4409
-			if box_type == 2 then -- models/free-market.can:1
-				box_data[3] = 4 -- models/free-market.can:1
-				sprite_data["sprite"] = "FM_transfer" -- models/free-market.can:4412
-			elseif box_type == 3 then -- models/free-market.can:1
-				sprite_data["sprite"] = "FM_pull_out" -- models/free-market.can:4414
-			elseif box_type == 1 then -- models/free-market.can:1
-				sprite_data["sprite"] = "FM_buy" -- models/free-market.can:4416
+		["force_set_sell_price"] = function(item_name, force_index, price) -- models/free-market.can:4265
+			local f_sell_prices = sell_prices[force_index] -- models/free-market.can:4266
+			if f_sell_prices == nil then -- models/free-market.can:4267
+				return  -- models/free-market.can:4267
+			end -- models/free-market.can:4267
+			f_sell_prices[item_name] = price -- models/free-market.can:4268
+			inactive_sell_prices[force_index][item_name] = nil -- models/free-market.can:4269
+		end, -- models/free-market.can:4269
+		["force_set_buy_price"] = function(item_name, force_index, price) -- models/free-market.can:4271
+			local f_buy_prices = buy_prices[force_index] -- models/free-market.can:4272
+			if f_buy_prices == nil then -- models/free-market.can:4273
+				return  -- models/free-market.can:4273
+			end -- models/free-market.can:4273
+			f_buy_prices[item_name] = price -- models/free-market.can:4274
+			inactive_buy_prices[force_index][item_name] = nil -- models/free-market.can:4275
+		end, -- models/free-market.can:4275
+		["reset_AI_force_storage"] = function(force_index) -- models/free-market.can:4277
+			local f_sell_prices = sell_prices[force_index] -- models/free-market.can:4278
+			if f_sell_prices == nil then -- models/free-market.can:4279
+				return  -- models/free-market.can:4279
+			end -- models/free-market.can:4279
+			local f_inactive_sell_prices = inactive_sell_prices[force_index] -- models/free-market.can:4281
+			for item_name, price in pairs(f_inactive_sell_prices) do -- models/free-market.can:4282
+				f_sell_prices[item_name] = price -- models/free-market.can:4283
+				f_inactive_sell_prices[item_name] = nil -- models/free-market.can:4284
+			end -- models/free-market.can:4284
+			local f_buy_prices = buy_prices[force_index] -- models/free-market.can:4286
+			local f_inactive_buy_prices = inactive_buy_prices[force_index] -- models/free-market.can:4287
+			for item_name, price in pairs(f_inactive_buy_prices) do -- models/free-market.can:4288
+				f_buy_prices[item_name] = price -- models/free-market.can:4289
+				f_inactive_buy_prices[item_name] = nil -- models/free-market.can:4290
+			end -- models/free-market.can:4290
+			local f_storages_limit = storages_limit[force_index] -- models/free-market.can:4294
+			local f_storage = storages[force_index] -- models/free-market.can:4295
+			for item_name in pairs(f_buy_prices) do -- models/free-market.can:4296
+				f_storage[item_name] = 2000000000 -- models/free-market.can:4297
+				f_storages_limit[item_name] = 4000000000 -- models/free-market.can:4298
+			end -- models/free-market.can:4298
+			for item_name in pairs(f_sell_prices) do -- models/free-market.can:4300
+				f_storage[item_name] = 2000000000 -- models/free-market.can:4301
+				f_storages_limit[item_name] = 4000000000 -- models/free-market.can:4302
+			end -- models/free-market.can:4302
+		end, -- models/free-market.can:4302
+		["get_item_limit"] = function(item_name, force_index) -- models/free-market.can:4305
+			local f_storages_limit = storages_limit[force_index] -- models/free-market.can:4306
+			if f_storages_limit == nil then -- models/free-market.can:4307
+				return  -- models/free-market.can:4307
+			end -- models/free-market.can:4307
+			return f_storages_limit[item_name] -- models/free-market.can:4308
+		end, -- models/free-market.can:4308
+		["get_default_storage_limit"] = function(force_index) -- models/free-market.can:4310
+			return default_storage_limit[force_index] -- models/free-market.can:4311
+		end, -- models/free-market.can:4311
+		["get_inactive_universal_transfer_boxes"] = function() -- models/free-market.can:4313
+			return inactive_universal_transfer_boxes -- models/free-market.can:4313
+		end, -- models/free-market.can:4313
+		["get_inactive_universal_bin_boxes"] = function() -- models/free-market.can:4314
+			return inactive_universal_bin_boxes -- models/free-market.can:4314
+		end, -- models/free-market.can:4314
+		["get_inactive_bin_boxes"] = function() -- models/free-market.can:4315
+			return inactive_bin_boxes -- models/free-market.can:4315
+		end, -- models/free-market.can:4315
+		["get_inactive_transfer_boxes"] = function() -- models/free-market.can:4316
+			return inactive_transfer_boxes -- models/free-market.can:4316
+		end, -- models/free-market.can:4316
+		["get_inactive_sell_prices"] = function() -- models/free-market.can:4317
+			return inactive_sell_prices -- models/free-market.can:4317
+		end, -- models/free-market.can:4317
+		["get_inactive_buy_prices"] = function() -- models/free-market.can:4318
+			return inactive_buy_prices -- models/free-market.can:4318
+		end, -- models/free-market.can:4318
+		["get_inactive_buy_boxes"] = function() -- models/free-market.can:4319
+			return inactive_buy_boxes -- models/free-market.can:4319
+		end, -- models/free-market.can:4319
+		["get_universal_bin_boxes"] = function() -- models/free-market.can:4320
+			return universal_bin_boxes -- models/free-market.can:4320
+		end, -- models/free-market.can:4320
+		["get_transfer_boxes"] = function() -- models/free-market.can:4321
+			return transfer_boxes -- models/free-market.can:4321
+		end, -- models/free-market.can:4321
+		["get_bin_boxes"] = function() -- models/free-market.can:4322
+			return bin_boxes -- models/free-market.can:4322
+		end, -- models/free-market.can:4322
+		["get_pull_boxes"] = function() -- models/free-market.can:4323
+			return pull_boxes -- models/free-market.can:4323
+		end, -- models/free-market.can:4323
+		["get_buy_boxes"] = function() -- models/free-market.can:4324
+			return buy_boxes -- models/free-market.can:4324
+		end, -- models/free-market.can:4324
+		["get_sell_prices"] = function() -- models/free-market.can:4325
+			return sell_prices -- models/free-market.can:4325
+		end, -- models/free-market.can:4325
+		["get_buy_prices"] = function() -- models/free-market.can:4326
+			return buy_prices -- models/free-market.can:4326
+		end, -- models/free-market.can:4326
+		["get_embargoes"] = function() -- models/free-market.can:4327
+			return embargoes -- models/free-market.can:4327
+		end, -- models/free-market.can:4327
+		["get_open_box"] = function() -- models/free-market.can:4328
+			return open_box -- models/free-market.can:4328
+		end, -- models/free-market.can:4328
+		["get_all_boxes"] = function() -- models/free-market.can:4329
+			return all_boxes -- models/free-market.can:4329
+		end, -- models/free-market.can:4329
+		["get_active_forces"] = function() -- models/free-market.can:4330
+			return active_forces -- models/free-market.can:4330
+		end, -- models/free-market.can:4330
+		["get_storages"] = function() -- models/free-market.can:4331
+			return storages -- models/free-market.can:4331
+		end -- models/free-market.can:4331
+	}) -- models/free-market.can:4331
+end -- models/free-market.can:4331
+local function link_data() -- models/free-market.can:4335
+	mod_data = global["free_market"] -- models/free-market.can:4336
+	bin_boxes = mod_data["bin_boxes"] -- models/free-market.can:4337
+	inactive_bin_boxes = mod_data["inactive_bin_boxes"] -- models/free-market.can:4338
+	universal_bin_boxes = mod_data["universal_bin_boxes"] -- models/free-market.can:4339
+	inactive_universal_bin_boxes = mod_data["universal_inactive_bin_boxes"] -- models/free-market.can:4340
+	pull_boxes = mod_data["pull_boxes"] -- models/free-market.can:4341
+	inactive_universal_transfer_boxes = mod_data["inactive_universal_transfer_boxes"] -- models/free-market.can:4342
+	inactive_transfer_boxes = mod_data["inactive_transfer_boxes"] -- models/free-market.can:4343
+	inactive_buy_boxes = mod_data["inactive_buy_boxes"] -- models/free-market.can:4344
+	universal_transfer_boxes = mod_data["universal_transfer_boxes"] -- models/free-market.can:4345
+	transfer_boxes = mod_data["transfer_boxes"] -- models/free-market.can:4346
+	buy_boxes = mod_data["buy_boxes"] -- models/free-market.can:4347
+	embargoes = mod_data["embargoes"] -- models/free-market.can:4348
+	inactive_sell_prices = mod_data["inactive_sell_prices"] -- models/free-market.can:4349
+	inactive_buy_prices = mod_data["inactive_buy_prices"] -- models/free-market.can:4350
+	sell_prices = mod_data["sell_prices"] -- models/free-market.can:4351
+	buy_prices = mod_data["buy_prices"] -- models/free-market.can:4352
+	item_HUD = mod_data["item_hinter"] -- models/free-market.can:4353
+	open_box = mod_data["open_box"] -- models/free-market.can:4354
+	all_boxes = mod_data["all_boxes"] -- models/free-market.can:4355
+	active_forces = mod_data["active_forces"] -- models/free-market.can:4356
+	default_storage_limit = mod_data["default_storage_limit"] -- models/free-market.can:4357
+	storages_limit = mod_data["storages_limit"] -- models/free-market.can:4358
+	storages = mod_data["storages"] -- models/free-market.can:4359
+end -- models/free-market.can:4359
+local function update_global_data() -- models/free-market.can:4362
+	global["free_market"] = global["free_market"] or {} -- models/free-market.can:4363
+	mod_data = global["free_market"] -- models/free-market.can:4364
+	mod_data["item_hinter"] = mod_data["item_hinter"] or {} -- models/free-market.can:4365
+	mod_data["open_box"] = {} -- models/free-market.can:4366
+	mod_data["active_forces"] = mod_data["active_forces"] or {} -- models/free-market.can:4367
+	mod_data["bin_boxes"] = mod_data["bin_boxes"] or {} -- models/free-market.can:4368
+	mod_data["inactive_bin_boxes"] = mod_data["inactive_bin_boxes"] or {} -- models/free-market.can:4369
+	mod_data["universal_bin_boxes"] = mod_data["universal_bin_boxes"] or {} -- models/free-market.can:4370
+	mod_data["universal_inactive_bin_boxes"] = mod_data["universal_inactive_bin_boxes"] or {} -- models/free-market.can:4371
+	mod_data["inactive_universal_transfer_boxes"] = mod_data["inactive_universal_transfer_boxes"] or {} -- models/free-market.can:4372
+	mod_data["inactive_transfer_boxes"] = mod_data["inactive_transfer_boxes"] or {} -- models/free-market.can:4373
+	mod_data["inactive_buy_boxes"] = mod_data["inactive_buy_boxes"] or {} -- models/free-market.can:4374
+	mod_data["universal_transfer_boxes"] = mod_data["universal_transfer_boxes"] or {} -- models/free-market.can:4375
+	mod_data["transfer_boxes"] = mod_data["transfer_boxes"] or {} -- models/free-market.can:4376
+	mod_data["pull_boxes"] = mod_data["pull_boxes"] or {} -- models/free-market.can:4377
+	mod_data["buy_boxes"] = mod_data["buy_boxes"] or {} -- models/free-market.can:4378
+	mod_data["inactive_sell_prices"] = mod_data["inactive_sell_prices"] or {} -- models/free-market.can:4379
+	mod_data["inactive_buy_prices"] = mod_data["inactive_buy_prices"] or {} -- models/free-market.can:4380
+	mod_data["sell_prices"] = mod_data["sell_prices"] or {} -- models/free-market.can:4381
+	mod_data["buy_prices"] = mod_data["buy_prices"] or {} -- models/free-market.can:4382
+	mod_data["embargoes"] = mod_data["embargoes"] or {} -- models/free-market.can:4383
+	mod_data["all_boxes"] = mod_data["all_boxes"] or {} -- models/free-market.can:4384
+	mod_data["default_storage_limit"] = mod_data["default_storage_limit"] or {} -- models/free-market.can:4385
+	mod_data["storages_limit"] = mod_data["storages_limit"] or {} -- models/free-market.can:4386
+	mod_data["storages"] = mod_data["storages"] or {} -- models/free-market.can:4387
+	link_data() -- models/free-market.can:4389
+	clear_invalid_data() -- models/free-market.can:4391
+	for item_name, item in pairs(game["item_prototypes"]) do -- models/free-market.can:4393
+		if item["stack_size"] <= 5 then -- models/free-market.can:4394
+			for _, f_storage_limit in pairs(storages_limit) do -- models/free-market.can:4395
+				f_storage_limit[item_name] = f_storage_limit[item_name] or 1 -- models/free-market.can:4396
+			end -- models/free-market.can:4396
+		end -- models/free-market.can:4396
+	end -- models/free-market.can:4396
+	init_force_data(game["forces"]["player"]["index"]) -- models/free-market.can:4401
+	for _, force in pairs(game["forces"]) do -- models/free-market.can:4403
+		if # force["players"] > 0 then -- models/free-market.can:4404
+			init_force_data(force["index"]) -- models/free-market.can:4405
+		end -- models/free-market.can:4405
+	end -- models/free-market.can:4405
+	for _, player in pairs(game["players"]) do -- models/free-market.can:4409
+		if player["valid"] then -- models/free-market.can:4410
+			local relative = player["gui"]["relative"] -- models/free-market.can:4411
+			if relative["FM_buttons"] == nil then -- models/free-market.can:4412
+				create_left_relative_gui(player) -- models/free-market.can:4413
+			end -- models/free-market.can:4413
+			if relative["FM_boxes_frame"] == nil then -- models/free-market.can:4415
+				create_top_relative_gui(player) -- models/free-market.can:4416
 			end -- models/free-market.can:4416
-			box_data[2] = draw_sprite(sprite_data) -- models/free-market.can:4419
-		end -- models/free-market.can:4419
-		for _, player in pairs(game["players"]) do -- models/free-market.can:4422
-			if player["valid"] then -- models/free-market.can:4423
-				create_top_relative_gui(player) -- models/free-market.can:4424
-			end -- models/free-market.can:4424
-		end -- models/free-market.can:4424
-	end -- models/free-market.can:4424
-	if version < 0.32 then -- models/free-market.can:4429
-		for _, force in pairs(game["forces"]) do -- models/free-market.can:4430
-			local index = force["index"] -- models/free-market.can:4431
-			if transfer_boxes[index] then -- models/free-market.can:4432
-				init_force_data(index) -- models/free-market.can:4433
-				default_storage_limit[index] = max_storage_threshold -- models/free-market.can:4434
-			end -- models/free-market.can:4434
-		end -- models/free-market.can:4434
-	end -- models/free-market.can:4434
-	if version < 0.31 then -- models/free-market.can:4439
-		for _, player in pairs(game["players"]) do -- models/free-market.can:4440
-			if player["valid"] then -- models/free-market.can:4441
-				delete_item_price_HUD(player) -- models/free-market.can:4442
-				if player["connected"] then -- models/free-market.can:4443
-					create_item_price_HUD(player) -- models/free-market.can:4444
-				end -- models/free-market.can:4444
+			local frame = player["gui"]["screen"]["FM_item_price_frame"] -- models/free-market.can:4418
+			if frame == nil then -- models/free-market.can:4419
+				create_item_price_HUD(player) -- models/free-market.can:4420
+			end -- models/free-market.can:4420
+		end -- models/free-market.can:4420
+	end -- models/free-market.can:4420
+end -- models/free-market.can:4420
+local function on_configuration_changed(event) -- models/free-market.can:4426
+	update_global_data() -- models/free-market.can:4427
+	local mod_changes = event["mod_changes"]["iFreeMarket"] -- models/free-market.can:4429
+	if not (mod_changes and mod_changes["old_version"]) then -- models/free-market.can:4430
+		return  -- models/free-market.can:4430
+	end -- models/free-market.can:4430
+	local version = tonumber(string["gmatch"](mod_changes["old_version"], "%d+.%d+")()) -- models/free-market.can:4432
+	if version < 0.34 then -- models/free-market.can:4434
+		for _, force in pairs(game["forces"]) do -- models/free-market.can:4435
+			local index = force["index"] -- models/free-market.can:4436
+			if sell_prices[index] then -- models/free-market.can:4437
+				init_force_data(index) -- models/free-market.can:4438
+			end -- models/free-market.can:4438
+		end -- models/free-market.can:4438
+		for _, player in pairs(game["players"]) do -- models/free-market.can:4442
+			if player["valid"] then -- models/free-market.can:4443
+				create_top_relative_gui(player) -- models/free-market.can:4444
 			end -- models/free-market.can:4444
 		end -- models/free-market.can:4444
 	end -- models/free-market.can:4444
-	if version < 0.30 then -- models/free-market.can:4450
-		for _, player in pairs(game["players"]) do -- models/free-market.can:4451
-			if player["valid"] then -- models/free-market.can:4452
-				local screen = player["gui"]["screen"] -- models/free-market.can:4453
-				local frame = screen["FM_prices_frame"] -- models/free-market.can:4454
-				if frame then -- models/free-market.can:4455
-					frame["destroy"]() -- models/free-market.can:4456
-				end -- models/free-market.can:4456
-			end -- models/free-market.can:4456
-		end -- models/free-market.can:4456
-	end -- models/free-market.can:4456
-	if version < 0.29 then -- models/free-market.can:4462
-		for _, player in pairs(game["players"]) do -- models/free-market.can:4463
-			if player["valid"] then -- models/free-market.can:4464
-				local screen = player["gui"]["screen"] -- models/free-market.can:4465
-				if screen["FM_sell_prices_frame"] then -- models/free-market.can:4466
-					screen["FM_sell_prices_frame"]["destroy"]() -- models/free-market.can:4467
-				end -- models/free-market.can:4467
-				if screen["FM_buy_prices_frame"] then -- models/free-market.can:4469
-					screen["FM_buy_prices_frame"]["destroy"]() -- models/free-market.can:4470
-				end -- models/free-market.can:4470
-				switch_buy_prices_gui(player) -- models/free-market.can:4472
-				switch_sell_prices_gui(player) -- models/free-market.can:4473
+	if version < 0.33 then -- models/free-market.can:4449
+		for _, force in pairs(game["forces"]) do -- models/free-market.can:4450
+			local index = force["index"] -- models/free-market.can:4451
+			if sell_prices[index] and mod_data["sell_boxes"] then -- models/free-market.can:4453
+				transfer_boxes[index] = mod_data["sell_boxes"][index] -- models/free-market.can:4454
+				inactive_transfer_boxes[index] = mod_data["inactive_sell_boxes"][index] -- models/free-market.can:4455
+			end -- models/free-market.can:4455
+			mod_data["sell_boxes"] = nil -- models/free-market.can:4457
+			mod_data["inactive_sell_boxes"] = nil -- models/free-market.can:4458
+		end -- models/free-market.can:4458
+		local sprite_data = { -- models/free-market.can:4461
+			["target_offset"] = BOX_TYPE_SPRITE_OFFSET, -- models/free-market.can:4462
+			["only_in_alt_mode"] = true, -- models/free-market.can:4463
+			["x_scale"] = 0.4, -- models/free-market.can:4464
+			["y_scale"] = 0.4 -- models/free-market.can:4464
+		} -- models/free-market.can:4464
+		for _, box_data in pairs(all_boxes) do -- models/free-market.can:4466
+			rendering_destroy(box_data[2]) -- models/free-market.can:4467
+			local entity = box_data[1] -- models/free-market.can:4469
+			sprite_data["target"] = entity -- models/free-market.can:4470
+			sprite_data["surface"] = entity["surface"] -- models/free-market.can:4471
+			if is_public_titles == false then -- models/free-market.can:4472
+				sprite_data["forces"] = { entity["force"] } -- models/free-market.can:4473
 			end -- models/free-market.can:4473
-		end -- models/free-market.can:4473
-	end -- models/free-market.can:4473
-	if version < 0.28 then -- models/free-market.can:4478
-		for _, player in pairs(game["players"]) do -- models/free-market.can:4479
-			if player["valid"] and player["mod_settings"]["FM_show_item_price"]["value"] then -- models/free-market.can:4480
-				create_item_price_HUD(player) -- models/free-market.can:4481
-			end -- models/free-market.can:4481
-		end -- models/free-market.can:4481
-	end -- models/free-market.can:4481
-	if version < 0.21 then -- models/free-market.can:4486
-		for _, player in pairs(game["players"]) do -- models/free-market.can:4487
-			if player["valid"] then -- models/free-market.can:4488
-				create_top_relative_gui(player) -- models/free-market.can:4489
-			end -- models/free-market.can:4489
-		end -- models/free-market.can:4489
-	end -- models/free-market.can:4489
-	if version < 0.22 then -- models/free-market.can:4494
-		for _, player in pairs(game["players"]) do -- models/free-market.can:4495
-			if player["valid"] then -- models/free-market.can:4496
-				create_left_relative_gui(player) -- models/free-market.can:4497
-			end -- models/free-market.can:4497
-		end -- models/free-market.can:4497
-	end -- models/free-market.can:4497
-	if version < 0.26 then -- models/free-market.can:4502
-		for _, player in pairs(game["players"]) do -- models/free-market.can:4503
-			if player["valid"] then -- models/free-market.can:4504
-				switch_sell_prices_gui(player) -- models/free-market.can:4505
-				switch_buy_prices_gui(player) -- models/free-market.can:4506
-			end -- models/free-market.can:4506
-		end -- models/free-market.can:4506
-		game["print"]({ -- models/free-market.can:4509
-			"", -- models/free-market.can:4509
-			{ "mod-name.free-market" }, -- models/free-market.can:4509
-			COLON, -- models/free-market.can:4509
-			" added price notification with settings" -- models/free-market.can:4509
-		}) -- models/free-market.can:4509
-	end -- models/free-market.can:4509
-end -- models/free-market.can:4509
-do -- models/free-market.can:4514
-	local function set_filters() -- models/free-market.can:4514
-		local filters = { -- models/free-market.can:4515
-			{ -- models/free-market.can:4516
-				["filter"] = "type", -- models/free-market.can:4516
-				["mode"] = "or", -- models/free-market.can:4516
-				["type"] = "container" -- models/free-market.can:4516
-			}, -- models/free-market.can:4516
-			{ -- models/free-market.can:4517
-				["filter"] = "type", -- models/free-market.can:4517
-				["mode"] = "or", -- models/free-market.can:4517
-				["type"] = "logistic-container" -- models/free-market.can:4517
-			} -- models/free-market.can:4517
-		} -- models/free-market.can:4517
-		script["set_event_filter"](defines["events"]["on_entity_died"], filters) -- models/free-market.can:4519
-		script["set_event_filter"](defines["events"]["on_robot_mined_entity"], filters) -- models/free-market.can:4520
-		script["set_event_filter"](defines["events"]["script_raised_destroy"], filters) -- models/free-market.can:4521
-		script["set_event_filter"](defines["events"]["on_player_mined_entity"], filters) -- models/free-market.can:4522
-	end -- models/free-market.can:4522
-	M["on_load"] = function() -- models/free-market.can:4525
-		link_data() -- models/free-market.can:4526
-		set_filters() -- models/free-market.can:4527
-	end -- models/free-market.can:4527
-	M["on_init"] = function() -- models/free-market.can:4529
-		update_global_data() -- models/free-market.can:4530
-		set_filters() -- models/free-market.can:4531
-	end -- models/free-market.can:4531
-end -- models/free-market.can:4531
-M["on_configuration_changed"] = on_configuration_changed -- models/free-market.can:4534
-M["add_remote_interface"] = add_remote_interface -- models/free-market.can:4535
-M["events"] = { -- models/free-market.can:4540
-	[defines["events"]["on_surface_deleted"]] = clear_invalid_entities, -- models/free-market.can:4541
-	[defines["events"]["on_surface_cleared"]] = clear_invalid_entities, -- models/free-market.can:4542
-	[defines["events"]["on_chunk_deleted"]] = clear_invalid_entities, -- models/free-market.can:4543
-	[defines["events"]["on_player_created"]] = on_player_created, -- models/free-market.can:4544
-	[defines["events"]["on_player_joined_game"]] = on_player_joined_game, -- models/free-market.can:4545
-	[defines["events"]["on_player_left_game"]] = on_player_left_game, -- models/free-market.can:4546
-	[defines["events"]["on_player_cursor_stack_changed"]] = function(event) -- models/free-market.can:4547
-		pcall(on_player_cursor_stack_changed, event) -- models/free-market.can:4548
-	end, -- models/free-market.can:4548
-	[defines["events"]["on_player_removed"]] = delete_player_data, -- models/free-market.can:4550
-	[defines["events"]["on_player_changed_force"]] = on_player_changed_force, -- models/free-market.can:4551
-	[defines["events"]["on_player_changed_surface"]] = on_player_changed_surface, -- models/free-market.can:4552
-	[defines["events"]["on_player_selected_area"]] = on_player_selected_area, -- models/free-market.can:4553
-	[defines["events"]["on_player_alt_selected_area"]] = on_player_alt_selected_area, -- models/free-market.can:4554
-	[defines["events"]["on_player_mined_entity"]] = clear_box_data, -- models/free-market.can:4555
-	[defines["events"]["on_gui_selection_state_changed"]] = on_gui_selection_state_changed, -- models/free-market.can:4556
-	[defines["events"]["on_gui_elem_changed"]] = on_gui_elem_changed, -- models/free-market.can:4557
-	[defines["events"]["on_gui_click"]] = on_gui_click, -- models/free-market.can:4558
-	[defines["events"]["on_gui_closed"]] = on_gui_closed, -- models/free-market.can:4559
-	[defines["events"]["on_selected_entity_changed"]] = on_selected_entity_changed, -- models/free-market.can:4560
-	[defines["events"]["on_force_created"]] = on_force_created, -- models/free-market.can:4561
-	[defines["events"]["on_forces_merging"]] = on_forces_merging, -- models/free-market.can:4562
-	[defines["events"]["on_runtime_mod_setting_changed"]] = on_runtime_mod_setting_changed, -- models/free-market.can:4563
-	[defines["events"]["on_force_cease_fire_changed"]] = function(event) -- models/free-market.can:4564
-		if is_auto_embargo then -- models/free-market.can:4566
-			pcall(on_force_cease_fire_changed, event) -- models/free-market.can:4567
-		end -- models/free-market.can:4567
-	end, -- models/free-market.can:4567
-	[defines["events"]["on_entity_settings_pasted"]] = function(event) -- models/free-market.can:4570
-		local source = event["source"] -- models/free-market.can:4571
-		if not (source and source["valid"]) then -- models/free-market.can:4572
-			return  -- models/free-market.can:4572
-		end -- models/free-market.can:4572
-		local box_data = all_boxes[source["unit_number"]] -- models/free-market.can:4573
-		if box_data == nil then -- models/free-market.can:4574
-			return  -- models/free-market.can:4574
-		end -- models/free-market.can:4574
-		local destination = event["destination"] -- models/free-market.can:4576
-		if not (destination and destination["valid"]) then -- models/free-market.can:4577
-			return  -- models/free-market.can:4577
-		end -- models/free-market.can:4577
-		if destination["force"] ~= source["force"] then -- models/free-market.can:4578
-			return  -- models/free-market.can:4578
-		end -- models/free-market.can:4578
-		if not ALLOWED_TYPES[destination["type"]] then -- models/free-market.can:4579
-			return  -- models/free-market.can:4579
-		end -- models/free-market.can:4579
-		local player = game["get_player"](event["player_index"]) -- models/free-market.can:4581
-		if not (player and player["valid"]) then -- models/free-market.can:4582
-			return  -- models/free-market.can:4582
-		end -- models/free-market.can:4582
-		local destination_box_data = all_boxes[destination["unit_number"]] -- models/free-market.can:4584
-		if destination_box_data then -- models/free-market.can:4585
-			rendering_destroy(destination_box_data[2]) -- models/free-market.can:4586
-			REMOVE_BOX_FUNCS[destination_box_data[3]](destination, destination_box_data) -- models/free-market.can:4587
-		end -- models/free-market.can:4587
-		local box_type = box_data[3] -- models/free-market.can:4590
+			local box_type = box_data[3] -- models/free-market.can:4476
+			if box_type == 2 then -- models/free-market.can:1
+				box_data[3] = 4 -- models/free-market.can:1
+				sprite_data["sprite"] = "FM_transparent-transfer" -- models/free-market.can:4479
+			elseif box_type == 3 then -- models/free-market.can:1
+				sprite_data["sprite"] = "FM_transparent-pull-out" -- models/free-market.can:4481
+			elseif box_type == 1 then -- models/free-market.can:1
+				sprite_data["sprite"] = "FM_transparent-buy" -- models/free-market.can:4483
+			end -- models/free-market.can:4483
+			box_data[2] = draw_sprite(sprite_data) -- models/free-market.can:4486
+		end -- models/free-market.can:4486
+		for _, player in pairs(game["players"]) do -- models/free-market.can:4489
+			if player["valid"] then -- models/free-market.can:4490
+				create_top_relative_gui(player) -- models/free-market.can:4491
+			end -- models/free-market.can:4491
+		end -- models/free-market.can:4491
+	end -- models/free-market.can:4491
+	if version < 0.32 then -- models/free-market.can:4496
+		for _, force in pairs(game["forces"]) do -- models/free-market.can:4497
+			local index = force["index"] -- models/free-market.can:4498
+			if transfer_boxes[index] then -- models/free-market.can:4499
+				init_force_data(index) -- models/free-market.can:4500
+				default_storage_limit[index] = max_storage_threshold -- models/free-market.can:4501
+			end -- models/free-market.can:4501
+		end -- models/free-market.can:4501
+	end -- models/free-market.can:4501
+	if version < 0.31 then -- models/free-market.can:4506
+		for _, player in pairs(game["players"]) do -- models/free-market.can:4507
+			if player["valid"] then -- models/free-market.can:4508
+				delete_item_price_HUD(player) -- models/free-market.can:4509
+				if player["connected"] then -- models/free-market.can:4510
+					create_item_price_HUD(player) -- models/free-market.can:4511
+				end -- models/free-market.can:4511
+			end -- models/free-market.can:4511
+		end -- models/free-market.can:4511
+	end -- models/free-market.can:4511
+	if version < 0.30 then -- models/free-market.can:4517
+		for _, player in pairs(game["players"]) do -- models/free-market.can:4518
+			if player["valid"] then -- models/free-market.can:4519
+				local screen = player["gui"]["screen"] -- models/free-market.can:4520
+				local frame = screen["FM_prices_frame"] -- models/free-market.can:4521
+				if frame then -- models/free-market.can:4522
+					frame["destroy"]() -- models/free-market.can:4523
+				end -- models/free-market.can:4523
+			end -- models/free-market.can:4523
+		end -- models/free-market.can:4523
+	end -- models/free-market.can:4523
+	if version < 0.29 then -- models/free-market.can:4529
+		for _, player in pairs(game["players"]) do -- models/free-market.can:4530
+			if player["valid"] then -- models/free-market.can:4531
+				local screen = player["gui"]["screen"] -- models/free-market.can:4532
+				if screen["FM_sell_prices_frame"] then -- models/free-market.can:4533
+					screen["FM_sell_prices_frame"]["destroy"]() -- models/free-market.can:4534
+				end -- models/free-market.can:4534
+				if screen["FM_buy_prices_frame"] then -- models/free-market.can:4536
+					screen["FM_buy_prices_frame"]["destroy"]() -- models/free-market.can:4537
+				end -- models/free-market.can:4537
+				switch_buy_prices_gui(player) -- models/free-market.can:4539
+				switch_sell_prices_gui(player) -- models/free-market.can:4540
+			end -- models/free-market.can:4540
+		end -- models/free-market.can:4540
+	end -- models/free-market.can:4540
+	if version < 0.28 then -- models/free-market.can:4545
+		for _, player in pairs(game["players"]) do -- models/free-market.can:4546
+			if player["valid"] and player["mod_settings"]["FM_show_item_price"]["value"] then -- models/free-market.can:4547
+				create_item_price_HUD(player) -- models/free-market.can:4548
+			end -- models/free-market.can:4548
+		end -- models/free-market.can:4548
+	end -- models/free-market.can:4548
+	if version < 0.21 then -- models/free-market.can:4553
+		for _, player in pairs(game["players"]) do -- models/free-market.can:4554
+			if player["valid"] then -- models/free-market.can:4555
+				create_top_relative_gui(player) -- models/free-market.can:4556
+			end -- models/free-market.can:4556
+		end -- models/free-market.can:4556
+	end -- models/free-market.can:4556
+	if version < 0.22 then -- models/free-market.can:4561
+		for _, player in pairs(game["players"]) do -- models/free-market.can:4562
+			if player["valid"] then -- models/free-market.can:4563
+				create_left_relative_gui(player) -- models/free-market.can:4564
+			end -- models/free-market.can:4564
+		end -- models/free-market.can:4564
+	end -- models/free-market.can:4564
+	if version < 0.26 then -- models/free-market.can:4569
+		for _, player in pairs(game["players"]) do -- models/free-market.can:4570
+			if player["valid"] then -- models/free-market.can:4571
+				switch_sell_prices_gui(player) -- models/free-market.can:4572
+				switch_buy_prices_gui(player) -- models/free-market.can:4573
+			end -- models/free-market.can:4573
+		end -- models/free-market.can:4573
+		game["print"]({ -- models/free-market.can:4576
+			"", -- models/free-market.can:4576
+			{ "mod-name.free-market" }, -- models/free-market.can:4576
+			COLON, -- models/free-market.can:4576
+			" added price notification with settings" -- models/free-market.can:4576
+		}) -- models/free-market.can:4576
+	end -- models/free-market.can:4576
+end -- models/free-market.can:4576
+do -- models/free-market.can:4581
+	local function set_filters() -- models/free-market.can:4581
+		local filters = { -- models/free-market.can:4582
+			{ -- models/free-market.can:4583
+				["filter"] = "type", -- models/free-market.can:4583
+				["mode"] = "or", -- models/free-market.can:4583
+				["type"] = "container" -- models/free-market.can:4583
+			}, -- models/free-market.can:4583
+			{ -- models/free-market.can:4584
+				["filter"] = "type", -- models/free-market.can:4584
+				["mode"] = "or", -- models/free-market.can:4584
+				["type"] = "logistic-container" -- models/free-market.can:4584
+			} -- models/free-market.can:4584
+		} -- models/free-market.can:4584
+		script["set_event_filter"](defines["events"]["on_entity_died"], filters) -- models/free-market.can:4586
+		script["set_event_filter"](defines["events"]["on_robot_mined_entity"], filters) -- models/free-market.can:4587
+		script["set_event_filter"](defines["events"]["script_raised_destroy"], filters) -- models/free-market.can:4588
+		script["set_event_filter"](defines["events"]["on_player_mined_entity"], filters) -- models/free-market.can:4589
+	end -- models/free-market.can:4589
+	M["on_load"] = function() -- models/free-market.can:4592
+		link_data() -- models/free-market.can:4593
+		set_filters() -- models/free-market.can:4594
+	end -- models/free-market.can:4594
+	M["on_init"] = function() -- models/free-market.can:4596
+		update_global_data() -- models/free-market.can:4597
+		set_filters() -- models/free-market.can:4598
+	end -- models/free-market.can:4598
+end -- models/free-market.can:4598
+M["on_configuration_changed"] = on_configuration_changed -- models/free-market.can:4601
+M["add_remote_interface"] = add_remote_interface -- models/free-market.can:4602
+M["events"] = { -- models/free-market.can:4607
+	[defines["events"]["on_surface_deleted"]] = clear_invalid_entities, -- models/free-market.can:4608
+	[defines["events"]["on_surface_cleared"]] = clear_invalid_entities, -- models/free-market.can:4609
+	[defines["events"]["on_chunk_deleted"]] = clear_invalid_entities, -- models/free-market.can:4610
+	[defines["events"]["on_player_created"]] = on_player_created, -- models/free-market.can:4611
+	[defines["events"]["on_player_joined_game"]] = on_player_joined_game, -- models/free-market.can:4612
+	[defines["events"]["on_player_left_game"]] = on_player_left_game, -- models/free-market.can:4613
+	[defines["events"]["on_player_cursor_stack_changed"]] = function(event) -- models/free-market.can:4614
+		pcall(on_player_cursor_stack_changed, event) -- models/free-market.can:4615
+	end, -- models/free-market.can:4615
+	[defines["events"]["on_player_removed"]] = delete_player_data, -- models/free-market.can:4617
+	[defines["events"]["on_player_changed_force"]] = on_player_changed_force, -- models/free-market.can:4618
+	[defines["events"]["on_player_changed_surface"]] = on_player_changed_surface, -- models/free-market.can:4619
+	[defines["events"]["on_player_selected_area"]] = on_player_selected_area, -- models/free-market.can:4620
+	[defines["events"]["on_player_alt_selected_area"]] = on_player_alt_selected_area, -- models/free-market.can:4621
+	[defines["events"]["on_player_mined_entity"]] = clear_box_data, -- models/free-market.can:4622
+	[defines["events"]["on_gui_selection_state_changed"]] = on_gui_selection_state_changed, -- models/free-market.can:4623
+	[defines["events"]["on_gui_elem_changed"]] = on_gui_elem_changed, -- models/free-market.can:4624
+	[defines["events"]["on_gui_click"]] = on_gui_click, -- models/free-market.can:4625
+	[defines["events"]["on_gui_opened"]] = on_gui_opened, -- models/free-market.can:4626
+	[defines["events"]["on_gui_closed"]] = on_gui_closed, -- models/free-market.can:4627
+	[defines["events"]["on_selected_entity_changed"]] = on_selected_entity_changed, -- models/free-market.can:4628
+	[defines["events"]["on_force_created"]] = on_force_created, -- models/free-market.can:4629
+	[defines["events"]["on_forces_merging"]] = on_forces_merging, -- models/free-market.can:4630
+	[defines["events"]["on_runtime_mod_setting_changed"]] = on_runtime_mod_setting_changed, -- models/free-market.can:4631
+	[defines["events"]["on_force_cease_fire_changed"]] = function(event) -- models/free-market.can:4632
+		if is_auto_embargo then -- models/free-market.can:4634
+			pcall(on_force_cease_fire_changed, event) -- models/free-market.can:4635
+		end -- models/free-market.can:4635
+	end, -- models/free-market.can:4635
+	[defines["events"]["on_entity_settings_pasted"]] = function(event) -- models/free-market.can:4638
+		local source = event["source"] -- models/free-market.can:4639
+		if not (source and source["valid"]) then -- models/free-market.can:4640
+			return  -- models/free-market.can:4640
+		end -- models/free-market.can:4640
+		local box_data = all_boxes[source["unit_number"]] -- models/free-market.can:4641
+		if box_data == nil then -- models/free-market.can:4642
+			return  -- models/free-market.can:4642
+		end -- models/free-market.can:4642
+		local destination = event["destination"] -- models/free-market.can:4644
+		if not (destination and destination["valid"]) then -- models/free-market.can:4645
+			return  -- models/free-market.can:4645
+		end -- models/free-market.can:4645
+		if destination["force"] ~= source["force"] then -- models/free-market.can:4646
+			return  -- models/free-market.can:4646
+		end -- models/free-market.can:4646
+		if not ALLOWED_CHEST_TYPES[destination["type"]] then -- models/free-market.can:4647
+			return  -- models/free-market.can:4647
+		end -- models/free-market.can:4647
+		local player = game["get_player"](event["player_index"]) -- models/free-market.can:4649
+		if not (player and player["valid"]) then -- models/free-market.can:4650
+			return  -- models/free-market.can:4650
+		end -- models/free-market.can:4650
+		local destination_box_data = all_boxes[destination["unit_number"]] -- models/free-market.can:4652
+		if destination_box_data then -- models/free-market.can:4653
+			rendering_destroy(destination_box_data[2]) -- models/free-market.can:4654
+			REMOVE_BOX_FUNCS[destination_box_data[3]](destination, destination_box_data) -- models/free-market.can:4655
+		end -- models/free-market.can:4655
+		local box_type = box_data[3] -- models/free-market.can:4658
 		if box_type == 3 then -- models/free-market.can:1
-			set_pull_box_data(box_data[5], player, destination) -- models/free-market.can:4592
+			set_pull_box_data(box_data[5], player, destination) -- models/free-market.can:4660
 		elseif box_type == 1 then -- models/free-market.can:1
-			local count -- models/free-market.can:4594
-			local items = box_data[4] -- models/free-market.can:4595
-			for i = 1, # items do -- models/free-market.can:4596
-				local buy_data = items[i] -- models/free-market.can:4597
-				if buy_data[1] == source then -- models/free-market.can:4598
-					count = buy_data[2] -- models/free-market.can:4599
-					break -- models/free-market.can:4600
-				end -- models/free-market.can:4600
-			end -- models/free-market.can:4600
-			set_buy_box_data(box_data[5], player, destination, count) -- models/free-market.can:4603
+			local count -- models/free-market.can:4662
+			local items = box_data[4] -- models/free-market.can:4663
+			for i = 1, # items do -- models/free-market.can:4664
+				local buy_data = items[i] -- models/free-market.can:4665
+				if buy_data[1] == source then -- models/free-market.can:4666
+					count = buy_data[2] -- models/free-market.can:4667
+					break -- models/free-market.can:4668
+				end -- models/free-market.can:4668
+			end -- models/free-market.can:4668
+			set_buy_box_data(box_data[5], player, destination, count) -- models/free-market.can:4671
 		elseif box_type == 4 then -- models/free-market.can:1
-			set_transfer_box_data(box_data[5], player, destination) -- models/free-market.can:4605
+			set_transfer_box_data(box_data[5], player, destination) -- models/free-market.can:4673
 		elseif box_type == 5 then -- models/free-market.can:1
-			set_universal_transfer_box_data(player, destination) -- models/free-market.can:4607
+			set_universal_transfer_box_data(player, destination) -- models/free-market.can:4675
 		elseif box_type == 6 then -- models/free-market.can:1
-			set_bin_box_data(box_data[5], player, destination) -- models/free-market.can:4609
+			set_bin_box_data(box_data[5], player, destination) -- models/free-market.can:4677
 		elseif box_type == 7 then -- models/free-market.can:1
-			set_universal_bin_box_data(player, destination) -- models/free-market.can:4611
-		end -- models/free-market.can:4611
-	end, -- models/free-market.can:4611
-	[defines["events"]["on_robot_mined_entity"]] = clear_box_data, -- models/free-market.can:4614
-	[defines["events"]["script_raised_destroy"]] = clear_box_data, -- models/free-market.can:4615
-	[defines["events"]["on_entity_died"]] = clear_box_data, -- models/free-market.can:4616
-	["FM_set-pull-box"] = function(event) -- models/free-market.can:4617
-		pcall(set_pull_box_key_pressed, event) -- models/free-market.can:4618
-	end, -- models/free-market.can:4618
-	["FM_set-transfer-box"] = function(event) -- models/free-market.can:4620
-		pcall(set_transfer_box_key_pressed, event) -- models/free-market.can:4621
-	end, -- models/free-market.can:4621
-	["FM_set-universal-transfer-box"] = function(event) -- models/free-market.can:4623
-		pcall(set_universal_transfer_box_key_pressed, event) -- models/free-market.can:4624
-	end, -- models/free-market.can:4624
-	["FM_set-bin-box"] = function(event) -- models/free-market.can:4626
-		pcall(set_bin_box_key_pressed, event) -- models/free-market.can:4627
-	end, -- models/free-market.can:4627
-	["FM_set-universal-bin-box"] = function(event) -- models/free-market.can:4629
-		pcall(set_universal_bin_box_key_pressed, event) -- models/free-market.can:4630
-	end, -- models/free-market.can:4630
-	["FM_set-buy-box"] = function(event) -- models/free-market.can:4632
-		pcall(set_buy_box_key_pressed, event) -- models/free-market.can:4633
-	end -- models/free-market.can:4633
-} -- models/free-market.can:4633
-M["on_nth_tick"] = { -- models/free-market.can:4637
-	[update_buy_tick] = check_buy_boxes, -- models/free-market.can:4638
-	[update_transfer_tick] = check_transfer_boxes, -- models/free-market.can:4639
-	[update_pull_tick] = check_pull_boxes, -- models/free-market.can:4640
-	[CHECK_FORCES_TICK] = check_forces, -- models/free-market.can:4641
-	[CHECK_TEAMS_DATA_TICK] = check_teams_data -- models/free-market.can:4642
-} -- models/free-market.can:4642
-M["commands"] = { -- models/free-market.can:4645
-	["embargo"] = function(cmd) -- models/free-market.can:4646
-		open_embargo_gui(game["get_player"](cmd["player_index"])) -- models/free-market.can:4647
-	end, -- models/free-market.can:4647
-	["prices"] = function(cmd) -- models/free-market.can:4649
-		switch_prices_gui(game["get_player"](cmd["player_index"])) -- models/free-market.can:4650
-	end, -- models/free-market.can:4650
-	["price_list"] = function(cmd) -- models/free-market.can:4652
-		open_price_list_gui(game["get_player"](cmd["player_index"])) -- models/free-market.can:4653
-	end, -- models/free-market.can:4653
-	["storage"] = function(cmd) -- models/free-market.can:4655
-		open_storage_gui(game["get_player"](cmd["player_index"])) -- models/free-market.can:4656
-	end -- models/free-market.can:4656
-} -- models/free-market.can:4656
-return M -- models/free-market.can:4661
+			set_universal_bin_box_data(player, destination) -- models/free-market.can:4679
+		end -- models/free-market.can:4679
+	end, -- models/free-market.can:4679
+	[defines["events"]["on_robot_mined_entity"]] = clear_box_data, -- models/free-market.can:4682
+	[defines["events"]["script_raised_destroy"]] = clear_box_data, -- models/free-market.can:4683
+	[defines["events"]["on_entity_died"]] = clear_box_data, -- models/free-market.can:4684
+	["FM_set-pull-box"] = function(event) -- models/free-market.can:4685
+		pcall(set_pull_box_key_pressed, event) -- models/free-market.can:4686
+	end, -- models/free-market.can:4686
+	["FM_set-transfer-box"] = function(event) -- models/free-market.can:4688
+		pcall(set_transfer_box_key_pressed, event) -- models/free-market.can:4689
+	end, -- models/free-market.can:4689
+	["FM_set-universal-transfer-box"] = function(event) -- models/free-market.can:4691
+		pcall(set_universal_transfer_box_key_pressed, event) -- models/free-market.can:4692
+	end, -- models/free-market.can:4692
+	["FM_set-bin-box"] = function(event) -- models/free-market.can:4694
+		pcall(set_bin_box_key_pressed, event) -- models/free-market.can:4695
+	end, -- models/free-market.can:4695
+	["FM_set-universal-bin-box"] = function(event) -- models/free-market.can:4697
+		pcall(set_universal_bin_box_key_pressed, event) -- models/free-market.can:4698
+	end, -- models/free-market.can:4698
+	["FM_set-buy-box"] = function(event) -- models/free-market.can:4700
+		pcall(set_buy_box_key_pressed, event) -- models/free-market.can:4701
+	end -- models/free-market.can:4701
+} -- models/free-market.can:4701
+M["on_nth_tick"] = { -- models/free-market.can:4705
+	[update_buy_tick] = check_buy_boxes, -- models/free-market.can:4706
+	[update_transfer_tick] = check_transfer_boxes, -- models/free-market.can:4707
+	[update_pull_tick] = check_pull_boxes, -- models/free-market.can:4708
+	[CHECK_FORCES_TICK] = check_forces, -- models/free-market.can:4709
+	[CHECK_TEAMS_DATA_TICK] = check_teams_data -- models/free-market.can:4710
+} -- models/free-market.can:4710
+M["commands"] = { -- models/free-market.can:4713
+	["embargo"] = function(cmd) -- models/free-market.can:4714
+		open_embargo_gui(game["get_player"](cmd["player_index"])) -- models/free-market.can:4715
+	end, -- models/free-market.can:4715
+	["prices"] = function(cmd) -- models/free-market.can:4717
+		switch_prices_gui(game["get_player"](cmd["player_index"])) -- models/free-market.can:4718
+	end, -- models/free-market.can:4718
+	["price_list"] = function(cmd) -- models/free-market.can:4720
+		open_price_list_gui(game["get_player"](cmd["player_index"])) -- models/free-market.can:4721
+	end, -- models/free-market.can:4721
+	["storage"] = function(cmd) -- models/free-market.can:4723
+		open_storage_gui(game["get_player"](cmd["player_index"])) -- models/free-market.can:4724
+	end -- models/free-market.can:4724
+} -- models/free-market.can:4724
+return M -- models/free-market.can:4729

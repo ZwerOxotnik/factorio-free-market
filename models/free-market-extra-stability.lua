@@ -3826,11 +3826,16 @@ local function check_pull_boxes() -- models/free-market.can:3618
 							break -- models/free-market.can:3632
 						end -- models/free-market.can:3632
 						local entity = force_entities[i] -- models/free-market.can:3634
+						if not entity["valid"] then -- models/free-market.can:3636
+							tremove(force_entities, i) -- models/free-market.can:3637
+							goto continue -- models/free-market.can:3638
+						end -- models/free-market.can:3638
 						stack["count"] = count_in_storage -- models/free-market.can:3641
 						local inserted_count = entity["insert"](stack) -- models/free-market.can:3642
 						inserted_count_in_total = inserted_count_in_total + inserted_count -- models/free-market.can:3643
 						count_in_storage = count_in_storage - inserted_count -- models/free-market.can:3644
-					end -- models/free-market.can:3644
+						::continue:: -- models/free-market.can:3646
+					end -- models/free-market.can:3646
 					storage[item_name] = count_in_storage -- models/free-market.can:3649
 				end -- models/free-market.can:3649
 			end -- models/free-market.can:3649
@@ -3852,6 +3857,10 @@ local function check_transfer_boxes() -- models/free-market.can:3667
 		local storage = storages[force_index] -- models/free-market.can:3670
 		for i = # force_entities, 1, - 1 do -- models/free-market.can:3671
 			local entity = force_entities[i] -- models/free-market.can:3672
+			if not entity["valid"] then -- models/free-market.can:3674
+				tremove(force_entities, i) -- models/free-market.can:3675
+				goto continue -- models/free-market.can:3676
+			end -- models/free-market.can:3676
 			local contents = entity["get_inventory"](1)["get_contents"]() -- models/free-market.can:3679
 			for item_name in pairs(contents) do -- models/free-market.can:3680
 				local count = storage[item_name] or 0 -- models/free-market.can:3681
@@ -3861,8 +3870,9 @@ local function check_transfer_boxes() -- models/free-market.can:3667
 					storage[item_name] = count + sum -- models/free-market.can:3685
 				end -- models/free-market.can:3685
 			end -- models/free-market.can:3685
-		end -- models/free-market.can:3685
-	end -- models/free-market.can:3685
+			::continue:: -- models/free-market.can:3689
+		end -- models/free-market.can:3689
+	end -- models/free-market.can:3689
 	for force_index, _items_data in pairs(bin_boxes) do -- models/free-market.can:3694
 		local storage = storages[force_index] -- models/free-market.can:3695
 		for item_name, force_entities in pairs(_items_data) do -- models/free-market.can:3696
@@ -3871,8 +3881,13 @@ local function check_transfer_boxes() -- models/free-market.can:3667
 			local sum = 0 -- models/free-market.can:3699
 			for i = # force_entities, 1, - 1 do -- models/free-market.can:3700
 				local entity = force_entities[i] -- models/free-market.can:3701
+				if not entity["valid"] then -- models/free-market.can:3703
+					tremove(force_entities, i) -- models/free-market.can:3704
+					goto continue -- models/free-market.can:3705
+				end -- models/free-market.can:3705
 				sum = sum + entity["remove_item"](stack) -- models/free-market.can:3708
-			end -- models/free-market.can:3708
+				::continue:: -- models/free-market.can:3710
+			end -- models/free-market.can:3710
 			if sum > 0 then -- models/free-market.can:3713
 				storage[item_name] = count + sum -- models/free-market.can:3714
 			end -- models/free-market.can:3714
@@ -3884,6 +3899,10 @@ local function check_transfer_boxes() -- models/free-market.can:3667
 		local storage = storages[force_index] -- models/free-market.can:3723
 		for i = # force_entities, 1, - 1 do -- models/free-market.can:3724
 			local entity = force_entities[i] -- models/free-market.can:3725
+			if not entity["valid"] then -- models/free-market.can:3727
+				tremove(force_entities, i) -- models/free-market.can:3728
+				goto continue -- models/free-market.can:3729
+			end -- models/free-market.can:3729
 			local contents = entity["get_inventory"](1)["get_contents"]() -- models/free-market.can:3732
 			for item_name in pairs(contents) do -- models/free-market.can:3733
 				local count = storage[item_name] or 0 -- models/free-market.can:3734
@@ -3897,8 +3916,9 @@ local function check_transfer_boxes() -- models/free-market.can:3667
 					end -- models/free-market.can:3741
 				end -- models/free-market.can:3741
 			end -- models/free-market.can:3741
-		end -- models/free-market.can:3741
-	end -- models/free-market.can:3741
+			::continue:: -- models/free-market.can:3746
+		end -- models/free-market.can:3746
+	end -- models/free-market.can:3746
 	for force_index, _items_data in pairs(transfer_boxes) do -- models/free-market.can:3751
 		local default_limit = default_storage_limit[force_index] -- models/free-market.can:3752
 		local storage_limit = storages_limit[force_index] -- models/free-market.can:3753
@@ -3912,8 +3932,13 @@ local function check_transfer_boxes() -- models/free-market.can:3667
 				local sum = 0 -- models/free-market.can:3761
 				for i = # force_entities, 1, - 1 do -- models/free-market.can:3762
 					local entity = force_entities[i] -- models/free-market.can:3763
+					if not entity["valid"] then -- models/free-market.can:3766
+						tremove(force_entities, i) -- models/free-market.can:3767
+						goto continue -- models/free-market.can:3768
+					end -- models/free-market.can:3768
 					sum = sum + entity["remove_item"](stack) -- models/free-market.can:3771
-				end -- models/free-market.can:3771
+					::continue:: -- models/free-market.can:3773
+				end -- models/free-market.can:3773
 				if sum > 0 then -- models/free-market.can:3776
 					storage[item_name] = count + sum -- models/free-market.can:3777
 				end -- models/free-market.can:3777
@@ -3966,6 +3991,10 @@ local function check_buy_boxes() -- models/free-market.can:3784
 						purchasable_count = floor(purchasable_count) -- models/free-market.can:3828
 					end -- models/free-market.can:3828
 					local buy_box = buy_data[1] -- models/free-market.can:3830
+					if not buy_box["valid"] then -- models/free-market.can:3832
+						tremove(entities, i) -- models/free-market.can:3833
+						goto skip_buy -- models/free-market.can:3834
+					end -- models/free-market.can:3834
 					local need_count = buy_data[2] -- models/free-market.can:3837
 					if purchasable_count < need_count then -- models/free-market.can:3838
 						need_count = purchasable_count -- models/free-market.can:3839
