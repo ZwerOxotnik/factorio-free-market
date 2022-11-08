@@ -1,4 +1,11 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.36.15
+Date: 2022-11-08
+  Changes:
+    - Copies chest settings after entity cloning
+  Scripting:
+    - Changed set_* functions in the remote interface (removed player as a parameter)
+---------------------------------------------------------------------------------------------------
 Version: 0.36.14
 Date: 2022-11-05
   Bugfixes:

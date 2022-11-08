@@ -37,7 +37,7 @@ local function place_dummy_trading_boxes(player)
 				pull_box_count = pull_box_count + 1
 				position.x = pull_box_count
 				entity = create_entity{name="steel-chest", position=position, force=force}
-				remote.call("free-market", "set_pull_box_data", item_name, player, entity)
+				remote.call("free-market", "set_pull_box_data", item_name, entity)
 				entity.insert(stack)
 			end
 		end
@@ -57,7 +57,7 @@ local function place_dummy_trading_boxes(player)
 				transferers_count = transferers_count + 1
 				position.x = transferers_count
 				entity = create_entity{name="steel-chest", position=position, force=force}
-				remote.call("free-market", "set_transfer_box_data", item_name, player, entity)
+				remote.call("free-market", "set_transfer_box_data", item_name, entity)
 				entity.insert(stack)
 			end
 		end
@@ -76,7 +76,7 @@ local function place_dummy_trading_boxes(player)
 				bin_boxes_count = bin_boxes_count + 1
 				position.x = bin_boxes_count
 				entity = create_entity{name="steel-chest", position=position, force=force}
-				remote.call("free-market", "set_bin_box_data", item_name, player, entity)
+				remote.call("free-market", "set_bin_box_data", item_name, entity)
 				entity.insert(stack)
 			end
 		end
@@ -96,7 +96,7 @@ local function place_dummy_trading_boxes(player)
 				buy_box_count = buy_box_count + 1
 				position.x = buy_box_count
 				entity = create_entity{name="steel-chest", position=position, force=force}
-				remote.call("free-market", "set_buy_box_data", item_name, player, entity, 50)
+				remote.call("free-market", "set_buy_box_data", item_name, entity, 50)
 				-- entity.insert(stack)
 			end
 		end
@@ -108,7 +108,7 @@ local function place_dummy_trading_boxes(player)
 		universal_transferers_count = universal_transferers_count + 1
 		position.x = universal_transferers_count
 		entity = create_entity{name="steel-chest", position=position, force=force}
-		remote.call("free-market", "set_universal_transfer_box_data", player, entity)
+		remote.call("free-market", "set_universal_transfer_box_data", entity)
 		-- entity.insert(stack)
 	end
 
@@ -118,7 +118,7 @@ local function place_dummy_trading_boxes(player)
 		universal_bin_boxes_count = universal_bin_boxes_count + 1
 		position.x = universal_bin_boxes_count
 		entity = create_entity{name="steel-chest", position=position, force=force}
-		remote.call("free-market", "set_universal_bin_box_data", player, entity)
+		remote.call("free-market", "set_universal_bin_box_data", entity)
 		-- entity.insert(stack)
 	end
 
