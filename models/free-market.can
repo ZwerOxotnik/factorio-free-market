@@ -2518,8 +2518,11 @@ local function on_forces_merging(event)
 	local source_storage = storages[source_index]
 	if source_storage then
 		local destination_index = event.destination.index
-		storages[destination_index] = storages[destination_index] or {} -- TODO: Recheck
 		local destination_storage = storages[destination_index]
+		if destination_storage == nil then
+			init_force_data(destination_index)
+			destination_storage = storages[destination_index]
+		end
 		for item_name, count in pairs(source_storage) do
 			destination_storage[item_name] = count + (destination_storage[item_name] or 0)
 		end
