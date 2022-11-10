@@ -492,7 +492,7 @@ local function clear_force_data(index)
 end
 
 ---@param index number
-local function init_force_data(index)
+function init_force_data(index)
 	inactive_sell_prices[index] = inactive_sell_prices[index] or {}
 	inactive_buy_prices[index] = inactive_buy_prices[index] or {}
 	bin_boxes[index] = bin_boxes[index] or {}
@@ -2602,6 +2602,7 @@ local function set_transfer_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
 	if not (entity and entity.valid) then return end
+	if entity.force ~= player.force then return end
 	if not entity.operable then return end
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
@@ -2631,6 +2632,7 @@ local function set_bin_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
 	if not (entity and entity.valid) then return end
+	if entity.force ~= player.force then return end
 	if not entity.operable then return end
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
@@ -2652,6 +2654,7 @@ local function set_universal_transfer_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
 	if not (entity and entity.valid) then return end
+	if entity.force ~= player.force then return end
 	if not entity.operable then return end
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
@@ -2674,6 +2677,7 @@ local function set_universal_bin_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
 	if not (entity and entity.valid) then return end
+	if entity.force ~= player.force then return end
 	if not entity.operable then return end
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
@@ -2687,6 +2691,7 @@ local function set_pull_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
 	if not (entity and entity.valid) then return end
+	if entity.force ~= player.force then return end
 	if not entity.operable then return end
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
@@ -2708,6 +2713,7 @@ local function set_buy_box_key_pressed(event)
 	local player = game.get_player(event.player_index)
 	local entity = player.selected
 	if not (entity and entity.valid) then return end
+	if entity.force ~= player.force then return end
 	if not entity.operable then return end
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end
@@ -3643,7 +3649,12 @@ local function on_gui_opened(event)
 	local player = game.get_player(event.player_index)
 	if not (player and player.valid) then return end
 
-	player.gui.relative.FM_boxes_frame.visible = ALLOWED_CHEST_TYPES[entity.type] == true
+	local boxes_frame = player.gui.relative.FM_boxes_frame
+	if player.force == entity.force then
+		boxes_frame.visible = ALLOWED_CHEST_TYPES[entity.type] == true
+	else
+		boxes_frame.visible = false
+	end
 end
 
 local function on_gui_closed(event)
@@ -4438,12 +4449,12 @@ local function update_global_data()
 		end
 	end
 
-	init_force_data(game.forces.player.index)
+	-- init_force_data(game.forces.player.index)
 
 	for _, force in pairs(game.forces) do
-		if #force.players > 0 then
+		-- if #force.players > 0 then
 			init_force_data(force.index)
-		end
+		-- end
 	end
 
 	for _, player in pairs(game.players) do

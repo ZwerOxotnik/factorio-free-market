@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.36.18
+Date: 2022-11-10
+  Scripting:
+    - init_force_data is global function now
+  Bugfixes:
+    - Players can change chests of other forces anymore
+    - Each force has data now to avoid bugs
+---------------------------------------------------------------------------------------------------
 Version: 0.36.17
 Date: 2022-11-08
   Changes:
