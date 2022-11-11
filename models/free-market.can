@@ -2454,7 +2454,10 @@ local function on_player_cursor_stack_changed(event)
 end
 
 local function on_force_created(event)
-	init_force_data(event.force.index)
+	local force = event.force
+	if force.valid then
+		init_force_data(event.force.index)
+	end
 end
 
 local function check_teams_data()
@@ -4030,35 +4033,35 @@ local SELECT_TOOLS = {
 	FM_set_buy_boxes_tool = set_buy_box_data
 }
 local function on_player_selected_area(event)
+	local player = game.get_player(event.player_index)
+	if not (player and player.valid) then return end
+
 	local tool_name = event.item
 	local func = SELECT_TOOLS[tool_name]
 	if func then
 		local entities = event.entities
-		local player = game.get_player(event.player_index)
 		for i=1, #entities do
 			local entity = entities[i]
-			if all_boxes[entity.unit_number] == nil then
+			if entity.valid and all_boxes[entity.unit_number] == nil then
 				local item = entity.get_inventory(chest_inventory_type)[1]
 				if item.valid_for_read then
-					func(item.name, player, entity)
+					func(item.name, entity)
 				end
 			end
 		end
 	elseif tool_name == "FM_set_universal_transfer_boxes_tool" then
 		local entities = event.entities
-		local player = game.get_player(event.player_index)
 		for i=1, #entities do
 			local entity = entities[i]
-			if all_boxes[entity.unit_number] == nil then
+			if entity.valid and all_boxes[entity.unit_number] == nil then
 				set_universal_transfer_box_data(entity)
 			end
 		end
 	elseif tool_name == "FM_set_universal_bin_boxes_tool" then
 		local entities = event.entities
-		local player = game.get_player(event.player_index)
 		for i=1, #entities do
 			local entity = entities[i]
-			if all_boxes[entity.unit_number] == nil then
+			if entity.valid and all_boxes[entity.unit_number] == nil then
 				set_universal_bin_box_data(entity)
 			end
 		end
@@ -4067,9 +4070,12 @@ local function on_player_selected_area(event)
 		local player = game.get_player(event.player_index)
 		local count = 0
 		for i=1, #entities do
-			local is_deleted = clear_box_data_by_entity(entities[i])
-			if is_deleted then
-				count = count + 1
+			local entity = entities[i]
+			if entity.valid then
+				local is_deleted = clear_box_data_by_entity(entity)
+				if is_deleted then
+					count = count + 1
+				end
 			end
 		end
 		if count > 0 then
