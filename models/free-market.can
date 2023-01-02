@@ -3861,105 +3861,105 @@ local function check_buy_boxes()
 
 	local forces_money = call("EasyAPI", "get_forces_money")
 	local buyer_money = forces_money[buyer_index]
-	if buyer_money and buyer_money > money_treshold then
-		local stack_count = 0 -- for optimization
-		local payment = 0
-		local f_buy_prices = buy_prices[buyer_index]
-		local inserted_count_in_total = 0
-		for item_name, entities in pairs(items_data) do
-			if money_treshold >= buyer_money then
-				-- TODO: improve
-				goto not_enough_money
-			end
-			local buy_price = f_buy_prices[item_name]
-			if buy_price and buyer_money >= buy_price then
-				for i=#entities, 1, -1 do
-					local buy_data = entities[i]
-					local purchasable_count = buyer_money / buy_price
-					if purchasable_count < 1 then
+	if buyer_money == nil or buyer_money <= money_treshold then
+		return
+	end
+
+	local stack_count = 0 -- for optimization
+	local payment = 0
+	local f_buy_prices = buy_prices[buyer_index]
+	local inserted_count_in_total = 0
+	for item_name, entities in pairs(items_data) do
+		if money_treshold >= buyer_money then
+			-- TODO: improve
+			goto not_enough_money
+		end
+		local buy_price = f_buy_prices[item_name]
+		if buy_price and buyer_money >= buy_price then
+			for i=#entities, 1, -1 do
+				local buy_data = entities[i]
+				local purchasable_count = buyer_money / buy_price
+				if purchasable_count < 1 then
+					goto skip_buy
+				else
+					purchasable_count = floor(purchasable_count)
+				end
+				local buy_box = buy_data[1]
+				--#if EXTRA_STABILITY then
+					if not buy_box.valid then
+						tremove(entities, i)
 						goto skip_buy
-					else
-						purchasable_count = floor(purchasable_count)
 					end
-					local buy_box = buy_data[1]
-					--#if EXTRA_STABILITY then
-						if not buy_box.valid then
-							tremove(entities, i)
-							goto skip_buy
-						end
-					--#end
-					local need_count = buy_data[2]
-					if purchasable_count < need_count then
-						need_count = purchasable_count
+				--#end
+				local need_count = buy_data[2]
+				if purchasable_count < need_count then
+					need_count = purchasable_count
+				end
+				local count = buy_box.get_item_count(item_name)
+				stack["name"] = item_name
+				if need_count < count then
+					stack_count = count
+				else
+					need_count = need_count - count
+					if need_count <= 0 then
+						goto skip_buy
 					end
-					local count = buy_box.get_item_count(item_name)
-					stack["name"] = item_name
-					if need_count < count then
-						stack_count = count
-					else
-						need_count = need_count - count
-						if need_count <= 0 then
-							goto skip_buy
-						end
 
-						local buyer_storage = storages[buyer_index]
-						local count_in_storage = buyer_storage[item_name]
-						if count_in_storage and count_in_storage > 0 then
-							stack_count = need_count - count_in_storage
-							if stack_count <= 0 then
-								buyer_storage[item_name] = count_in_storage - need_count
-								stack_count = 0
-								goto fulfilled_needs
-							else
-								buyer_storage[item_name] = count_in_storage + (stack_count - need_count)
-							end
+					local buyer_storage = storages[buyer_index]
+					local count_in_storage = buyer_storage[item_name]
+					if count_in_storage and count_in_storage > 0 then
+						stack_count = need_count - count_in_storage
+						if stack_count <= 0 then
+							buyer_storage[item_name] = count_in_storage - need_count
+							stack_count = 0
+							goto fulfilled_needs
 						else
-							stack_count = need_count
+							buyer_storage[item_name] = count_in_storage + (stack_count - need_count)
 						end
+					else
+						stack_count = need_count
+					end
 
-						for seller_index, seller_storage in pairs(storages) do
-							if buyer_index ~= seller_index and forces_money[seller_index] and not embargoes[seller_index][buyer_index] then
-								local sell_price = sell_prices[seller_index][item_name]
-								if sell_price and buy_price >= sell_price then
-									count_in_storage = seller_storage[item_name]
-									if count_in_storage then
-										if count_in_storage > stack_count then
-											seller_storage[item_name] = count_in_storage - stack_count
-											stack_count = 0
-											payment = need_count * sell_price
-											buyer_money = buyer_money - payment
-											forces_money[seller_index] = forces_money[seller_index] + payment
-											goto fulfilled_needs
-										else
-											stack_count = stack_count - count_in_storage
-											seller_storage[item_name] = 0
-											payment = (need_count - stack_count) * sell_price
-											buyer_money = buyer_money - payment
-											forces_money[seller_index] = forces_money[seller_index] + payment
-										end
+					for seller_index, seller_storage in pairs(storages) do
+						if buyer_index ~= seller_index and forces_money[seller_index] and not embargoes[seller_index][buyer_index] then
+							local sell_price = sell_prices[seller_index][item_name]
+							if sell_price and buy_price >= sell_price then
+								count_in_storage = seller_storage[item_name]
+								if count_in_storage then
+									if count_in_storage > stack_count then
+										seller_storage[item_name] = count_in_storage - stack_count
+										stack_count = 0
+										payment = need_count * sell_price
+										buyer_money = buyer_money - payment
+										forces_money[seller_index] = forces_money[seller_index] + payment
+										goto fulfilled_needs
+									else
+										stack_count = stack_count - count_in_storage
+										seller_storage[item_name] = 0
+										payment = (need_count - stack_count) * sell_price
+										buyer_money = buyer_money - payment
+										forces_money[seller_index] = forces_money[seller_index] + payment
 									end
 								end
 							end
 						end
 					end
-					:: fulfilled_needs ::
-					local found_items = need_count - stack_count
-					if found_items > 0 then
-						stack["count"] = found_items
-						inserted_count_in_total = inserted_count_in_total + buy_box.insert(stack)
-					end
-					:: skip_buy ::
 				end
+				:: fulfilled_needs ::
+				local found_items = need_count - stack_count
+				if found_items > 0 then
+					stack["count"] = found_items
+					inserted_count_in_total = inserted_count_in_total + buy_box.insert(stack)
+				end
+				:: skip_buy ::
 			end
 		end
-		:: not_enough_money ::
-		if pull_cost_per_item == 0 then
-			forces_money[buyer_index] = buyer_money
-		else
-			forces_money[buyer_index] = buyer_money - ceil(inserted_count_in_total * pull_cost_per_item)
-		end
+	end
+	:: not_enough_money ::
+	if pull_cost_per_item == 0 then
+		forces_money[buyer_index] = buyer_money
 	else
-		return
+		forces_money[buyer_index] = buyer_money - ceil(inserted_count_in_total * pull_cost_per_item)
 	end
 
 	local forces = game.forces
