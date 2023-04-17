@@ -2456,7 +2456,7 @@ end
 local function on_force_created(event)
 	local force = event.force
 	if force.valid then
-		init_force_data(event.force_index)
+		init_force_data(force.index)
 	end
 end
 
@@ -2592,7 +2592,7 @@ local function on_entity_cloned(event)
 end
 
 local function on_force_cease_fire_changed(event)
-	local force_index = event.force_index
+	local force_index = event.force.index
 	local other_force_index = event.other_force.index
 	if event.added then
 		embargoes[force_index][other_force_index] = nil
