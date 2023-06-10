@@ -2,7 +2,7 @@
 Version: 0.38.0
 Date: 2023-06-10
   Bugfixes:
-    - Fixed gui crush in some cases in theory again
+    - Fixed gui crash in some cases in theory again
     - Removed debug messages and debug actions
   Features:
     - Supports commands "/fix-bugs" in EasyAPI (turn on in settings)
@@ -10,7 +10,7 @@ Date: 2023-06-10
 Version: 0.37.0
 Date: 2023-06-09
   Bugfixes:
-    - Fixed gui crush in some cases in theory
+    - Fixed gui crash in some cases in theory
 ---------------------------------------------------------------------------------------------------
 Version: 0.36.22
 Date: 2023-04-17
@@ -62,7 +62,7 @@ Date: 2022-11-08
 Version: 0.36.14
 Date: 2022-11-05
   Bugfixes:
-    - Fixed crush with pull boxes for some special forces
+    - Fixed crash with pull boxes for some special forces
 ---------------------------------------------------------------------------------------------------
 Version: 0.36.13
 Date: 2022-10-10
@@ -154,7 +154,7 @@ Date: 2022-01-19
 Version: 0.35.7
 Date: 2022-01-16
   Bugfixes:
-    - Fixed crush when none of forces was selected in a search of prices
+    - Fixed crash when none of forces was selected in a search of prices
 ---------------------------------------------------------------------------------------------------
 Version: 0.35.6
 Date: 2022-01-16
@@ -165,7 +165,7 @@ Date: 2022-01-16
 Version: 0.35.5
 Date: 2022-01-15
   Bugfixes:
-    - Fixed changing of chest settings (no crush anymore)
+    - Fixed changing of chest settings (no crash anymore)
 ---------------------------------------------------------------------------------------------------
 Version: 0.35.4
 Date: 2022-01-15
@@ -310,7 +310,7 @@ Date: 2022-01-09
 Version: 0.33.2
 Date: 2022-01-09
   Bugfixes:
-    - Fixed crush of migration in some cases (bug from 0.33.0)
+    - Fixed crash of migration in some cases (bug from 0.33.0)
 ---------------------------------------------------------------------------------------------------
 Version: 0.33.1
 Date: 2022-01-09
@@ -426,7 +426,7 @@ Date: 2021-12-22
 Version: 0.29.1
 Date: 2021-12-20
   Bugfixes:
-    - Fixed crush on on_forces_merging event
+    - Fixed crash on on_forces_merging event
 ---------------------------------------------------------------------------------------------------
 Version: 0.29.0
 Date: 2021-12-19
@@ -520,7 +520,7 @@ Date: 2021-12-13
 Version: 0.25.1
 Date: 2021-12-13
   Bugfixes:
-    - Fixed crush and data on merging forces
+    - Fixed crash and data on merging forces
 ---------------------------------------------------------------------------------------------------
 Version: 0.25.0
 Date: 2021-12-12
@@ -737,7 +737,7 @@ Date: 2021-10-12
 Version: 0.15.3
 Date: 2021-10-11
   Bugfixes:
-    - Fixed crush
+    - Fixed crash
 ---------------------------------------------------------------------------------------------------
 Version: 0.15.2
 Date: 2021-10-10
@@ -864,7 +864,7 @@ Date: 2021-09-23
 Version: 0.10.6
 Date: 2021-09-22
   Bugfixes:
-    - Fixed crush during merging of forces
+    - Fixed crash during merging of forces
 ---------------------------------------------------------------------------------------------------
 Version: 0.10.5
 Date: 2021-09-14
@@ -966,7 +966,7 @@ Date: 2021-09-03
 Version: 0.7.8
 Date: 2021-09-02
   Bugfixes:
-    - Fixed crush during trading
+    - Fixed crash during trading
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.7
 Date: 2021-09-02
@@ -986,7 +986,7 @@ Date: 2021-09-02
 Version: 0.7.4
 Date: 2021-09-02
   Bugfixes:
-    - Fixed crush during buying
+    - Fixed crash during buying
 ---------------------------------------------------------------------------------------------------
 Version: 0.7.3
 Date: 2021-09-02
