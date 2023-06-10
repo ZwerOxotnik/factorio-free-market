@@ -1,4 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.38.0
+Date: 2023-06-10
+  Bugfixes:
+    - Fixed gui crush in some cases in theory again
+    - Removed debug messages and debug actions
+  Features:
+    - Supports commands "/fix-bugs" in EasyAPI (turn on in settings)
+---------------------------------------------------------------------------------------------------
 Version: 0.37.0
 Date: 2023-06-09
   Bugfixes:
@@ -947,7 +955,7 @@ Date: 2021-09-03
   Features:
     - Added support of logistic containers
 ---------------------------------------------------------------------------------------------------
-Version: 0.8.0
+Version: 0.7.9
 Date: 2021-09-03
   Features:
     - Added support of logistic containers

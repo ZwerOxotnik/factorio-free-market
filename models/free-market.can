@@ -4457,9 +4457,11 @@ local function update_global_data()
 	-- init_force_data(game.forces.player.index)
 
 	for _, force in pairs(game.forces) do
-		-- if #force.players > 0 then
-			init_force_data(force.index)
-		-- end
+		if force.valid then
+			-- if #force.players > 0 then
+				init_force_data(force.index)
+			-- end
+		end
 	end
 
 	for _, player in pairs(game.players) do
@@ -4487,12 +4489,13 @@ local function on_configuration_changed(event)
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
 
-	if version < 0.37 then
+	if version < 0.38 then
 		for _, player in pairs(game.players) do
 			if player.valid then
 				local frame = player.gui.screen.FM_item_price_frame
 				if frame and frame.valid then
 					frame.destroy()
+					item_HUD[player.index] = nil
 					if player.mod_settings["FM_show_item_price"].value then
 						create_item_price_HUD(player)
 					end
@@ -4658,6 +4661,26 @@ do
 		script.set_event_filter(defines.events.script_raised_destroy, filters)
 		script.set_event_filter(defines.events.on_player_mined_entity, filters)
 		script.set_event_filter(defines.events.on_entity_cloned, filters)
+
+		local EasyAPI_events = call("EasyAPI", "get_events")
+		if EasyAPI_events.on_fix_bugs then
+			clear_invalid_player_data()
+
+			script.on_event(EasyAPI_events.on_fix_bugs, function()
+				for _, player in pairs(game.players) do
+					if player.valid then
+						local frame = player.gui.screen.FM_item_price_frame
+						if frame and frame.valid then
+							frame.destroy()
+							item_HUD[player.index] = nil
+							if player.mod_settings["FM_show_item_price"].value then
+								create_item_price_HUD(player)
+							end
+						end
+					end
+				end
+			end)
+		end
 	end
 
 	M.on_load = function()

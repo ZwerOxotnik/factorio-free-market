@@ -35,10 +35,10 @@ jobs:
         prop_path: 'name'
     - uses: leafo/gh-actions-lua@v8
       with:
-        luaVersion: "5.4.3"
+        luaVersion: "5.4.6"
     - uses: leafo/gh-actions-luarocks@v4
       with:
-        luarocksVersion: "3.7.0"
+        luarocksVersion: "3.9.2"
     - name: install candran
       run: luarocks install candran
     - name: install lpeg

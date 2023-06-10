@@ -1,11 +1,11 @@
 {
 	"name": "iFreeMarket",
-	"version": "0.37.0",
+	"version": "0.38.0",
 	"factorio_version": "1.1",
 	"title": "Free market",
 	"author": "ZwerOxotnik",
 	"contact": "zweroxotnik@gmail.com, Discord:ZwerOxotnik#7117",
-	"homepage": "reddit.com/r/ZwerOxotnik/",
+	"homepage": "https://reddit.com/r/ZwerOxotnik/",
 	"description": "See locale/*",
 	"dependencies": [
 		"zk-lib >= 0.10.0",
