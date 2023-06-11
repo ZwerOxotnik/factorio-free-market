@@ -4662,11 +4662,23 @@ do
 		script.set_event_filter(defines.events.on_player_mined_entity, filters)
 		script.set_event_filter(defines.events.on_entity_cloned, filters)
 
+		local function check_local_and_global_data(local_data, global_data_name)
+			if (type(global_data_name) == "string" and local_data ~= global.free_market[global_data_name]) then
+				local message = string.format("!WARNING! Desync has been detected in mod_data[%s]. Please report this to ZwerOxotnik and load your game again!", global_data_name)
+				log(message)
+				if game then
+					message = string.format("[color=red]!WARNING![/color] Desync has been detected in mod_data[%s]. Please report this to ZwerOxotnik and load your game again!", global_data_name)
+					game.print(message)
+				end
+			end
+		end
+
 		local EasyAPI_events = call("EasyAPI", "get_events")
 		if EasyAPI_events.on_fix_bugs then
-			clear_invalid_player_data()
-
 			script.on_event(EasyAPI_events.on_fix_bugs, function()
+				clear_invalid_player_data()
+				clear_invalid_entities()
+
 				for _, player in pairs(game.players) do
 					if player.valid then
 						local frame = player.gui.screen.FM_item_price_frame
@@ -4679,6 +4691,31 @@ do
 						end
 					end
 				end
+
+				--#define("check_local_and_global_data(x)", "check_local_and_global_data(x, \"x\")")
+				check_local_and_global_data(embargoes)
+				check_local_and_global_data(sell_prices)
+				check_local_and_global_data(inactive_sell_prices)
+				check_local_and_global_data(buy_prices)
+				check_local_and_global_data(inactive_buy_prices)
+				check_local_and_global_data(transfer_boxes)
+				check_local_and_global_data(inactive_transfer_boxes)
+				check_local_and_global_data(bin_boxes)
+				check_local_and_global_data(inactive_bin_boxes)
+				check_local_and_global_data(universal_transfer_boxes)
+				check_local_and_global_data(inactive_universal_transfer_boxes)
+				check_local_and_global_data(universal_bin_boxes)
+				check_local_and_global_data(inactive_universal_bin_boxes)
+				check_local_and_global_data(buy_boxes)
+				check_local_and_global_data(inactive_buy_boxes)
+				check_local_and_global_data(pull_boxes)
+				check_local_and_global_data(open_box)
+				check_local_and_global_data(all_boxes)
+				check_local_and_global_data(active_forces)
+				check_local_and_global_data(storages)
+				check_local_and_global_data(storages_limit)
+				check_local_and_global_data(default_storage_limit)
+				check_local_and_global_data(item_HUD)
 			end)
 		end
 	end
