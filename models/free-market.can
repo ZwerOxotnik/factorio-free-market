@@ -4664,10 +4664,10 @@ do
 
 		local function check_local_and_global_data(local_data, global_data_name)
 			if (type(global_data_name) == "string" and local_data ~= global.free_market[global_data_name]) then
-				local message = string.format("!WARNING! Desync has been detected in mod_data[%s]. Please report this to ZwerOxotnik and load your game again!", global_data_name)
+				local message = string.format("!WARNING! Desync has been detected in __%s__ mod_data[\"%s\"]. Please report and send log files to ZwerOxotnik and try to load your game again!", script.mod_name, global_data_name)
 				log(message)
 				if game then
-					message = string.format("[color=red]!WARNING![/color] Desync has been detected in mod_data[%s]. Please report this to ZwerOxotnik and load your game again!", global_data_name)
+					message = string.format("[color=red]!WARNING![/color] Desync has been detected __%s__ in mod_data[\"%s\"]. [color=yellow]Please report and send log files to ZwerOxotnik and try to load your game again![/color]", script.mod_name, global_data_name)
 					game.print(message)
 				end
 			end
@@ -4704,7 +4704,7 @@ do
 				check_local_and_global_data(universal_transfer_boxes, "universal_transfer_boxes")
 				check_local_and_global_data(inactive_universal_transfer_boxes, "inactive_universal_transfer_boxes")
 				check_local_and_global_data(universal_bin_boxes, "universal_bin_boxes")
-				check_local_and_global_data(inactive_universal_bin_boxes, "inactive_universal_bin_boxes")
+				check_local_and_global_data(inactive_universal_bin_boxes, "universal_inactive_bin_boxes")
 				check_local_and_global_data(buy_boxes, "buy_boxes")
 				check_local_and_global_data(inactive_buy_boxes, "inactive_buy_boxes")
 				check_local_and_global_data(pull_boxes, "pull_boxes")
@@ -4714,7 +4714,7 @@ do
 				check_local_and_global_data(storages, "storages")
 				check_local_and_global_data(storages_limit, "storages_limit")
 				check_local_and_global_data(default_storage_limit, "default_storage_limit")
-				check_local_and_global_data(item_HUD, "item_HUD")
+				check_local_and_global_data(item_HUD, "item_hinter")
 			end)
 		end
 	end
