@@ -1,4 +1,9 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.38.6
+Date: 2023-06-12
+  Changes:
+    - Detection of desynced mod data shoudn't kick players when they joining to a server with desynced data
+---------------------------------------------------------------------------------------------------
 Version: 0.38.5
 Date: 2023-06-12
   Changes:

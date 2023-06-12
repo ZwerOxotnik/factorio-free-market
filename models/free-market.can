@@ -432,44 +432,47 @@ end
 
 ---@param local_data table
 ---@param global_data_name string
+---@param receiver table?
 ---@return boolean
-function check_local_and_global_data(local_data, global_data_name)
+function check_local_and_global_data(local_data, global_data_name, receiver)
 	if (type(global_data_name) == "string" and local_data ~= global.free_market[global_data_name]) then
 		local message = string.format("!WARNING! Desync has been detected in __%s__ mod_data[\"%s\"]. Please report and send log files to ZwerOxotnik and try to load your game again!", script.mod_name, global_data_name)
 		log(message)
-		if game then
+		if game and (game.is_multiplayer() == false or receiver) then
 			message = string.format("[color=red]!WARNING![/color] Desync has been detected __%s__ in mod_data[\"%s\"]. [color=yellow]Please report and send log files to ZwerOxotnik and try to load your game again![/color]", script.mod_name, global_data_name)
-			game.print(message)
+			receiver = receiver or game
+			receiver.print(message)
 		end
 		return true
 	end
 	return false
 end
 
-function detect_desync()
-	check_local_and_global_data(embargoes, "embargoes")
-	check_local_and_global_data(sell_prices, "sell_prices")
-	check_local_and_global_data(inactive_sell_prices, "inactive_sell_prices")
-	check_local_and_global_data(buy_prices, "buy_prices")
-	check_local_and_global_data(inactive_buy_prices, "inactive_buy_prices")
-	check_local_and_global_data(transfer_boxes, "transfer_boxes")
-	check_local_and_global_data(inactive_transfer_boxes, "inactive_transfer_boxes")
-	check_local_and_global_data(bin_boxes, "bin_boxes")
-	check_local_and_global_data(inactive_bin_boxes, "inactive_bin_boxes")
-	check_local_and_global_data(universal_transfer_boxes, "universal_transfer_boxes")
-	check_local_and_global_data(inactive_universal_transfer_boxes, "inactive_universal_transfer_boxes")
-	check_local_and_global_data(universal_bin_boxes, "universal_bin_boxes")
-	check_local_and_global_data(inactive_universal_bin_boxes, "universal_inactive_bin_boxes")
-	check_local_and_global_data(buy_boxes, "buy_boxes")
-	check_local_and_global_data(inactive_buy_boxes, "inactive_buy_boxes")
-	check_local_and_global_data(pull_boxes, "pull_boxes")
-	check_local_and_global_data(open_box, "open_box")
-	check_local_and_global_data(all_boxes, "all_boxes")
-	check_local_and_global_data(active_forces, "active_forces")
-	check_local_and_global_data(storages, "storages")
-	check_local_and_global_data(storages_limit, "storages_limit")
-	check_local_and_global_data(default_storage_limit, "default_storage_limit")
-	check_local_and_global_data(item_HUD, "item_hinter")
+---@param receiver table?
+function detect_desync(receiver)
+	check_local_and_global_data(embargoes, "embargoes", receiver)
+	check_local_and_global_data(sell_prices, "sell_prices", receiver)
+	check_local_and_global_data(inactive_sell_prices, "inactive_sell_prices", receiver)
+	check_local_and_global_data(buy_prices, "buy_prices", receiver)
+	check_local_and_global_data(inactive_buy_prices, "inactive_buy_prices", receiver)
+	check_local_and_global_data(transfer_boxes, "transfer_boxes", receiver)
+	check_local_and_global_data(inactive_transfer_boxes, "inactive_transfer_boxes", receiver)
+	check_local_and_global_data(bin_boxes, "bin_boxes", receiver)
+	check_local_and_global_data(inactive_bin_boxes, "inactive_bin_boxes", receiver)
+	check_local_and_global_data(universal_transfer_boxes, "universal_transfer_boxes", receiver)
+	check_local_and_global_data(inactive_universal_transfer_boxes, "inactive_universal_transfer_boxes", receiver)
+	check_local_and_global_data(universal_bin_boxes, "universal_bin_boxes", receiver)
+	check_local_and_global_data(inactive_universal_bin_boxes, "universal_inactive_bin_boxes", receiver)
+	check_local_and_global_data(buy_boxes, "buy_boxes", receiver)
+	check_local_and_global_data(inactive_buy_boxes, "inactive_buy_boxes", receiver)
+	check_local_and_global_data(pull_boxes, "pull_boxes", receiver)
+	check_local_and_global_data(open_box, "open_box", receiver)
+	check_local_and_global_data(all_boxes, "all_boxes", receiver)
+	check_local_and_global_data(active_forces, "active_forces", receiver)
+	check_local_and_global_data(storages, "storages", receiver)
+	check_local_and_global_data(storages_limit, "storages_limit", receiver)
+	check_local_and_global_data(default_storage_limit, "default_storage_limit", receiver)
+	check_local_and_global_data(item_HUD, "item_hinter", receiver)
 end
 
 --#endregion
@@ -4530,7 +4533,7 @@ local function update_global_data()
 		end
 	end
 
-	detect_desync()
+	detect_desync(game)
 end
 
 local function on_configuration_changed(event)
@@ -4705,7 +4708,7 @@ do
 				clear_invalid_player_data()
 				clear_invalid_entities()
 
-				detect_desync()
+				detect_desync(game)
 			end)
 		end
 	end
