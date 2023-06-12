@@ -436,10 +436,12 @@ end
 ---@return boolean
 function check_local_and_global_data(local_data, global_data_name, receiver)
 	if (type(global_data_name) == "string" and local_data ~= global.free_market[global_data_name]) then
-		local message = string.format("!WARNING! Desync has been detected in __%s__ mod_data[\"%s\"]. Please report and send log files to ZwerOxotnik and try to load your game again!", script.mod_name, global_data_name)
+		local message = string.format("!WARNING! Desync has been detected in __%s__ %s. Please report and send log files to %s and try to load your game again or use /sync", script.mod_name, "mod_data[\"" .. global_data_name .. "\"]", "ZwerOxotnik")
 		log(message)
 		if game and (game.is_multiplayer() == false or receiver) then
-			message = string.format("[color=red]!WARNING![/color] Desync has been detected __%s__ in mod_data[\"%s\"]. [color=yellow]Please report and send log files to ZwerOxotnik and try to load your game again![/color]", script.mod_name, global_data_name)
+			message = {"EasyAPI.report-desync",
+				script.mod_name, "mod_data[\"" .. global_data_name .. "\"]", "ZwerOxotnik"
+			}
 			receiver = receiver or game
 			receiver.print(message)
 		end
@@ -936,13 +938,27 @@ local function clear_invalid_player_data()
 		local player = game.get_player(player_index)
 		if not (player and player.valid) then
 			item_HUD[player_index] = nil
-		elseif not player.connected then
-			delete_item_price_HUD(player)
-		else
+		elseif player.connected then
 			local player_item_HUD = item_HUD[player_index]
 			if player_item_HUD and player_item_HUD[1].valid == false then
-				log(string.format("[%s] item_HUD for \"%s\" refers to invalid data", script.mod_name, player.name))
+				log(string.format("[BUG][%s] item_HUD for \"%s\" refers to invalid data", script.mod_name, player.name))
 				delete_item_price_HUD(player)
+			end
+		end
+	end
+
+	for _, player in pairs(game.players) do
+		if (player and player.valid) then
+			local player_index = player.index
+			if not player.connected then
+				delete_item_price_HUD(player)
+			elseif item_HUD[player_index] == nil then
+				local frame = player.gui.screen.FM_item_price_frame
+				if frame and frame.valid then
+					log(string.format("[BUG][iFreeMarket] Player \"%s\" has FM_item_price_frame and online, item_HUD[player_index] is nil", player.name))
+					delete_item_price_HUD(player)
+					create_item_price_HUD(player)
+				end
 			end
 		end
 	end
@@ -2848,6 +2864,7 @@ end
 local GUIS = {
 	[''] = function(element, player)
 		if element.type ~= "sprite-button" then return end
+
 		local parent_name = element.parent.name
 		if parent_name == "price_list_table" then
 			local item_name = sub(element.sprite, 6)
@@ -4709,6 +4726,11 @@ do
 				clear_invalid_entities()
 
 				detect_desync(game)
+			end)
+		end
+		if EasyAPI_events.on_sync then
+			script.on_event(EasyAPI_events.on_sync, function()
+				link_data()
 			end)
 		end
 	end

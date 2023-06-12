@@ -1,4 +1,10 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.38.7
+Date: 2023-06-12
+  Changes:
+    - Added integration with /sync from EasyAPI (update EasyAPI)
+    - Improved check of invalid player data
+---------------------------------------------------------------------------------------------------
 Version: 0.38.6
 Date: 2023-06-12
   Changes:
