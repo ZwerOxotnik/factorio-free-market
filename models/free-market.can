@@ -938,6 +938,7 @@ local function clear_invalid_player_data()
 		else
 			local player_item_HUD = item_HUD[player_index]
 			if player_item_HUD and player_item_HUD[1].valid == false then
+				log(string.format("[%s] item_HUD for \"%s\" refers to invalid data", script.mod_name, player.name))
 				delete_item_price_HUD(player)
 			end
 		end
