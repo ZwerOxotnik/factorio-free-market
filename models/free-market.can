@@ -429,6 +429,49 @@ function resetAllBoxes(force_index)
 	resetBuyBoxes(force_index)
 end
 
+
+---@param local_data table
+---@param global_data_name string
+---@return boolean
+function check_local_and_global_data(local_data, global_data_name)
+	if (type(global_data_name) == "string" and local_data ~= global.free_market[global_data_name]) then
+		local message = string.format("!WARNING! Desync has been detected in __%s__ mod_data[\"%s\"]. Please report and send log files to ZwerOxotnik and try to load your game again!", script.mod_name, global_data_name)
+		log(message)
+		if game then
+			message = string.format("[color=red]!WARNING![/color] Desync has been detected __%s__ in mod_data[\"%s\"]. [color=yellow]Please report and send log files to ZwerOxotnik and try to load your game again![/color]", script.mod_name, global_data_name)
+			game.print(message)
+		end
+		return true
+	end
+	return false
+end
+
+function detect_desync()
+	check_local_and_global_data(embargoes, "embargoes")
+	check_local_and_global_data(sell_prices, "sell_prices")
+	check_local_and_global_data(inactive_sell_prices, "inactive_sell_prices")
+	check_local_and_global_data(buy_prices, "buy_prices")
+	check_local_and_global_data(inactive_buy_prices, "inactive_buy_prices")
+	check_local_and_global_data(transfer_boxes, "transfer_boxes")
+	check_local_and_global_data(inactive_transfer_boxes, "inactive_transfer_boxes")
+	check_local_and_global_data(bin_boxes, "bin_boxes")
+	check_local_and_global_data(inactive_bin_boxes, "inactive_bin_boxes")
+	check_local_and_global_data(universal_transfer_boxes, "universal_transfer_boxes")
+	check_local_and_global_data(inactive_universal_transfer_boxes, "inactive_universal_transfer_boxes")
+	check_local_and_global_data(universal_bin_boxes, "universal_bin_boxes")
+	check_local_and_global_data(inactive_universal_bin_boxes, "universal_inactive_bin_boxes")
+	check_local_and_global_data(buy_boxes, "buy_boxes")
+	check_local_and_global_data(inactive_buy_boxes, "inactive_buy_boxes")
+	check_local_and_global_data(pull_boxes, "pull_boxes")
+	check_local_and_global_data(open_box, "open_box")
+	check_local_and_global_data(all_boxes, "all_boxes")
+	check_local_and_global_data(active_forces, "active_forces")
+	check_local_and_global_data(storages, "storages")
+	check_local_and_global_data(storages_limit, "storages_limit")
+	check_local_and_global_data(default_storage_limit, "default_storage_limit")
+	check_local_and_global_data(item_HUD, "item_hinter")
+end
+
 --#endregion
 
 
@@ -892,6 +935,11 @@ local function clear_invalid_player_data()
 			item_HUD[player_index] = nil
 		elseif not player.connected then
 			delete_item_price_HUD(player)
+		else
+			local player_item_HUD = item_HUD[player_index]
+			if player_item_HUD and player_item_HUD[1].valid == false then
+				delete_item_price_HUD(player)
+			end
 		end
 	end
 end
@@ -2413,6 +2461,7 @@ local function on_player_joined_game(event)
 
 	if #game.connected_players == 1 then
 		clear_invalid_player_data()
+		detect_desync()
 	end
 
 	clear_boxes_gui(player)
@@ -4479,6 +4528,8 @@ local function update_global_data()
 			end
 		end
 	end
+
+	detect_desync()
 end
 
 local function on_configuration_changed(event)
@@ -4488,21 +4539,6 @@ local function on_configuration_changed(event)
 	if not (mod_changes and mod_changes.old_version) then return end
 
 	local version = tonumber(string.gmatch(mod_changes.old_version, "%d+.%d+")())
-
-	if version < 0.38 then
-		for _, player in pairs(game.players) do
-			if player.valid then
-				local frame = player.gui.screen.FM_item_price_frame
-				if frame and frame.valid then
-					frame.destroy()
-					item_HUD[player.index] = nil
-					if player.mod_settings["FM_show_item_price"].value then
-						create_item_price_HUD(player)
-					end
-				end
-			end
-		end
-	end
 
 	if version < 0.34 then
 		for _, force in pairs(game.forces) do
@@ -4662,59 +4698,13 @@ do
 		script.set_event_filter(defines.events.on_player_mined_entity, filters)
 		script.set_event_filter(defines.events.on_entity_cloned, filters)
 
-		local function check_local_and_global_data(local_data, global_data_name)
-			if (type(global_data_name) == "string" and local_data ~= global.free_market[global_data_name]) then
-				local message = string.format("!WARNING! Desync has been detected in __%s__ mod_data[\"%s\"]. Please report and send log files to ZwerOxotnik and try to load your game again!", script.mod_name, global_data_name)
-				log(message)
-				if game then
-					message = string.format("[color=red]!WARNING![/color] Desync has been detected __%s__ in mod_data[\"%s\"]. [color=yellow]Please report and send log files to ZwerOxotnik and try to load your game again![/color]", script.mod_name, global_data_name)
-					game.print(message)
-				end
-			end
-		end
-
 		local EasyAPI_events = call("EasyAPI", "get_events")
 		if EasyAPI_events.on_fix_bugs then
 			script.on_event(EasyAPI_events.on_fix_bugs, function()
 				clear_invalid_player_data()
 				clear_invalid_entities()
 
-				for _, player in pairs(game.players) do
-					if player.valid then
-						local frame = player.gui.screen.FM_item_price_frame
-						if frame and frame.valid then
-							frame.destroy()
-							item_HUD[player.index] = nil
-							if player.mod_settings["FM_show_item_price"].value then
-								create_item_price_HUD(player)
-							end
-						end
-					end
-				end
-
-				check_local_and_global_data(embargoes, "embargoes")
-				check_local_and_global_data(sell_prices, "sell_prices")
-				check_local_and_global_data(inactive_sell_prices, "inactive_sell_prices")
-				check_local_and_global_data(buy_prices, "buy_prices")
-				check_local_and_global_data(inactive_buy_prices, "inactive_buy_prices")
-				check_local_and_global_data(transfer_boxes, "transfer_boxes")
-				check_local_and_global_data(inactive_transfer_boxes, "inactive_transfer_boxes")
-				check_local_and_global_data(bin_boxes, "bin_boxes")
-				check_local_and_global_data(inactive_bin_boxes, "inactive_bin_boxes")
-				check_local_and_global_data(universal_transfer_boxes, "universal_transfer_boxes")
-				check_local_and_global_data(inactive_universal_transfer_boxes, "inactive_universal_transfer_boxes")
-				check_local_and_global_data(universal_bin_boxes, "universal_bin_boxes")
-				check_local_and_global_data(inactive_universal_bin_boxes, "universal_inactive_bin_boxes")
-				check_local_and_global_data(buy_boxes, "buy_boxes")
-				check_local_and_global_data(inactive_buy_boxes, "inactive_buy_boxes")
-				check_local_and_global_data(pull_boxes, "pull_boxes")
-				check_local_and_global_data(open_box, "open_box")
-				check_local_and_global_data(all_boxes, "all_boxes")
-				check_local_and_global_data(active_forces, "active_forces")
-				check_local_and_global_data(storages, "storages")
-				check_local_and_global_data(storages_limit, "storages_limit")
-				check_local_and_global_data(default_storage_limit, "default_storage_limit")
-				check_local_and_global_data(item_HUD, "item_hinter")
+				detect_desync()
 			end)
 		end
 	end

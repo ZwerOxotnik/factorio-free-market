@@ -1,18 +1,24 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.38.4
+Date: 2023-06-12
+  Changes:
+    - Detects desynced mod data at start (writes in logs) and detects for first online player
+    - Improved fixing of invalid player data
+---------------------------------------------------------------------------------------------------
 Version: 0.38.3
 Date: 2023-06-11
   Bugfixes:
-    - Improved check of desync (no more false reports)(bug from 0.38.2)
+    - Improved check of desynced mod data (no more false reports)(bug from 0.38.2)
 ---------------------------------------------------------------------------------------------------
 Version: 0.38.2
 Date: 2023-06-11
   Bugfixes:
-    - Fixed check of desync (bug from 0.38.1)
+    - Fixed check of desynced mod data (bug from 0.38.1)
 ---------------------------------------------------------------------------------------------------
 Version: 0.38.1
 Date: 2023-06-11
   Changes:
-    - Checks desync and fix more bugs during /fix-bugs
+    - Checks desynced mod data and fix more bugs during /fix-bugs
 ---------------------------------------------------------------------------------------------------
 Version: 0.38.0
 Date: 2023-06-10
@@ -904,7 +910,7 @@ Date: 2021-09-09
 Version: 0.10.1
 Date: 2021-09-08
   Bugfixes:
-    - Fixed desync
+    - Fixed desynced mod data
 ---------------------------------------------------------------------------------------------------
 Version: 0.10.0
 Date: 2021-09-08
