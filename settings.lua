@@ -1,4 +1,12 @@
-require("models/BetterCommands/control"):create_settings() -- Adds switchable commands
+--- Adds settings for commands
+if mods["BetterCommands"] then
+	local is_ok, better_commands = pcall(require, "__BetterCommands__/BetterCommands/control")
+	if is_ok then
+		better_commands.COMMAND_PREFIX = "fm_"
+		better_commands.create_settings("iFreeMarket", "fm_") -- Adds switchable commands
+	end
+end
+
 
 data:extend({
 	{type = "int-setting", name = "FM_money-treshold", setting_type = "runtime-global", default_value = 100, minimum_value = 1, maximum_value = 1e18},
