@@ -4483,6 +4483,13 @@ local function link_data()
 	default_storage_limit = mod_data.default_storage_limit
 	storages_limit = mod_data.storages_limit
 	storages = mod_data.storages
+
+	local id = call("EasyAPI", "get_event_name", "on_entity_changed_force")
+	script.on_event(id, function(event)
+		local entity = event.entity
+		if not (entity and entity.valid) then return end
+		clear_box_data_by_entity(entity)
+	end)
 end
 
 local function update_global_data()
@@ -4753,10 +4760,10 @@ M.add_remote_interface = add_remote_interface
 M.events = {
 	[defines.events.on_surface_deleted] = clear_invalid_entities,
 	[defines.events.on_surface_cleared] = clear_invalid_entities,
-	[defines.events.on_chunk_deleted] = clear_invalid_entities,
-	[defines.events.on_player_created] = on_player_created,
+	[defines.events.on_chunk_deleted]   = clear_invalid_entities,
+	[defines.events.on_player_created]     = on_player_created,
 	[defines.events.on_player_joined_game] = on_player_joined_game,
-	[defines.events.on_player_left_game] = on_player_left_game,
+	[defines.events.on_player_left_game]   = on_player_left_game,
 	[defines.events.on_player_cursor_stack_changed] = function(event)
 		pcall(on_player_cursor_stack_changed, event) -- TODO: recheck
 	end,
@@ -4768,13 +4775,13 @@ M.events = {
 	[defines.events.on_player_mined_entity] = clear_box_data,
 	[defines.events.on_gui_selection_state_changed] = on_gui_selection_state_changed,
 	[defines.events.on_gui_elem_changed] = on_gui_elem_changed,
-	[defines.events.on_gui_click] = on_gui_click,
+	[defines.events.on_gui_click]  = on_gui_click,
 	[defines.events.on_gui_opened] = on_gui_opened,
 	[defines.events.on_gui_closed] = on_gui_closed,
 	[defines.events.on_selected_entity_changed] = on_selected_entity_changed,
-	[defines.events.on_force_created] = on_force_created,
+	[defines.events.on_force_created]  = on_force_created,
 	[defines.events.on_forces_merging] = on_forces_merging,
-	[defines.events.on_entity_cloned] = on_entity_cloned,
+	[defines.events.on_entity_cloned]  = on_entity_cloned,
 	[defines.events.on_runtime_mod_setting_changed] = on_runtime_mod_setting_changed,
 	[defines.events.on_force_cease_fire_changed] = function(event)
 		-- TODO: refactor
