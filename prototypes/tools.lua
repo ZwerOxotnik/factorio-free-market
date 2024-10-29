@@ -1,4 +1,4 @@
-local flags = {"hidden", "not-stackable", "only-in-cursor", "spawnable"}
+local flags = {"not-stackable", "only-in-cursor", "spawnable"}
 local selection_mode = {"entity-with-health", "same-force", "avoid-rolling-stock"}
 local entity_type_filters = {"container", "logistic-container"}
 
@@ -25,7 +25,17 @@ local function create_FM_select_tool(name, style, hotkey_name, icon)
 			icon_size = 64,
 			order = order,
 			flags = flags,
-			icon_mipmaps = nil,
+			hidden = true,
+			select = {
+				border_color = {1, 1, 1},
+				mode = {"blueprint"},
+				cursor_box_type = "copy",
+			},
+			alt_select = {
+				border_color = {0, 1, 0},
+				mode = {"blueprint"},
+				cursor_box_type = "copy",
+			},
 			subgroup = "tool",
 			stack_size = 1,
 			entity_filter_count = nil,
@@ -45,12 +55,10 @@ local function create_FM_select_tool(name, style, hotkey_name, icon)
 			action = "spawn-item",
 			item_to_spawn = name,
 			associated_control_input = hotkey_name,
-			icon = {
-				filename = "__iFreeMarket__/graphics/" .. icon .. ".png",
-				priority = "low",
-				size = 64,
-				flags = {"gui-icon"}
-			},
+			small_icon = "__iFreeMarket__/graphics/" .. icon .. "-24x.png",
+			icon       = "__iFreeMarket__/graphics/" .. icon .. ".png",
+			small_icon_size = 24,
+			icon_size       = 64,
 			toggleable = true,
 			order = order,
 			style = style

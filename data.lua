@@ -108,7 +108,7 @@ data:extend({
 		name = "trading",
 		icon = "__base__/graphics/icons/market.png",
 		icon_size = 64, icon_mipmaps = 4,
-		flags = {"hidden"},
+		hidden = true,
 		subgroup = "science-pack",
 		order = "y",
 		stack_size = 100000

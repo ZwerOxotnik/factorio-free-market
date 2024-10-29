@@ -12,12 +12,12 @@ local PROHIBIT_ITEMS_TYPES = {
 local function place_dummy_trading_boxes(player)
 	local stack = {name = "", count = 10}
 	local position = {x=0, y=0}
-	local universal_transferers_count = global.universal_transferers_count
-	local universal_bin_boxes_count = global.universal_bin_boxes_count
-	local bin_boxes_count = global.bin_boxes_count
-	local transferers_count = global.transferers_count
-	local pull_box_count = global.pull_box_count
-	local buy_box_count  = global.buy_box_count
+	local universal_transferers_count = storage.universal_transferers_count
+	local universal_bin_boxes_count = storage.universal_bin_boxes_count
+	local bin_boxes_count = storage.bin_boxes_count
+	local transferers_count = storage.transferers_count
+	local pull_box_count = storage.pull_box_count
+	local buy_box_count  = storage.buy_box_count
 	local force = player.force
 	local force_index = force.index
 	local surface = player.surface
@@ -26,7 +26,7 @@ local function place_dummy_trading_boxes(player)
 
 	local i = 0
 	position.y = 2
-	for item_name, item in pairs(game.item_prototypes) do
+	for item_name, item in pairs(prototypes.item) do
 		if not PROHIBIT_ITEMS_TYPES[item.type] then
 			i = i + 1
 			if i > max_items then
@@ -45,7 +45,7 @@ local function place_dummy_trading_boxes(player)
 
 	i = 0
 	position.y = -2
-	for item_name, item in pairs(game.item_prototypes) do
+	for item_name, item in pairs(prototypes.item) do
 		if not PROHIBIT_ITEMS_TYPES[item.type] then
 			i = i + 1
 			if i > max_items then
@@ -65,7 +65,7 @@ local function place_dummy_trading_boxes(player)
 
 	i = 0
 	position.y = -6
-	for item_name, item in pairs(game.item_prototypes) do
+	for item_name, item in pairs(prototypes.item) do
 		if not PROHIBIT_ITEMS_TYPES[item.type] then
 			i = i + 1
 			if i > max_items then
@@ -84,7 +84,7 @@ local function place_dummy_trading_boxes(player)
 
 	i = 0
 	position.y = 6
-	for item_name, item in pairs(game.item_prototypes) do
+	for item_name, item in pairs(prototypes.item) do
 		if not PROHIBIT_ITEMS_TYPES[item.type] then
 			i = i + 1
 			if i > max_items then
@@ -122,22 +122,22 @@ local function place_dummy_trading_boxes(player)
 		-- entity.insert(stack)
 	end
 
-	global.universal_transferers_count = universal_transferers_count
-	global.universal_bin_boxes_count = universal_bin_boxes_count
-	global.bin_boxes_count = bin_boxes_count
-	global.transferers_count = transferers_count
-	global.pull_box_count = pull_box_count
-	global.buy_box_count = buy_box_count
+	storage.universal_transferers_count = universal_transferers_count
+	storage.universal_bin_boxes_count = universal_bin_boxes_count
+	storage.bin_boxes_count = bin_boxes_count
+	storage.transferers_count = transferers_count
+	storage.pull_box_count = pull_box_count
+	storage.buy_box_count = buy_box_count
 end
 
 script.on_event(defines.events.on_player_created, function(event)
 	if event.player_index ~= 1 then return end
-	global.universal_transferers_count = 0
-	global.universal_bin_boxes_count = 0
-	global.transferers_count = 0
-	global.bin_boxes_count = 0
-	global.pull_box_count = 0
-	global.buy_box_count = 0
+	storage.universal_transferers_count = 0
+	storage.universal_bin_boxes_count = 0
+	storage.transferers_count = 0
+	storage.bin_boxes_count = 0
+	storage.pull_box_count = 0
+	storage.buy_box_count = 0
 
 	local player = game.get_player(1)
 	for i=1, dummy_forces_count do
@@ -146,16 +146,16 @@ script.on_event(defines.events.on_player_created, function(event)
 		remote.call("EasyAPI", "set_force_money", new_force, 100000000)
 		place_dummy_trading_boxes(player)
 	end
-	if max_items > #game.item_prototypes then
-		max_items = #game.item_prototypes
+	if max_items > #prototypes.item then
+		max_items = #prototypes.item
 	end
 
-	local universal_transferers_count = global.universal_transferers_count
-	local universal_bin_boxes_count = global.universal_bin_boxes_count
-	local transferers_count = global.transferers_count
-	local bin_boxes_count = global.bin_boxes_count
-	local pull_box_count = global.pull_box_count
-	local buy_box_count  = global.buy_box_count
+	local universal_transferers_count = storage.universal_transferers_count
+	local universal_bin_boxes_count = storage.universal_bin_boxes_count
+	local transferers_count = storage.transferers_count
+	local bin_boxes_count = storage.bin_boxes_count
+	local pull_box_count = storage.pull_box_count
+	local buy_box_count  = storage.buy_box_count
 	game.print("This scenario uses for testing \"Free market\".")
 	game.print("Created " .. dummy_forces_count .. " dummy forces and using " .. max_items .. " items.")
 	game.print("Created " .. universal_transferers_count .. " universal transferers")
