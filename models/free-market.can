@@ -5,91 +5,91 @@ local M = {}
 --#region Global data
 ---@class mod_data
 ---@type table<string, table>
-local mod_data
+local __mod_data
 
 -- {force index = {[force index] = boolean}}
 ---@class embargoes
 ---@type table<integer, table<integer, boolean>>
-local embargoes
+local __embargoes
 
 -- {force index = {[item name] = price}}
 ---@class sell_prices
 ---@type table<integer, table<string, integer>>
-local sell_prices
+local __sell_prices
 
 -- {force index = {[item name] = price}}
 ---@class inactive_sell_prices
 ---@type table<integer, table<string, integer>>
-local inactive_sell_prices
+local __inactive_sell_prices
 
 -- {force index = {[item name] = price}}
 ---@class buy_prices
 ---@type table<integer, table<string, integer>>
-local buy_prices
+local __buy_prices
 
 -- {force index = {[item name] = price}}
 ---@class inactive_buy_prices
 ---@type table<integer, table<string, integer>>
-local inactive_buy_prices
+local __inactive_buy_prices
 
 --- {force index = {[item name] = {LuaEntity}}}
 ---@class transfer_boxes
 ---@type table<integer, table<string, table<integer, LuaEntity>>>
-local transfer_boxes
+local __transfer_boxes
 
 --- {force index = {[item name] = {LuaEntity}}}
 ---@class inactive_transfer_boxes
 ---@type table<integer, table<string, table<integer, LuaEntity>>>
-local inactive_transfer_boxes
+local __inactive_transfer_boxes
 
 -- {force index = {[item name] = {LuaEntity}}}
 ---@class bin_boxes
 ---@type table<integer, table>
-local bin_boxes
+local __bin_boxes
 
 -- {force index = {[item name] = {LuaEntity}}}
 ---@class inactive_bin_boxes
 ---@type table<integer, table>
-local inactive_bin_boxes
+local __inactive_bin_boxes
 
 --- {force index = {LuaEntity}}
 ---@class universal_transfer_boxes
 ---@type table<integer, table<integer, LuaEntity>>
-local universal_transfer_boxes
+local __universal_transfer_boxes
 
 --- {force index = {LuaEntity}}
 ---@class inactive_universal_transfer_boxes
 ---@type table<integer, table<integer, LuaEntity>>
-local inactive_universal_transfer_boxes
+local __inactive_universal_transfer_boxes
 
 --- {force index = {LuaEntity}}
 ---@class universal_bin_boxes
 ---@type table<integer, table<integer, LuaEntity>>
-local universal_bin_boxes
+local __universal_bin_boxes
 
 --- {force index = {LuaEntity}}
 ---@class inactive_universal_bin_boxes
 ---@type table<integer, table<integer, LuaEntity>>
-local inactive_universal_bin_boxes
+local __inactive_universal_bin_boxes
 
 -- {force index = {[item name] = {LuaEntity, count}}}
 ---@class buy_boxes
 ---@type table<integer, table>
-local buy_boxes
+local __buy_boxes
 
 -- {force index = {[item name] = {LuaEntity, count}}}
 ---@class inactive_buy_boxes
 ---@type table<integer, table>
-local inactive_buy_boxes
+local __inactive_buy_boxes
 
 --- {force index = {[item name] = {LuaEntity}}}
 ---@class pull_boxes
 ---@type table<integer, table<string, table<integer, LuaEntity>>>
-local pull_boxes
+local __pull_boxes
 
 ---@class open_box
 ---@type table<integer, table>
-local open_box
+local __open_box
 
 ---@class all_boxes
 ---@field [1] LuaEntity
@@ -97,28 +97,28 @@ local open_box
 ---@field [3] integer # box_type
 ---@field [4] table # items data of box
 ---@field [5] string? # item name
-local all_boxes
+local __all_boxes
 
 -- key, force index\
 -- Should give valid force indexes
 ---@class active_forces
 ---@type table<integer, integer>
-local active_forces
+local __active_forces
 
 -- {force index = {[item name] = count}}
 ---@class storages
 ---@type table<integer, table<string, integer>>
-local storages
+local __storages
 
 -- {force index = {[item name] = max count}}
 ---@class storages_limit
 ---@type table<integer, table<string, integer>>
-local storages_limit
+local __storages_limit
 
 -- {force index = max count}
 ---@class default_storage_limit
 ---@type table<integer, integer>
-local default_storage_limit
+local __default_storage_limit
 
 -- {force index = {Gui elements}}
 ---@class item_HUD
@@ -128,7 +128,7 @@ local default_storage_limit
 ---@field [4] GuiElement # item_label
 ---@field [5] GuiElement # storage_count
 ---@field [6] GuiElement # storage_limit
-local item_HUD
+local __item_HUD
 
 --#endregion
 
@@ -141,10 +141,7 @@ local call = remote.call
 local floor = math.floor
 local ceil = math.ceil
 local draw_sprite = rendering.draw_sprite
-local Rget_type = rendering.get_type
-local get_render_target = rendering.get_target
-local is_render_valid = rendering.is_valid
-local rendering_destroy = rendering.destroy
+local get_rendered_by_id = rendering.get_object_by_id
 local print_to_rcon = rcon.print
 --#if IGNORE_MACROSES then
 	local UNIVERSAL_BIN_TYPE = 7
@@ -198,7 +195,7 @@ local SCROLL_PANE = {
 local CLOSE_BUTTON = {
 	hovered_sprite = "utility/close_black",
 	clicked_sprite = "utility/close_black",
-	sprite = "utility/close_white",
+	sprite = "utility/close",
 	style = "frame_action_button",
 	type = "sprite-button",
 	name = "FM_close"
@@ -288,65 +285,67 @@ function print_force_data(target, getter)
 
 	local print_to_target = getter.print
 	print_to_target('')
-	print_to_target("Inactive sell prices:" .. serpent.line(inactive_sell_prices[index]))
-	print_to_target("Inactive buy prices:" .. serpent.line(inactive_buy_prices[index]))
-	print_to_target("Sell prices:" .. serpent.line(sell_prices[index]))
-	print_to_target("Buy prices:" .. serpent.line(buy_prices[index]))
-	print_to_target("Universal transferers:" .. serpent.line(universal_transfer_boxes[index]))
-	print_to_target("Transferers:" .. serpent.line(transfer_boxes[index]))
-	print_to_target("Bin boxes:" .. serpent.line(bin_boxes[index]))
-	print_to_target("Universal bin boxes:" .. serpent.line(universal_bin_boxes[index]))
-	print_to_target("Pull boxes:" .. serpent.line(pull_boxes[index]))
-	print_to_target("Buy boxes:" .. serpent.line(buy_boxes[index]))
-	print_to_target("Embargoes:" .. serpent.line(embargoes[index]))
-	print_to_target("Storage:" .. serpent.line(storages[index]))
+	print_to_target("Inactive sell prices:" .. serpent.line(__inactive_sell_prices[index]))
+	print_to_target("Inactive buy prices:" .. serpent.line(__inactive_buy_prices[index]))
+	print_to_target("Sell prices:" .. serpent.line(__sell_prices[index]))
+	print_to_target("Buy prices:" .. serpent.line(__buy_prices[index]))
+	print_to_target("Universal transferers:" .. serpent.line(__universal_transfer_boxes[index]))
+	print_to_target("Transferers:" .. serpent.line(__transfer_boxes[index]))
+	print_to_target("Bin boxes:" .. serpent.line(__bin_boxes[index]))
+	print_to_target("Universal bin boxes:" .. serpent.line(__universal_bin_boxes[index]))
+	print_to_target("Pull boxes:" .. serpent.line(__pull_boxes[index]))
+	print_to_target("Buy boxes:" .. serpent.line(__buy_boxes[index]))
+	print_to_target("Embargoes:" .. serpent.line(__embargoes[index]))
+	print_to_target("Storage:" .. serpent.line(__storages[index]))
 end
 
 --TODO: improve for inactive boxes
 ---@param force_index integer
 function resetBuyBoxes(force_index)
-	local f_buy_boxes = buy_boxes[force_index]
+	local f_buy_boxes = __buy_boxes[force_index]
 	if f_buy_boxes == nil then return end
 
 	for _, forces_data in pairs(f_buy_boxes) do
 		for _, entities_data in pairs(forces_data) do
 			local unit_number = entities_data[1].unit_number
-			rendering_destroy(all_boxes[unit_number][2])
-			all_boxes[unit_number] = nil
+			local rendered = get_rendered_by_id(__all_boxes[unit_number][2])
+			rendered.destroy()
+			__all_boxes[unit_number] = nil
 		end
 	end
-	buy_boxes[force_index] = {}
+	__buy_boxes[force_index] = {}
 
-	local f_buy_prices = buy_prices[force_index]
+	local f_buy_prices = __buy_prices[force_index]
 	if f_buy_prices == nil then return end
-	local f_inactive_buy_prices = inactive_buy_prices[force_index]
+	local f_inactive_buy_prices = __inactive_buy_prices[force_index]
 	if f_inactive_buy_prices == nil then return end
 	for item_name, price in pairs(f_buy_prices) do
 		f_inactive_buy_prices[item_name] = price
 	end
-	buy_prices[force_index] = {}
+	__buy_prices[force_index] = {}
 end
 
 --TODO: improve for inactive boxes
 ---@param force_index integer
 function resetTransferBoxes(force_index)
-	local f_transfer_boxes = transfer_boxes[force_index]
+	local f_transfer_boxes = __transfer_boxes[force_index]
 	if f_transfer_boxes == nil then return end
 
 	for _, entities_data in pairs(f_transfer_boxes) do
 		for i=1, #entities_data do
 			local unit_number = entities_data[i].unit_number
-			rendering_destroy(all_boxes[unit_number][2])
-			all_boxes[unit_number] = nil
+			local rendered = get_rendered_by_id(__all_boxes[unit_number][2])
+			rendered.destroy()
+			__all_boxes[unit_number] = nil
 		end
 	end
-	transfer_boxes[force_index] = {}
+	__transfer_boxes[force_index] = {}
 
-	local f_inactive_sell_prices = inactive_sell_prices[force_index]
+	local f_inactive_sell_prices = __inactive_sell_prices[force_index]
 	if f_inactive_sell_prices == nil then return end
-	local f_sell_prices = sell_prices[force_index]
+	local f_sell_prices = __sell_prices[force_index]
 	if f_sell_prices == nil then return end
-	local storage = storages[force_index]
+	local storage = __storages[force_index]
 	if storage == nil then return end
 
 	for item_name, price in pairs(f_sell_prices) do
@@ -361,61 +360,65 @@ end
 --TODO: improve for inactive boxes
 ---@param force_index integer
 function resetUniversalTransferBoxes(force_index)
-	local entities = universal_transfer_boxes[force_index]
+	local entities = __universal_transfer_boxes[force_index]
 	if entities == nil then return end
 
 	for i=1, #entities do
 		local unit_number = entities[i].unit_number
-		rendering_destroy(all_boxes[unit_number][2])
-		all_boxes[unit_number] = nil
+		local rendered = get_rendered_by_id(__all_boxes[unit_number][2])
+		rendered.destroy()
+		__all_boxes[unit_number] = nil
 	end
-	universal_transfer_boxes[force_index] = {}
+	__universal_transfer_boxes[force_index] = {}
 end
 
 --TODO: improve for inactive boxes
 ---@param force_index integer
 function resetBinBoxes(force_index)
-	local f_bin_boxes = bin_boxes[force_index]
+	local f_bin_boxes = __bin_boxes[force_index]
 	if f_bin_boxes == nil then return end
 
 	for _, entities_data in pairs(f_bin_boxes) do
 		for i=1, #entities_data do
 			local unit_number = entities_data[i].unit_number
-			rendering_destroy(all_boxes[unit_number][2])
-			all_boxes[unit_number] = nil
+			local rendered = get_rendered_by_id(__all_boxes[unit_number][2])
+			rendered.destroy()
+			__all_boxes[unit_number] = nil
 		end
 	end
-	bin_boxes[force_index] = {}
+	__bin_boxes[force_index] = {}
 end
 
 --TODO: improve for inactive boxes
 ---@param force_index integer
 function resetUniversalBinBoxes(force_index)
-	local entities = universal_bin_boxes[force_index]
+	local entities = __universal_bin_boxes[force_index]
 	if entities == nil then return end
 
 	for i=1, #entities do
 		local unit_number = entities[i].unit_number
-		rendering_destroy(all_boxes[unit_number][2])
-		all_boxes[unit_number] = nil
+		local rendered = get_rendered_by_id(__all_boxes[unit_number][2])
+		rendered.destroy()
+		__all_boxes[unit_number] = nil
 	end
-	universal_bin_boxes[force_index] = {}
+	__universal_bin_boxes[force_index] = {}
 end
 
 --TODO: improve for inactive boxes
 ---@param force_index integer
 function resetPullBoxes(force_index)
-	local f_pull_boxes = pull_boxes[force_index]
+	local f_pull_boxes = __pull_boxes[force_index]
 	if f_pull_boxes == nil then return end
 
 	for _, entities_data in pairs(f_pull_boxes) do
 		for i=1, #entities_data do
 			local unit_number = entities_data[i].unit_number
-			rendering_destroy(all_boxes[unit_number][2])
-			all_boxes[unit_number] = nil
+			local rendered = get_rendered_by_id(__all_boxes[unit_number][2])
+			rendered.destroy()
+			__all_boxes[unit_number] = nil
 		end
 	end
-	pull_boxes[force_index] = {}
+	__pull_boxes[force_index] = {}
 end
 
 --TODO: improve for inactive boxes
@@ -435,7 +438,7 @@ end
 ---@param receiver table?
 ---@return boolean
 function check_local_and_global_data(local_data, global_data_name, receiver)
-	if (type(global_data_name) == "string" and local_data ~= global.free_market[global_data_name]) then
+	if (type(global_data_name) == "string" and local_data ~= storage.free_market[global_data_name]) then
 		local message = string.format("!WARNING! Desync has been detected in __%s__ %s. Please report and send log files to %s and try to load your game again or use /sync", script.mod_name, "mod_data[\"" .. global_data_name .. "\"]", "ZwerOxotnik")
 		log(message)
 		if game and (game.is_multiplayer() == false or receiver) then
@@ -452,29 +455,29 @@ end
 
 ---@param receiver table?
 function detect_desync(receiver)
-	check_local_and_global_data(embargoes, "embargoes", receiver)
-	check_local_and_global_data(sell_prices, "sell_prices", receiver)
-	check_local_and_global_data(inactive_sell_prices, "inactive_sell_prices", receiver)
-	check_local_and_global_data(buy_prices, "buy_prices", receiver)
-	check_local_and_global_data(inactive_buy_prices, "inactive_buy_prices", receiver)
-	check_local_and_global_data(transfer_boxes, "transfer_boxes", receiver)
-	check_local_and_global_data(inactive_transfer_boxes, "inactive_transfer_boxes", receiver)
-	check_local_and_global_data(bin_boxes, "bin_boxes", receiver)
-	check_local_and_global_data(inactive_bin_boxes, "inactive_bin_boxes", receiver)
-	check_local_and_global_data(universal_transfer_boxes, "universal_transfer_boxes", receiver)
-	check_local_and_global_data(inactive_universal_transfer_boxes, "inactive_universal_transfer_boxes", receiver)
-	check_local_and_global_data(universal_bin_boxes, "universal_bin_boxes", receiver)
-	check_local_and_global_data(inactive_universal_bin_boxes, "universal_inactive_bin_boxes", receiver)
-	check_local_and_global_data(buy_boxes, "buy_boxes", receiver)
-	check_local_and_global_data(inactive_buy_boxes, "inactive_buy_boxes", receiver)
-	check_local_and_global_data(pull_boxes, "pull_boxes", receiver)
-	check_local_and_global_data(open_box, "open_box", receiver)
-	check_local_and_global_data(all_boxes, "all_boxes", receiver)
-	check_local_and_global_data(active_forces, "active_forces", receiver)
-	check_local_and_global_data(storages, "storages", receiver)
-	check_local_and_global_data(storages_limit, "storages_limit", receiver)
-	check_local_and_global_data(default_storage_limit, "default_storage_limit", receiver)
-	check_local_and_global_data(item_HUD, "item_hinter", receiver)
+	check_local_and_global_data(__embargoes, "embargoes", receiver)
+	check_local_and_global_data(__sell_prices, "sell_prices", receiver)
+	check_local_and_global_data(__inactive_sell_prices, "inactive_sell_prices", receiver)
+	check_local_and_global_data(__buy_prices, "buy_prices", receiver)
+	check_local_and_global_data(__inactive_buy_prices, "inactive_buy_prices", receiver)
+	check_local_and_global_data(__transfer_boxes, "transfer_boxes", receiver)
+	check_local_and_global_data(__inactive_transfer_boxes, "inactive_transfer_boxes", receiver)
+	check_local_and_global_data(__bin_boxes, "bin_boxes", receiver)
+	check_local_and_global_data(__inactive_bin_boxes, "inactive_bin_boxes", receiver)
+	check_local_and_global_data(__universal_transfer_boxes, "universal_transfer_boxes", receiver)
+	check_local_and_global_data(__inactive_universal_transfer_boxes, "inactive_universal_transfer_boxes", receiver)
+	check_local_and_global_data(__universal_bin_boxes, "universal_bin_boxes", receiver)
+	check_local_and_global_data(__inactive_universal_bin_boxes, "universal_inactive_bin_boxes", receiver)
+	check_local_and_global_data(__buy_boxes, "buy_boxes", receiver)
+	check_local_and_global_data(__inactive_buy_boxes, "inactive_buy_boxes", receiver)
+	check_local_and_global_data(__pull_boxes, "pull_boxes", receiver)
+	check_local_and_global_data(__open_box, "open_box", receiver)
+	check_local_and_global_data(__all_boxes, "all_boxes", receiver)
+	check_local_and_global_data(__active_forces, "active_forces", receiver)
+	check_local_and_global_data(__storages, "storages", receiver)
+	check_local_and_global_data(__storages_limit, "storages_limit", receiver)
+	check_local_and_global_data(__default_storage_limit, "default_storage_limit", receiver)
+	check_local_and_global_data(__item_HUD, "item_hinter", receiver)
 end
 
 --#endregion
@@ -484,20 +487,20 @@ end
 
 ---@param name string
 function getRconData(name)
-	print_to_rcon(game.table_to_json(mod_data[name]))
+	print_to_rcon(helpers.table_to_json(__mod_data[name]))
 end
 
 ---@param name string
 ---@param force LuaForce
 function getRconForceData(name, force)
 	if not force.valid then return end
-	print_to_rcon(game.table_to_json(mod_data[name][force.index]))
+	print_to_rcon(helpers.table_to_json(__mod_data[name][force.index]))
 end
 
 ---@param name string
 ---@param force_index integer
 function getRconForceDataByIndex(name, force_index)
-	print_to_rcon(game.table_to_json(mod_data[name][force_index]))
+	print_to_rcon(helpers.table_to_json(__mod_data[name][force_index]))
 end
 
 --#endregion
@@ -507,33 +510,33 @@ end
 
 ---@param index number
 local function clear_force_data(index)
-	default_storage_limit[index] = nil
-	inactive_sell_prices[index] = nil
-	inactive_buy_prices[index] = nil
-	bin_boxes[index] = nil
-	inactive_bin_boxes[index] = nil
-	universal_bin_boxes[index] = nil
-	inactive_universal_bin_boxes[index] = nil
-	inactive_universal_transfer_boxes[index] = nil
-	inactive_transfer_boxes[index] = nil
-	inactive_buy_boxes[index] = nil
-	storages_limit[index] = nil
-	sell_prices[index] = nil
-	buy_prices[index] = nil
-	pull_boxes[index] = nil
-	universal_transfer_boxes[index] = nil
-	transfer_boxes[index] = nil
-	buy_boxes[index] = nil
-	embargoes[index] = nil
-	storages[index] = nil
+	__default_storage_limit[index] = nil
+	__inactive_sell_prices[index] = nil
+	__inactive_buy_prices[index] = nil
+	__bin_boxes[index] = nil
+	__inactive_bin_boxes[index] = nil
+	__universal_bin_boxes[index] = nil
+	__inactive_universal_bin_boxes[index] = nil
+	__inactive_universal_transfer_boxes[index] = nil
+	__inactive_transfer_boxes[index] = nil
+	__inactive_buy_boxes[index] = nil
+	__storages_limit[index] = nil
+	__sell_prices[index] = nil
+	__buy_prices[index] = nil
+	__pull_boxes[index] = nil
+	__universal_transfer_boxes[index] = nil
+	__transfer_boxes[index] = nil
+	__buy_boxes[index] = nil
+	__embargoes[index] = nil
+	__storages[index] = nil
 
-	for _, force_data in pairs(embargoes) do
+	for _, force_data in pairs(__embargoes) do
 		force_data[index] = nil
 	end
 
-	for i, force_index in pairs(active_forces) do
+	for i, force_index in pairs(__active_forces) do
 		if force_index == index then
-			tremove(active_forces, i)
+			tremove(__active_forces, i)
 			break
 		end
 	end
@@ -541,28 +544,28 @@ end
 
 ---@param index number
 function init_force_data(index)
-	inactive_sell_prices[index] = inactive_sell_prices[index] or {}
-	inactive_buy_prices[index] = inactive_buy_prices[index] or {}
-	bin_boxes[index] = bin_boxes[index] or {}
-	inactive_bin_boxes[index] = inactive_bin_boxes[index] or {}
-	universal_bin_boxes[index] = universal_bin_boxes[index] or {}
-	inactive_universal_bin_boxes[index] = inactive_universal_bin_boxes[index] or {}
-	inactive_universal_transfer_boxes[index] = inactive_universal_transfer_boxes[index] or {}
-	inactive_transfer_boxes[index] = inactive_transfer_boxes[index] or {}
-	inactive_buy_boxes[index] = inactive_buy_boxes[index] or {}
-	sell_prices[index] = sell_prices[index] or {}
-	buy_prices[index] = buy_prices[index] or {}
-	pull_boxes[index] = pull_boxes[index] or {}
-	universal_transfer_boxes[index] = universal_transfer_boxes[index] or {}
-	transfer_boxes[index] = transfer_boxes[index] or {}
-	buy_boxes[index] = buy_boxes[index] or {}
-	embargoes[index] = embargoes[index] or {}
-	storages[index] = storages[index] or {}
+	__inactive_sell_prices[index] = __inactive_sell_prices[index] or {}
+	__inactive_buy_prices[index] = __inactive_buy_prices[index] or {}
+	__bin_boxes[index] = __bin_boxes[index] or {}
+	__inactive_bin_boxes[index] = __inactive_bin_boxes[index] or {}
+	__universal_bin_boxes[index] = __universal_bin_boxes[index] or {}
+	__inactive_universal_bin_boxes[index] = __inactive_universal_bin_boxes[index] or {}
+	__inactive_universal_transfer_boxes[index] = __inactive_universal_transfer_boxes[index] or {}
+	__inactive_transfer_boxes[index] = __inactive_transfer_boxes[index] or {}
+	__inactive_buy_boxes[index] = __inactive_buy_boxes[index] or {}
+	__sell_prices[index] = __sell_prices[index] or {}
+	__buy_prices[index] = __buy_prices[index] or {}
+	__pull_boxes[index] = __pull_boxes[index] or {}
+	__universal_transfer_boxes[index] = __universal_transfer_boxes[index] or {}
+	__transfer_boxes[index] = __transfer_boxes[index] or {}
+	__buy_boxes[index] = __buy_boxes[index] or {}
+	__embargoes[index] = __embargoes[index] or {}
+	__storages[index] = __storages[index] or {}
 
-	if storages_limit[index] == nil then
-		storages_limit[index] = {}
-		local f_storages_limit = storages_limit[index]
-		for item_name, item in pairs(game.item_prototypes) do
+	if __storages_limit[index] == nil then
+		__storages_limit[index] = {}
+		local f_storages_limit = __storages_limit[index]
+		for item_name, item in pairs(prototypes.item) do
 			if item.stack_size <= 5 then
 				f_storages_limit[item_name] = 1
 			end
@@ -574,24 +577,24 @@ end
 ---@param box_data all_boxes
 local function remove_certain_transfer_box(entity, box_data)
 	local force_index = entity.force_index
-	local f_transfer_boxes = transfer_boxes[force_index]
+	local f_transfer_boxes = __transfer_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_transfer_boxes[item_name]
-	all_boxes[entity.unit_number] = nil
+	__all_boxes[entity.unit_number] = nil
 	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
 			tremove(entities, i)
 			if #entities == 0 then
 				f_transfer_boxes[item_name] = nil
-				local quantity_stored = storages[force_index][item_name]
+				local quantity_stored = __storages[force_index][item_name]
 				if quantity_stored == nil or quantity_stored <= 0 then
-					local f_sell_prices = sell_prices[force_index]
+					local f_sell_prices = __sell_prices[force_index]
 					local sell_price = f_sell_prices[item_name]
 					if sell_price then
-						local count_in_storage = storages[force_index][item_name]
+						local count_in_storage = __storages[force_index][item_name]
 						if count_in_storage == nil or count_in_storage <= 0 then
-							inactive_sell_prices[force_index][item_name] = sell_price
+							__inactive_sell_prices[force_index][item_name] = sell_price
 							f_sell_prices[item_name] = nil
 						end
 					end
@@ -606,24 +609,24 @@ end
 ---@param box_data all_boxes
 local function remove_certain_bin_box(entity, box_data)
 	local force_index = entity.force_index
-	local f_bin_boxes = bin_boxes[force_index]
+	local f_bin_boxes = __bin_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_bin_boxes[item_name]
-	all_boxes[entity.unit_number] = nil
+	__all_boxes[entity.unit_number] = nil
 	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
 			tremove(entities, i)
 			if #entities == 0 then
 				f_bin_boxes[item_name] = nil
-				local quantity_stored = storages[force_index][item_name]
+				local quantity_stored = __storages[force_index][item_name]
 				if quantity_stored == nil or quantity_stored <= 0 then
-					local f_sell_prices = sell_prices[force_index]
+					local f_sell_prices = __sell_prices[force_index]
 					local sell_price = f_sell_prices[item_name]
-					if sell_price and transfer_boxes[force_index][item_name] == nil then
-						local count_in_storage = storages[force_index][item_name]
+					if sell_price and __transfer_boxes[force_index][item_name] == nil then
+						local count_in_storage = __storages[force_index][item_name]
 						if count_in_storage == nil or count_in_storage <= 0 then
-							inactive_sell_prices[force_index][item_name] = sell_price
+							__inactive_sell_prices[force_index][item_name] = sell_price
 							f_sell_prices[item_name] = nil
 						end
 					end
@@ -637,8 +640,8 @@ end
 ---@param entity LuaEntity #LuaEntity
 local function remove_certain_universal_transfer_box(entity)
 	local force_index = entity.force_index
-	local entities = universal_transfer_boxes[force_index]
-	all_boxes[entity.unit_number] = nil
+	local entities = __universal_transfer_boxes[force_index]
+	__all_boxes[entity.unit_number] = nil
 	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
@@ -651,8 +654,8 @@ end
 ---@param entity LuaEntity #LuaEntity
 local function remove_certain_universal_bin_box(entity)
 	local force_index = entity.force_index
-	local entities = universal_bin_boxes[force_index]
-	all_boxes[entity.unit_number] = nil
+	local entities = __universal_bin_boxes[force_index]
+	__all_boxes[entity.unit_number] = nil
 	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
@@ -666,10 +669,10 @@ end
 ---@param box_data all_boxes
 local function remove_certain_buy_box(entity, box_data)
 	local force_index = entity.force_index
-	local f_buy_boxes = buy_boxes[force_index]
+	local f_buy_boxes = __buy_boxes[force_index]
 	local item_name = box_data[5]
 	local items_data = f_buy_boxes[item_name]
-	all_boxes[entity.unit_number] = nil
+	__all_boxes[entity.unit_number] = nil
 	if items_data == nil then return end
 	for i = #items_data, 1, -1 do
 		local buy_box = items_data[i]
@@ -677,10 +680,10 @@ local function remove_certain_buy_box(entity, box_data)
 			tremove(items_data, i)
 			if #items_data == 0 then
 				f_buy_boxes[item_name] = nil
-				local f_buy_prices = buy_prices[force_index]
+				local f_buy_prices = __buy_prices[force_index]
 				local buy_price = f_buy_prices[item_name]
 				if buy_price then
-					inactive_buy_prices[force_index][item_name] = buy_price
+					__inactive_buy_prices[force_index][item_name] = buy_price
 					f_buy_prices[item_name] = nil
 				end
 			end
@@ -693,10 +696,10 @@ end
 ---@param box_data all_boxes
 local function remove_certain_pull_box(entity, box_data)
 	local force_index = entity.force_index
-	local f_pull_boxes = pull_boxes[force_index]
+	local f_pull_boxes = __pull_boxes[force_index]
 	local item_name = box_data[5]
 	local entities = f_pull_boxes[item_name]
-	all_boxes[entity.unit_number] = nil
+	__all_boxes[entity.unit_number] = nil
 	if entities == nil then return end
 	for i = #entities, 1, -1 do
 		if entities[i] == entity then
@@ -714,7 +717,7 @@ end
 ---@param item_name string
 ---@param count number
 local function change_count_in_buy_box_data(entity, item_name, count)
-	local data = buy_boxes[entity.force_index][item_name]
+	local data = __buy_boxes[entity.force_index][item_name]
 	for i = 1, #data do
 		local buy_box = data[i]
 		if buy_box[1] == entity then
@@ -726,12 +729,12 @@ end
 
 local function clear_invalid_embargoes()
 	local forces = game.forces
-	for index in pairs(embargoes) do
+	for index in pairs(__embargoes) do
 		if forces[index] == nil then
-			embargoes[index] = nil
+			__embargoes[index] = nil
 		end
 	end
-	for _, forces_data in pairs(embargoes) do
+	for _, forces_data in pairs(__embargoes) do
 		for index in pairs(forces_data) do
 			if forces[index] == nil then
 				forces_data[index] = nil
@@ -758,14 +761,14 @@ local function show_item_sprite_above_chest(item_name, force, entity)
 end
 
 local function clear_invalid_prices(prices)
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	local forces = game.forces
 	for index, forces_data in pairs(prices) do
 		if forces[index] == nil then
-			sell_prices[index] = nil
-			buy_prices[index] = nil
-			inactive_sell_prices[index] = nil
-			inactive_buy_prices[index] = nil
+			__sell_prices[index] = nil
+			__buy_prices[index] = nil
+			__inactive_sell_prices[index] = nil
+			__inactive_buy_prices[index] = nil
 		else
 			for item_name in pairs(forces_data) do
 				if item_prototypes[item_name] == nil then
@@ -777,9 +780,9 @@ local function clear_invalid_prices(prices)
 end
 
 local function clear_invalid_storage_data()
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	local forces = game.forces
-	for index, data in pairs(pull_boxes) do
+	for index, data in pairs(__pull_boxes) do
 		if forces[index] == nil then
 			clear_force_data(index)
 		else
@@ -793,9 +796,9 @@ local function clear_invalid_storage_data()
 end
 
 local function clear_invalid_pull_boxes_data()
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	local forces = game.forces
-	for index, data in pairs(pull_boxes) do
+	for index, data in pairs(__pull_boxes) do
 		if forces[index] == nil then
 			clear_force_data(index)
 		else
@@ -808,12 +811,13 @@ local function clear_invalid_pull_boxes_data()
 						if entity.valid == false then
 							tremove(entities, i)
 						else
-							local box_data = all_boxes[entity.unit_number]
+							local box_data = __all_boxes[entity.unit_number]
 							if box_data == nil then
 								tremove(entities, i)
 							elseif entity ~= box_data[1] then
-								rendering_destroy(box_data[2])
-								all_boxes[entity.unit_number] = nil
+								local rendered = get_rendered_by_id(box_data[2])
+								rendered.destroy()
+								__all_boxes[entity.unit_number] = nil
 								tremove(entities, i)
 							end
 						end
@@ -829,7 +833,7 @@ end
 
 ---@param _data transfer_boxes|inactive_transfer_boxes
 local function clear_invalid_transfer_boxes_data(_data)
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	local forces = game.forces
 	for index, data in pairs(_data) do
 		if forces[index] == nil then
@@ -844,12 +848,13 @@ local function clear_invalid_transfer_boxes_data(_data)
 						if entity.valid == false then
 							tremove(entities, i)
 						else
-							local box_data = all_boxes[entity.unit_number]
+							local box_data = __all_boxes[entity.unit_number]
 							if box_data == nil then
 								tremove(entities, i)
 							elseif entity ~= box_data[1] then
-								rendering_destroy(box_data[2])
-								all_boxes[entity.unit_number] = nil
+								local rendered = get_rendered_by_id(box_data[2])
+								rendered.destroy()
+								__all_boxes[entity.unit_number] = nil
 								tremove(entities, i)
 							end
 						end
@@ -865,7 +870,7 @@ end
 
 ---@param _data buy_boxes|inactive_buy_boxes
 local function clear_invalid_buy_boxes_data(_data)
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	local forces = game.forces
 	for index, data in pairs(_data) do
 		if forces[index] == nil then
@@ -882,14 +887,15 @@ local function clear_invalid_buy_boxes_data(_data)
 							tremove(entities, i)
 						elseif not box_data[2] then
 							tremove(entities, i)
-							all_boxes[entity.unit_number] = nil
+							__all_boxes[entity.unit_number] = nil
 						else
-							local _box_data = all_boxes[entity.unit_number]
+							local _box_data = __all_boxes[entity.unit_number]
 							if _box_data == nil then
 								tremove(entities, i)
 							elseif entity ~= _box_data[1] then
-								rendering_destroy(box_data[2])
-								all_boxes[entity.unit_number] = nil
+								local rendered = get_rendered_by_id(box_data[2])
+								rendered.destroy()
+								__all_boxes[entity.unit_number] = nil
 								tremove(entities, i)
 							end
 						end
@@ -911,12 +917,13 @@ local function clear_invalid_simple_boxes(data)
 			if entity.valid == false then
 				tremove(entities, i)
 			else
-				local box_data = all_boxes[entity.unit_number]
+				local box_data = __all_boxes[entity.unit_number]
 				if box_data == nil then
 					tremove(entities, i)
 				elseif entity ~= box_data[1] then
-					rendering_destroy(box_data[2])
-					all_boxes[entity.unit_number] = nil
+					local rendered = get_rendered_by_id(box_data[2])
+					rendered.destroy()
+					__all_boxes[entity.unit_number] = nil
 					tremove(entities, i)
 				end
 			end
@@ -929,17 +936,17 @@ local function delete_item_price_HUD(player)
 	local frame = player.gui.screen.FM_item_price_frame
 	if frame then
 		frame.destroy()
-		item_HUD[player.index] = nil
+		__item_HUD[player.index] = nil
 	end
 end
 
 local function clear_invalid_player_data()
-	for player_index in pairs(item_HUD) do
+	for player_index in pairs(__item_HUD) do
 		local player = game.get_player(player_index)
 		if not (player and player.valid) then
-			item_HUD[player_index] = nil
+			__item_HUD[player_index] = nil
 		elseif player.connected then
-			local player_item_HUD = item_HUD[player_index]
+			local player_item_HUD = __item_HUD[player_index]
 			if player_item_HUD and player_item_HUD[1].valid == false then
 				log(string.format("[BUG][%s] item_HUD for \"%s\" refers to invalid data", script.mod_name, player.name))
 				delete_item_price_HUD(player)
@@ -952,7 +959,7 @@ local function clear_invalid_player_data()
 			local player_index = player.index
 			if not player.connected then
 				delete_item_price_HUD(player)
-			elseif item_HUD[player_index] == nil then
+			elseif __item_HUD[player_index] == nil then
 				local frame = player.gui.screen.FM_item_price_frame
 				if frame and frame.valid then
 					log(string.format("[BUG][iFreeMarket] Player \"%s\" has FM_item_price_frame and online, item_HUD[player_index] is nil", player.name))
@@ -965,40 +972,41 @@ local function clear_invalid_player_data()
 end
 
 local function clear_invalid_entities()
-	local item_prototypes = game.item_prototypes
-	for unit_number, data in pairs(all_boxes) do
+	local item_prototypes = prototypes.item
+	for unit_number, data in pairs(__all_boxes) do
 		if not data[1].valid then
-			all_boxes[unit_number] = nil
+			__all_boxes[unit_number] = nil
 		else
 			local item_name = data[5]
 			if item_name and item_prototypes[item_name] == nil then
-				rendering_destroy(data[2])
-				all_boxes[unit_number] = nil
+				local rendered = get_rendered_by_id(data[2])
+				rendered.destroy()
+				__all_boxes[unit_number] = nil
 			end
 		end
 	end
 
 	clear_invalid_storage_data()
 	clear_invalid_pull_boxes_data()
-	clear_invalid_transfer_boxes_data(transfer_boxes)
-	clear_invalid_transfer_boxes_data(inactive_transfer_boxes)
-	clear_invalid_transfer_boxes_data(bin_boxes)
-	clear_invalid_transfer_boxes_data(inactive_bin_boxes)
-	clear_invalid_buy_boxes_data(buy_boxes)
-	clear_invalid_buy_boxes_data(inactive_buy_boxes)
-	clear_invalid_simple_boxes(universal_transfer_boxes)
-	clear_invalid_simple_boxes(inactive_universal_transfer_boxes)
-	clear_invalid_simple_boxes(universal_bin_boxes)
-	clear_invalid_simple_boxes(inactive_universal_bin_boxes)
+	clear_invalid_transfer_boxes_data(__transfer_boxes)
+	clear_invalid_transfer_boxes_data(__inactive_transfer_boxes)
+	clear_invalid_transfer_boxes_data(__bin_boxes)
+	clear_invalid_transfer_boxes_data(__inactive_bin_boxes)
+	clear_invalid_buy_boxes_data(__buy_boxes)
+	clear_invalid_buy_boxes_data(__inactive_buy_boxes)
+	clear_invalid_simple_boxes(__universal_transfer_boxes)
+	clear_invalid_simple_boxes(__inactive_universal_transfer_boxes)
+	clear_invalid_simple_boxes(__universal_bin_boxes)
+	clear_invalid_simple_boxes(__inactive_universal_bin_boxes)
 end
 
 clear_invalid_data = function()
 	clear_invalid_entities()
-	clear_invalid_prices(storages_limit) -- it works, so it's fine
-	clear_invalid_prices(inactive_sell_prices)
-	clear_invalid_prices(inactive_buy_prices)
-	clear_invalid_prices(sell_prices)
-	clear_invalid_prices(buy_prices)
+	clear_invalid_prices(__storages_limit) -- it works, so it's fine
+	clear_invalid_prices(__inactive_sell_prices)
+	clear_invalid_prices(__inactive_buy_prices)
+	clear_invalid_prices(__sell_prices)
+	clear_invalid_prices(__buy_prices)
 	clear_invalid_embargoes()
 	clear_invalid_player_data()
 end
@@ -1012,8 +1020,8 @@ end
 
 local function delete_player_data(event)
 	local player_index = event.player_index
-	open_box[player_index] = nil
-	item_HUD[player_index] = nil
+	__open_box[player_index] = nil
+	__item_HUD[player_index] = nil
 end
 
 local function make_prices_header(table)
@@ -1077,7 +1085,7 @@ local function update_prices_table(player, item_name, table_element)
 			result[_force.index] = {name = name}
 		end
 	end
-	for index, force_items in pairs(buy_prices) do
+	for index, force_items in pairs(__buy_prices) do
 		local data = result[index]
 		if data then
 			local buy_value = force_items[item_name]
@@ -1086,7 +1094,7 @@ local function update_prices_table(player, item_name, table_element)
 			end
 		end
 	end
-	for index, force_items in pairs(sell_prices) do
+	for index, force_items in pairs(__sell_prices) do
 		local data = result[index]
 		if data then
 			local sell_price = force_items[item_name]
@@ -1118,8 +1126,8 @@ local function update_price_list_table(force, scroll_pane)
 	make_price_list_header(price_list_table)
 
 	local force_index = force.index
-	local f_buy_prices = buy_prices[force_index] or EMPTY_TABLE
-	local f_sell_prices = sell_prices[force_index] or EMPTY_TABLE
+	local f_buy_prices = __buy_prices[force_index] or EMPTY_TABLE
+	local f_sell_prices = __sell_prices[force_index] or EMPTY_TABLE
 
 	local add = price_list_table.add
 	for item_name, buy_price in pairs(f_buy_prices) do
@@ -1152,7 +1160,7 @@ local function update_price_list_by_sell_filter(force, scroll_pane, text_filter)
 	short_price_list_table.children[5].destroy()
 	short_price_list_table.children[2].destroy()
 
-	local f_sell_prices = sell_prices[force.index]
+	local f_sell_prices = __sell_prices[force.index]
 	if f_sell_prices == nil then return end
 
 	local add = short_price_list_table.add
@@ -1179,7 +1187,7 @@ local function update_price_list_by_buy_filter(force, scroll_pane, text_filter)
 	short_price_list_table.children[6].destroy()
 	short_price_list_table.children[3].destroy()
 
-	local f_buy_prices = buy_prices[force.index]
+	local f_buy_prices = __buy_prices[force.index]
 	if f_buy_prices == nil then return end
 
 	local add = short_price_list_table.add
@@ -1219,7 +1227,7 @@ local function update_embargo_table(embargo_table, player)
 	local force_index = player.force_index
 	local in_embargo_list = {}
 	local no_embargo_list = {}
-	local f_embargoes = embargoes[force_index]
+	local f_embargoes = __embargoes[force_index]
 	for force_name, force in pairs(game.forces) do
 		if #force.players > 0 and force.index ~= force_index then
 			if f_embargoes[force.index] then
@@ -1288,8 +1296,8 @@ end
 ---@param sell_price count
 local function notify_sell_price(source_index, item_name, sell_price)
 	local forces = game.forces
-	local f_embargoes = embargoes[source_index]
-	for _, force_index in pairs(active_forces) do
+	local f_embargoes = __embargoes[source_index]
+	for _, force_index in pairs(__active_forces) do
 		if force_index ~= source_index and not f_embargoes[f_embargoes] then
 			for _, player in pairs(forces[force_index].connected_players) do
 				pcall(add_item_in_sell_prices, player, item_name, sell_price, source_index)
@@ -1303,8 +1311,8 @@ end
 ---@param sell_price integer
 local function notify_buy_price(source_index, item_name, sell_price)
 	local forces = game.forces
-	for _, force_index in pairs(active_forces) do
-		if force_index ~= source_index and not embargoes[force_index][source_index] then
+	for _, force_index in pairs(__active_forces) do
+		if force_index ~= source_index and not __embargoes[force_index][source_index] then
 			for _, player in pairs(forces[force_index].connected_players) do
 				pcall(add_item_in_buy_prices, player, item_name, sell_price, source_index)
 			end
@@ -1318,8 +1326,8 @@ end
 ---@return integer|string? # returns previous sell price in a case of conflict
 local function change_sell_price_by_player(item_name, player, sell_price)
 	local force_index = player.force_index
-	local f_sell_prices = sell_prices[force_index]
-	local f_inactive_sell_prices = inactive_sell_prices[force_index]
+	local f_sell_prices = __sell_prices[force_index]
+	local f_inactive_sell_prices = __inactive_sell_prices[force_index]
 	if sell_price == nil then
 		f_inactive_sell_prices[item_name] = nil
 		f_sell_prices[item_name] = nil
@@ -1331,7 +1339,7 @@ local function change_sell_price_by_player(item_name, player, sell_price)
 	local prev_sell_price = f_sell_prices[item_name] or inactive_sell_price
 	if prev_sell_price == sell_price then
 		if inactive_sell_price then
-			local count_in_storage = storages[force_index][item_name]
+			local count_in_storage = __storages[force_index][item_name]
 			if count_in_storage and count_in_storage > 0 then
 				f_sell_prices[item_name] = sell_price
 				f_inactive_sell_prices[item_name] = nil
@@ -1341,7 +1349,7 @@ local function change_sell_price_by_player(item_name, player, sell_price)
 		return
 	end
 
-	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+	local buy_price = __buy_prices[force_index][item_name] or __inactive_buy_prices[force_index][item_name]
 	if sell_price < minimal_price or sell_price > maximal_price or (buy_price and sell_price < buy_price) then
 		player.print({"gui-map-generator.invalid-value-for-field", sell_price, buy_price or minimal_price, maximal_price})
 		return active_sell_price or inactive_sell_price or ''
@@ -1351,7 +1359,7 @@ local function change_sell_price_by_player(item_name, player, sell_price)
 		f_sell_prices[item_name] = sell_price
 		notify_sell_price(force_index, item_name, sell_price)
 	elseif inactive_sell_price then
-		local count_in_storage = storages[force_index][item_name]
+		local count_in_storage = __storages[force_index][item_name]
 		if count_in_storage == nil or count_in_storage <= 0 then
 			f_inactive_sell_prices[item_name] = sell_price
 		else
@@ -1359,11 +1367,11 @@ local function change_sell_price_by_player(item_name, player, sell_price)
 			f_inactive_sell_prices[item_name] = nil
 			notify_sell_price(force_index, item_name, sell_price)
 		end
-	elseif transfer_boxes[force_index][item_name] then
+	elseif __transfer_boxes[force_index][item_name] then
 		f_sell_prices[item_name] = sell_price
 		notify_sell_price(force_index, item_name, sell_price)
 	else
-		local count_in_storage = storages[force_index][item_name]
+		local count_in_storage = __storages[force_index][item_name]
 		if count_in_storage == nil or count_in_storage <= 0 then
 			f_inactive_sell_prices[item_name] = sell_price
 		else
@@ -1379,8 +1387,8 @@ end
 ---@return integer|string? # returns previous sell price in a case of conflict
 local function change_buy_price_by_player(item_name, player, buy_price)
 	local force_index = player.force_index
-	local f_buy_prices = buy_prices[force_index]
-	local f_inactive_buy_prices = inactive_buy_prices[force_index]
+	local f_buy_prices = __buy_prices[force_index]
+	local f_inactive_buy_prices = __inactive_buy_prices[force_index]
 	if buy_price == nil then
 		f_inactive_buy_prices[item_name] = nil
 		f_buy_prices[item_name] = nil
@@ -1392,7 +1400,7 @@ local function change_buy_price_by_player(item_name, player, buy_price)
 		return
 	end
 
-	local sell_price = sell_prices[force_index][item_name]
+	local sell_price = __sell_prices[force_index][item_name]
 	if buy_price < minimal_price or buy_price > maximal_price or (sell_price and sell_price < buy_price) then
 		player.print({"gui-map-generator.invalid-value-for-field", buy_price, minimal_price, sell_price or maximal_price})
 		return f_buy_prices[item_name] or f_inactive_buy_prices[item_name] or ''
@@ -1403,7 +1411,7 @@ local function change_buy_price_by_player(item_name, player, buy_price)
 		notify_buy_price(force_index, item_name, buy_price)
 	elseif f_inactive_buy_prices[item_name] then
 		f_inactive_buy_prices[item_name] = buy_price
-	elseif buy_boxes[force_index][item_name] then
+	elseif __buy_boxes[force_index][item_name] then
 		f_buy_prices[item_name] = buy_price
 		notify_buy_price(force_index, item_name, buy_price)
 	else
@@ -1462,7 +1470,7 @@ local function switch_sell_prices_gui(player, location)
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			--#if DEBUG then
 				local cost = 0
-				for item_name in pairs(game.item_prototypes) do
+				for item_name in pairs(prototypes.item) do
 					cost = cost + 1
 					add_item_in_sell_prices(player, item_name, cost, player.index)
 				end
@@ -1476,7 +1484,7 @@ local function switch_sell_prices_gui(player, location)
 		else
 			direction = "horizontal"
 		end
-		main_frame = screen.add{type = "frame", name = "FM_sell_prices_frame", style = "borderless_frame", direction = direction}
+		main_frame = screen.add{type = "frame", name = "FM_sell_prices_frame", style = "tips_and_tricks_notification_frame", direction = direction}
 		main_frame.location = location or {x = player.display_resolution.width - 752, y = 272}
 		create_price_notification_handler(main_frame, "FM_switch_sell_prices_gui", is_vertical)
 		local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
@@ -1500,7 +1508,7 @@ local function switch_buy_prices_gui(player, location)
 			prices_flow.add{type = "table", name = "FM_prices_table", style = "FM_prices_table", column_count = column_count}
 			--#if DEBUG then
 				local cost = 0
-				for item_name in pairs(game.item_prototypes) do
+				for item_name in pairs(prototypes.item) do
 					cost = cost + 1
 					add_item_in_buy_prices(player, item_name, cost, player.index)
 				end
@@ -1514,7 +1522,7 @@ local function switch_buy_prices_gui(player, location)
 		else
 			direction = "horizontal"
 		end
-		main_frame = screen.add{type = "frame", name = "FM_buy_prices_frame", style = "borderless_frame", direction = direction}
+		main_frame = screen.add{type = "frame", name = "FM_buy_prices_frame", style = "tips_and_tricks_notification_frame", direction = direction}
 		main_frame.location = location or {x = player.display_resolution.width - 712, y = 272}
 		create_price_notification_handler(main_frame, "FM_switch_buy_prices_gui", is_vertical)
 		local prices_flow = main_frame.add{type = "frame", name = "FM_prices_flow", style = "FM_prices_frame", direction = "vertical"}
@@ -1559,12 +1567,12 @@ end
 local function set_transfer_box_data(item_name, entity)
 	local force = entity.force
 	local force_index = force.index
-	local f_transfer_boxes = transfer_boxes[force_index]
+	local f_transfer_boxes = __transfer_boxes[force_index]
 	if f_transfer_boxes[item_name] == nil then
-		local f_inactive_sell_prices = inactive_sell_prices[force_index]
+		local f_inactive_sell_prices = __inactive_sell_prices[force_index]
 		local inactive_sell_price = f_inactive_sell_prices[item_name]
 		if inactive_sell_price then
-			sell_prices[force_index][item_name] = inactive_sell_price
+			__sell_prices[force_index][item_name] = inactive_sell_price
 			f_inactive_sell_prices[item_name] = nil
 			notify_sell_price(force_index, item_name, inactive_sell_price)
 		end
@@ -1584,20 +1592,20 @@ local function set_transfer_box_data(item_name, entity)
 		sprite_data.forces = {force}
 	end
 	---@type number
-	local id = draw_sprite(sprite_data)
+	local id = draw_sprite(sprite_data).id
 	show_item_sprite_above_chest(item_name, force, entity)
 
 	entity.get_inventory(chest_inventory_type).set_bar(2)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, TRANSFER_TYPE, entities, item_name}
+	__all_boxes[entity.unit_number] = {entity, id, TRANSFER_TYPE, entities, item_name}
 end
 
 ---@param entity LuaEntity
 local function set_universal_transfer_box_data(entity)
 	local force = entity.force
 	local force_index = force.index
-	local entities = universal_transfer_boxes[force_index]
+	local entities = __universal_transfer_boxes[force_index]
 	entities[#entities+1] = entity
 	local sprite_data = {
 		sprite = "FM_transparent-universal-transfer",
@@ -1611,10 +1619,10 @@ local function set_universal_transfer_box_data(entity)
 		sprite_data.forces = {force}
 	end
 	---@type number
-	local id = draw_sprite(sprite_data)
+	local id = draw_sprite(sprite_data).id
 
 	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, UNIVERSAL_TRANSFER_TYPE, entities, nil}
+	__all_boxes[entity.unit_number] = {entity, id, UNIVERSAL_TRANSFER_TYPE, entities, nil}
 end
 
 ---@param item_name string
@@ -1622,7 +1630,7 @@ end
 local function set_bin_box_data(item_name, entity)
 	local force = entity.force
 	local force_index = force.index
-	local f_bin_boxes = bin_boxes[force_index]
+	local f_bin_boxes = __bin_boxes[force_index]
 	if f_bin_boxes[item_name] == nil then
 		f_bin_boxes[item_name] = {}
 	end
@@ -1640,18 +1648,18 @@ local function set_bin_box_data(item_name, entity)
 		sprite_data.forces = {force}
 	end
 	---@type number
-	local id = draw_sprite(sprite_data)
+	local id = draw_sprite(sprite_data).id
 	show_item_sprite_above_chest(item_name, force, entity)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, BIN_TYPE, entities, item_name}
+	__all_boxes[entity.unit_number] = {entity, id, BIN_TYPE, entities, item_name}
 end
 
 ---@param entity LuaEntity
 local function set_universal_bin_box_data(entity)
 	local force = entity.force
 	local force_index = force.index
-	local entities = universal_bin_boxes[force_index]
+	local entities = __universal_bin_boxes[force_index]
 	entities[#entities+1] = entity
 	local sprite_data = {
 		sprite = "FM_transparent-universal-bin",
@@ -1665,10 +1673,10 @@ local function set_universal_bin_box_data(entity)
 		sprite_data.forces = {force}
 	end
 	---@type number
-	local id = draw_sprite(sprite_data)
+	local id = draw_sprite(sprite_data).id
 
 	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, UNIVERSAL_BIN_TYPE, entities, nil}
+	__all_boxes[entity.unit_number] = {entity, id, UNIVERSAL_BIN_TYPE, entities, nil}
 end
 
 ---@param item_name string
@@ -1676,7 +1684,7 @@ end
 local function set_pull_box_data(item_name, entity)
 	local force = entity.force
 	local force_index = force.index
-	local force_pull_boxes = pull_boxes[force_index]
+	local force_pull_boxes = __pull_boxes[force_index]
 	force_pull_boxes[item_name] = force_pull_boxes[item_name] or {}
 	local items = force_pull_boxes[item_name]
 	items[#items+1] = entity
@@ -1692,30 +1700,30 @@ local function set_pull_box_data(item_name, entity)
 		sprite_data.forces = {force}
 	end
 	---@type number
-	local id = draw_sprite(sprite_data)
+	local id = draw_sprite(sprite_data).id
 	show_item_sprite_above_chest(item_name, force, entity)
 
 	entity.get_inventory(chest_inventory_type).set_bar(2)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, PULL_TYPE, items, item_name}
+	__all_boxes[entity.unit_number] = {entity, id, PULL_TYPE, items, item_name}
 end
 
 ---@param item_name string
 ---@param entity LuaEntity
 ---@param count? number
 local function set_buy_box_data(item_name, entity, count)
-	count = count or game.item_prototypes[item_name].stack_size
+	count = count or prototypes.item[item_name].stack_size
 
 	local force = entity.force
 	local force_index = force.index
-	local f_buy_boxes = buy_boxes[force_index]
+	local f_buy_boxes = __buy_boxes[force_index]
 	if f_buy_boxes[item_name] == nil then
-		local f_inactive_buy_prices = inactive_buy_prices[force_index]
+		local f_inactive_buy_prices = __inactive_buy_prices[force_index]
 		local inactive_buy_price = f_inactive_buy_prices[item_name]
 		if inactive_buy_price then
 			---@cast inactive_buy_price integer
-			buy_prices[force_index][item_name] = inactive_buy_price
+			__buy_prices[force_index][item_name] = inactive_buy_price
 			f_inactive_buy_prices[item_name] = nil
 			notify_buy_price(force_index, item_name, inactive_buy_price)
 		end
@@ -1735,11 +1743,11 @@ local function set_buy_box_data(item_name, entity, count)
 		sprite_data.forces = {force}
 	end
 	---@type number
-	local id = draw_sprite(sprite_data)
+	local id = draw_sprite(sprite_data).id
 	show_item_sprite_above_chest(item_name, force, entity)
 
 	-- (it's kind of messy data. Perhaps, there's another way)
-	all_boxes[entity.unit_number] = {entity, id, BUY_TYPE, items, item_name}
+	__all_boxes[entity.unit_number] = {entity, id, BUY_TYPE, items, item_name}
 end
 
 ---@param player LuaPlayer
@@ -1812,7 +1820,7 @@ local function open_force_configuration(player)
 	setting_row.style.vertical_align = "center"
 	setting_row.add(LABEL).caption = {'', {"free-market.default-storage-limit"}, COLON}
 	local default_limit_textfield = setting_row.add(DEFAULT_LIMIT_TEXTFIELD)
-	local default_limit = default_storage_limit[force.index] or max_storage_threshold
+	local default_limit = __default_storage_limit[force.index] or max_storage_threshold
 	default_limit_textfield.text = tostring(default_limit)
 	setting_row.add(CHECK_BUTTON).name = "FM_confirm_default_limit"
 
@@ -1856,11 +1864,11 @@ local function switch_prices_gui(player, item_name)
 			item_row.FM_prices_item.elem_value = item_name
 
 			local force_index = player.force_index
-			local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
+			local sell_price = __sell_prices[force_index][item_name] or __inactive_sell_prices[force_index][item_name]
 			if sell_price then
 				item_row.sell_price.text = tostring(sell_price)
 			end
-			local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+			local buy_price = __buy_prices[force_index][item_name] or __inactive_buy_prices[force_index][item_name]
 			if buy_price then
 				item_row.buy_price.text = tostring(buy_price)
 			end
@@ -1902,7 +1910,7 @@ local function switch_prices_gui(player, item_name)
 	add(LABEL).caption = {"free-market.buy-gui"}
 	local buy_textfield = add(BUY_PRICE_TEXTFIELD)
 	if item_name then
-		local price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+		local price = __buy_prices[force_index][item_name] or __inactive_buy_prices[force_index][item_name]
 		if price then
 			buy_textfield.text = tostring(price)
 		end
@@ -1911,7 +1919,7 @@ local function switch_prices_gui(player, item_name)
 	add(LABEL).caption = {"free-market.sell-gui"}
 	local sell_textfield = add(SELL_PRICE_TEXTFIELD)
 	if item_name then
-		local price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
+		local price = __sell_prices[force_index][item_name] or __inactive_sell_prices[force_index][item_name]
 		if price then
 			sell_textfield.text = tostring(price)
 		end
@@ -1931,9 +1939,9 @@ local function switch_prices_gui(player, item_name)
 	if item_name == nil then
 		storage_row.visible = false
 	else
-		local count = storages[force_index][item_name] or 0
+		local count = __storages[force_index][item_name] or 0
 		storage_count.caption = tostring(count)
-		local limit = storages_limit[force_index][item_name] or default_storage_limit[force_index] or max_storage_threshold
+		local limit = __storages_limit[force_index][item_name] or __default_storage_limit[force_index] or max_storage_threshold
 		storage_limit_textfield.text = tostring(limit)
 	end
 
@@ -1995,7 +2003,7 @@ local function open_storage_gui(player)
 	make_storage_header(storage_table)
 
 	local add = storage_table.add
-	for item_name, count in pairs(storages[player.force_index]) do
+	for item_name, count in pairs(__storages[player.force_index]) do
 		add(SPRITE_BUTTON).sprite = "item/" .. item_name
 		add(LABEL).caption = tostring(count)
 	end
@@ -2032,8 +2040,8 @@ local function open_price_list_gui(player)
 	local size = 0
 	for force_name, force in pairs(game.forces) do
 		local force_index = force.index
-		local f_sell_prices = sell_prices[force_index]
-		local f_buy_prices = buy_prices[force_index]
+		local f_sell_prices = __sell_prices[force_index]
+		local f_buy_prices = __buy_prices[force_index]
 		if (f_sell_prices and next(f_sell_prices)) or (f_buy_prices and next(f_buy_prices)) then
 			size = size + 1
 			items[size] = force_name
@@ -2053,9 +2061,9 @@ local function open_price_list_gui(player)
 		type = "sprite-button",
 		style = "frame_action_button",
 		name = "FM_search_by_price",
-		hovered_sprite = "utility/search_black",
-		clicked_sprite = "utility/search_black",
-		sprite = "utility/search_white"
+		hovered_sprite = "utility/search",
+		clicked_sprite = "utility/search",
+		sprite = "utility/search"
 	}
 
 	local prices_frame = content_flow.add{type = "frame", name = "deep_frame", style = "deep_frame_in_shallow_frame", direction = "vertical"}
@@ -2110,7 +2118,7 @@ local function open_buy_box_gui(player, is_new, entity)
 		confirm_button.name = "FM_confirm_buy_box"
 	else
 		confirm_button.name = "FM_change_buy_box"
-		local box_data = all_boxes[entity.unit_number]
+		local box_data = __all_boxes[entity.unit_number]
 		local entities_data = box_data[4]
 		for i = 1, #entities_data do
 			local buy_box = entities_data[i]
@@ -2125,7 +2133,7 @@ local function open_buy_box_gui(player, is_new, entity)
 end
 
 local function clear_boxes_gui(player)
-	open_box[player.index] = nil
+	__open_box[player.index] = nil
 	player.gui.relative.FM_boxes_frame.content.main_flow.box_operations.clear()
 end
 
@@ -2146,7 +2154,7 @@ local function open_transfer_box_gui(player, is_new, entity)
 		confirm_button.name = "FM_confirm_transfer_box"
 	else
 		confirm_button.name = "FM_change_transfer_box"
-		FM_item.elem_value = all_boxes[entity.unit_number][5]
+		FM_item.elem_value = __all_boxes[entity.unit_number][5]
 	end
 end
 
@@ -2167,7 +2175,7 @@ local function open_bin_box_gui(player, is_new, entity)
 		confirm_button.name = "FM_confirm_bin_box"
 	else
 		confirm_button.name = "FM_change_bin_box"
-		FM_item.elem_value = all_boxes[entity.unit_number][5]
+		FM_item.elem_value = __all_boxes[entity.unit_number][5]
 	end
 end
 
@@ -2212,7 +2220,7 @@ local function open_pull_box_gui(player, is_new, entity)
 		confirm_button.name = "FM_confirm_pull_box"
 	else
 		confirm_button.name = "FM_change_pull_box"
-		FM_item.elem_value = all_boxes[entity.unit_number][5]
+		FM_item.elem_value = __all_boxes[entity.unit_number][5]
 	end
 end
 
@@ -2250,8 +2258,8 @@ local function create_left_relative_gui(player)
 	buttons_table.add{
 		type = "sprite-button",
 		sprite = "utility/side_menu_menu_icon",
-		hovered_sprite = "utility/side_menu_menu_hover_icon",
-		clicked_sprite = "utility/side_menu_menu_hover_icon",
+		hovered_sprite = "utility/side_menu_menu_icon", -- TODO: old side_menu_menu_hover_icon
+		clicked_sprite = "utility/side_menu_menu_icon", -- TODO: old side_menu_menu_hover_icon
 		style = "slot_button",
 		name = "FM_open_force_configuration"
 	}
@@ -2261,7 +2269,7 @@ end
 ---@param item_name string
 local function check_buy_price(player, item_name)
 	local force_index = player.force_index
-	if buy_prices[force_index][item_name] == nil then
+	if __buy_prices[force_index][item_name] == nil then
 		local screen = player.gui.screen
 		local prices_frame = screen.FM_prices_frame
 		local content_flow
@@ -2271,7 +2279,7 @@ local function check_buy_price(player, item_name)
 		else
 			content_flow = prices_frame.shallow_frame.content_flow
 			content_flow.item_row.FM_prices_item.elem_value = item_name
-			local sell_price = sell_prices[force_index][item_name]
+			local sell_price = __sell_prices[force_index][item_name]
 			if sell_price then
 				content_flow.item_row.sell_price.text = tostring(sell_price)
 			end
@@ -2286,7 +2294,7 @@ end
 ---@param item_name string
 local function check_sell_price_for_opened_chest(player, gui, item_name)
 	local force_index = player.force_index
-	local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
+	local sell_price = __sell_prices[force_index][item_name] or __inactive_sell_prices[force_index][item_name]
 	if sell_price then return end
 
 	local row = gui.add{type = "table", name = "sell_price_table", column_count = 4}
@@ -2302,7 +2310,7 @@ end
 ---@param item_name string
 local function check_buy_price_for_opened_chest(player, gui, item_name)
 	local force_index = player.force_index
-	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+	local buy_price = __buy_prices[force_index][item_name] or __inactive_buy_prices[force_index][item_name]
 	if buy_price then return end
 
 	local row = gui.add{type = "table", name = "buy_price_table", column_count = 4}
@@ -2317,7 +2325,7 @@ end
 ---@param item_name string
 local function check_sell_price(player, item_name)
 	local force_index = player.force_index
-	if sell_prices[force_index][item_name] == nil then
+	if __sell_prices[force_index][item_name] == nil then
 		local prices_frame = player.gui.screen.FM_prices_frame
 		local content_flow
 		if prices_frame == nil then
@@ -2326,7 +2334,7 @@ local function check_sell_price(player, item_name)
 		else
 			content_flow = prices_frame.shallow_frame.content_flow
 			content_flow.item_row.FM_prices_item.elem_value = item_name
-			local buy_price = buy_prices[force_index][item_name]
+			local buy_price = __buy_prices[force_index][item_name]
 			if buy_price then
 				content_flow.item_row.buy_price.text = tostring(buy_price)
 			end
@@ -2380,7 +2388,7 @@ function create_item_price_HUD(player)
 	local storage_limit = add(LABEL)
 	-- storage_limit.name = "storage_limit"
 
-	item_HUD[player.index] = {
+	__item_HUD[player.index] = {
 		info_flow,
 		sell_price,
 		buy_price,
@@ -2392,7 +2400,7 @@ end
 
 ---@param player LuaPlayer
 local function hide_item_price_HUD(player)
-	local hinter = item_HUD[player.index]
+	local hinter = __item_HUD[player.index]
 	if hinter then
 		hinter[1].visible = false
 	end
@@ -2402,12 +2410,12 @@ end
 ---@param item_name string
 local function show_item_info_HUD(player, item_name)
 	local force_index = player.force_index
-	local sell_price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
-	local buy_price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
-	local count = storages[force_index][item_name]
-	local limit = storages_limit[force_index][item_name] or default_storage_limit[force_index] or max_storage_threshold
+	local sell_price = __sell_prices[force_index][item_name] or __inactive_sell_prices[force_index][item_name]
+	local buy_price = __buy_prices[force_index][item_name] or __inactive_buy_prices[force_index][item_name]
+	local count = __storages[force_index][item_name]
+	local limit = __storages_limit[force_index][item_name] or __default_storage_limit[force_index] or max_storage_threshold
 
-	local hinter = item_HUD[player.index]
+	local hinter = __item_HUD[player.index]
 	hinter[1].visible = true
 	if sell_price then
 		hinter[2].caption = tostring(sell_price)
@@ -2444,7 +2452,7 @@ local REMOVE_BOX_FUNCS = {
 local function clear_box_data(event)
 	local entity = event.entity
 	local unit_number = entity.unit_number
-	local box_data = all_boxes[unit_number]
+	local box_data = __all_boxes[unit_number]
 	if box_data == nil then return end
 
 	REMOVE_BOX_FUNCS[box_data[3]](entity, box_data)
@@ -2453,10 +2461,11 @@ end
 ---@param entity LuaEntity
 local function clear_box_data_by_entity(entity)
 	local unit_number = entity.unit_number
-	local box_data = all_boxes[unit_number]
+	local box_data = __all_boxes[unit_number]
 	if box_data == nil then return end
 
-	rendering_destroy(box_data[2])
+	local rendered = get_rendered_by_id(box_data[2])
+	rendered.destroy()
 	REMOVE_BOX_FUNCS[box_data[3]](entity, box_data)
 	return true
 end
@@ -2503,7 +2512,7 @@ local function on_player_joined_game(event)
 		switch_prices_gui(player)
 		switch_prices_gui(player)
 		switch_prices_gui(player)
-		for item_name in pairs(game.item_prototypes) do
+		for item_name in pairs(prototypes.item) do
 			switch_prices_gui(player, item_name)
 		end
 	--#end
@@ -2529,7 +2538,7 @@ local function on_force_created(event)
 end
 
 local function check_teams_data()
-	for _, storage in pairs(storages) do
+	for _, storage in pairs(__storages) do
 		for item_name, count in pairs(storage) do
 			if count == 0 then
 				storage[item_name] = nil
@@ -2542,43 +2551,43 @@ local function check_forces()
 	local forces_money = call("EasyAPI", "get_forces_money")
 
 	local neutral_force = game.forces.neutral
-	mod_data.active_forces = {}
-	active_forces = mod_data.active_forces
+	__mod_data.active_forces = {}
+	__active_forces = __mod_data.active_forces
 	local size = 0
 	-- TODO: improve and refactor
 	for _, force in pairs(game.forces) do
 		if #force.connected_players > 0 then
 			local force_index = force.index
-			local items_data = buy_boxes[force_index]
-			local storage_data = storages[force_index]
+			local items_data = __buy_boxes[force_index]
+			local storage_data = __storages[force_index]
 			if items_data and next(items_data) or storage_data and next(storage_data) then
 				local buyer_money = forces_money[force_index]
 				if buyer_money and buyer_money > money_treshold then
 					size = size + 1
-					active_forces[size] = force_index
+					__active_forces[size] = force_index
 				end
 			end
 		elseif math.random(99) > skip_offline_team_chance or force == neutral_force then
 			local force_index = force.index
-			local items_data = buy_boxes[force_index]
-			local storage_data = storages[force_index]
+			local items_data = __buy_boxes[force_index]
+			local storage_data = __storages[force_index]
 			if items_data and next(items_data) or storage_data and next(storage_data) then
 				local buyer_money = forces_money[force_index]
 				if buyer_money and buyer_money > money_treshold then
 					size = size + 1
-					active_forces[size] = force_index
+					__active_forces[size] = force_index
 				end
 			end
 		end
 	end
 
-	if #active_forces < 2 then
-		mod_data.active_forces = {}
-		active_forces = mod_data.active_forces
+	if #__active_forces < 2 then
+		__mod_data.active_forces = {}
+		__active_forces = __mod_data.active_forces
 	end
 
 	--#if DEBUG then
-		game.print("Active forces: " .. serpent.line(active_forces))
+		game.print("Active forces: " .. serpent.line(__active_forces))
 	--#end
 end
 
@@ -2586,13 +2595,13 @@ local function on_forces_merging(event)
 	local source = event.source
 	local source_index = source.index
 
-	local source_storage = storages[source_index]
+	local source_storage = __storages[source_index]
 	if source_storage then
 		local destination_index = event.destination.index
-		local destination_storage = storages[destination_index]
+		local destination_storage = __storages[destination_index]
 		if destination_storage == nil then
 			init_force_data(destination_index)
-			destination_storage = storages[destination_index]
+			destination_storage = __storages[destination_index]
 		end
 		for item_name, count in pairs(source_storage) do
 			destination_storage[item_name] = count + (destination_storage[item_name] or 0)
@@ -2600,16 +2609,16 @@ local function on_forces_merging(event)
 	end
 	clear_force_data(source_index)
 
-	local ids = rendering.get_all_ids()
+	local ids = rendering.get_all_objects()
 	for i = 1, #ids do
-		local id = ids[i]
-		if is_render_valid(id) then
-			local target = get_render_target(id)
+		local rendered = get_rendered_by_id(ids[i])
+		if rendered.valid then
+			local target = rendered.target
 			if target then
 				local entity = target.entity
-				if (not (entity and entity.valid) or entity.force == source) and Rget_type(id) == "text" then
-					rendering_destroy(id)
-					all_boxes[entity.unit_number] = nil
+				if (not (entity and entity.valid) or entity.force == source) and rendered.type == "text" then
+					rendered.destroy()
+					__all_boxes[entity.unit_number] = nil
 				end
 			end
 		end
@@ -2622,15 +2631,16 @@ end
 local function on_entity_cloned(event)
 	local source = event.source
 	if not (source and source.valid) then return end
-	local box_data = all_boxes[source.unit_number]
+	local box_data = __all_boxes[source.unit_number]
 	if box_data == nil then return end
 
 	local destination = event.destination
 	if not (destination and destination.valid) then return end
 
-	local destination_box_data = all_boxes[destination.unit_number]
+	local destination_box_data = __all_boxes[destination.unit_number]
 	if destination_box_data then
-		rendering_destroy(destination_box_data[2])
+		local rendered = get_rendered_by_id(destination_box_data[2])
+		rendered.destroy()
 		REMOVE_BOX_FUNCS[destination_box_data[3]](destination, destination_box_data)
 	end
 
@@ -2663,9 +2673,9 @@ local function on_force_cease_fire_changed(event)
 	local force_index = event.force.index
 	local other_force_index = event.other_force.index
 	if event.added then
-		embargoes[force_index][other_force_index] = nil
+		__embargoes[force_index][other_force_index] = nil
 	else
-		embargoes[force_index][other_force_index] = true
+		__embargoes[force_index][other_force_index] = true
 	end
 end
 
@@ -2678,7 +2688,7 @@ local function set_transfer_box_key_pressed(event)
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
 
-	local box_data = all_boxes[entity.unit_number]
+	local box_data = __all_boxes[entity.unit_number]
 	if box_data then
 		local item_name = box_data[5]
 		local box_type = box_data[3]
@@ -2708,7 +2718,7 @@ local function set_bin_box_key_pressed(event)
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
 
-	if all_boxes[entity.unit_number] then
+	if __all_boxes[entity.unit_number] then
 		return
 	end
 
@@ -2730,7 +2740,7 @@ local function set_universal_transfer_box_key_pressed(event)
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
 
-	local box_data = all_boxes[entity.unit_number]
+	local box_data = __all_boxes[entity.unit_number]
 	if box_data == nil then
 		set_universal_transfer_box_data(entity)
 	else
@@ -2753,7 +2763,7 @@ local function set_universal_bin_box_key_pressed(event)
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
 
-	if all_boxes[entity.unit_number] == nil then
+	if __all_boxes[entity.unit_number] == nil then
 		set_universal_bin_box_data(entity)
 	end
 end
@@ -2767,7 +2777,7 @@ local function set_pull_box_key_pressed(event)
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end -- TODO: print message
 
-	if all_boxes[entity.unit_number] then
+	if __all_boxes[entity.unit_number] then
 		return
 	end
 
@@ -2789,7 +2799,7 @@ local function set_buy_box_key_pressed(event)
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if get_distance(player.position, entity.position) > 30 then return end
 
-	local box_data = all_boxes[entity.unit_number]
+	local box_data = __all_boxes[entity.unit_number]
 	if box_data then
 		local item_name = box_data[5]
 		local box_type = box_data[3]
@@ -2834,13 +2844,13 @@ local function on_gui_elem_changed(event)
 	local force_index = player.force_index
 
 	storage_row.visible = true
-	local count = storages[force_index][item_name] or 0
+	local count = __storages[force_index][item_name] or 0
 	storage_row.storage_count.caption = tostring(count)
-	local limit = storages_limit[force_index][item_name] or default_storage_limit[force_index] or max_storage_threshold
+	local limit = __storages_limit[force_index][item_name] or __default_storage_limit[force_index] or max_storage_threshold
 	storage_row.storage_limit.text = tostring(limit)
 
-	item_row.sell_price.text = tostring(sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name] or '')
-	item_row.buy_price.text = tostring(buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name] or '')
+	item_row.sell_price.text = tostring(__sell_prices[force_index][item_name] or __inactive_sell_prices[force_index][item_name] or '')
+	item_row.buy_price.text = tostring(__buy_prices[force_index][item_name] or __inactive_buy_prices[force_index][item_name] or '')
 	update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 end
 
@@ -2875,9 +2885,9 @@ local GUIS = {
 			else
 				local content_flow = prices_frame.shallow_frame.content_flow
 				content_flow.item_row.FM_prices_item.elem_value = item_name
-				local sell_price = sell_prices[force_index][item_name]
+				local sell_price = __sell_prices[force_index][item_name]
 				content_flow.item_row.sell_price.text = tostring(sell_price or '')
-				local buy_price = buy_prices[force_index][item_name]
+				local buy_price = __buy_prices[force_index][item_name]
 				content_flow.item_row.buy_price.text = tostring(buy_price or '')
 				update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
 			end
@@ -2898,7 +2908,7 @@ local GUIS = {
 		end
 
 		local force_index = player.force_index
-		default_storage_limit[force_index] = default_limit
+		__default_storage_limit[force_index] = default_limit
 	end,
 	FM_confirm_storage_limit = function(element, player)
 		local storage_row = element.parent
@@ -2912,7 +2922,7 @@ local GUIS = {
 		if item_name == nil then return end
 
 		local force_index = player.force_index
-		storages_limit[force_index][item_name] = storage_limit
+		__storages_limit[force_index][item_name] = storage_limit
 	end,
 	FM_confirm_buy_box = function(element, player)
 		local parent = element.parent
@@ -2934,10 +2944,10 @@ local GUIS = {
 
 		local box_operations = parent.parent
 		local player_index = player.index
-		local entity = open_box[player_index] -- TODO: change?
+		local entity = __open_box[player_index] -- TODO: change?
 		if entity then
 			local inventory_size = #entity.get_inventory(chest_inventory_type)
-			local max_count = game.item_prototypes[item_name].stack_size * inventory_size
+			local max_count = prototypes.item[item_name].stack_size * inventory_size
 			if count > max_count then
 				player.print({"gui-map-generator.invalid-value-for-field", count, 1, max_count})
 				parent.count.text = tostring(max_count)
@@ -2953,13 +2963,13 @@ local GUIS = {
 		end
 
 		if #box_operations.children == 0 then
-			open_box[player_index] = nil
+			__open_box[player_index] = nil
 		end
 	end,
 	FM_confirm_buy_price_for_chest = function(element, player)
 		local box_operations = element.parent
-		local entity = open_box[player.index] -- TODO: change?
-		local box_data = all_boxes[entity.unit_number]
+		local entity = __open_box[player.index] -- TODO: change?
+		local box_data = __all_boxes[entity.unit_number]
 		if box_data == nil then
 			-- TODO: improve
 			box_operations.clear()
@@ -2989,7 +2999,7 @@ local GUIS = {
 
 		local box_operations = parent.parent
 		local player_index = player.index
-		local entity = open_box[player_index] -- TODO: change?
+		local entity = __open_box[player_index] -- TODO: change?
 		if entity then
 			set_transfer_box_data(item_name, entity)
 			box_operations.clear()
@@ -3000,7 +3010,7 @@ local GUIS = {
 		end
 
 		if #box_operations.children == 0 then
-			open_box[player_index] = nil
+			__open_box[player_index] = nil
 		end
 	end,
 	FM_confirm_bin_box = function(element, player)
@@ -3013,19 +3023,19 @@ local GUIS = {
 
 		local box_operations = parent.parent
 		local player_index = player.index
-		local entity = open_box[player_index] -- TODO: change?
+		local entity = __open_box[player_index] -- TODO: change?
 		if entity then
 			set_bin_box_data(item_name, entity)
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
 		box_operations.clear()
-		open_box[player_index] = nil
+		__open_box[player_index] = nil
 	end,
 	FM_confirm_sell_price_for_chest = function(element, player)
 		local box_operations = element.parent
-		local entity = open_box[player.index] -- TODO: change?
-		local box_data = all_boxes[entity.unit_number]
+		local entity = __open_box[player.index] -- TODO: change?
+		local box_data = __all_boxes[entity.unit_number]
 		if box_data == nil then
 			-- TODO: improve
 			box_operations.clear()
@@ -3054,27 +3064,28 @@ local GUIS = {
 		end
 
 		local player_index = player.index
-		local entity = open_box[player_index] -- TODO: change?
+		local entity = __open_box[player_index] -- TODO: change?
 		if entity then
 			set_pull_box_data(item_name, entity)
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
-		open_box[player_index] = nil
+		__open_box[player_index] = nil
 		local box_operations = parent.parent
 		box_operations.clear()
 	end,
 	FM_change_transfer_box = function(element, player)
 		local parent = element.parent
 		local player_index = player.index
-		local entity = open_box[player_index]
+		local entity = __open_box[player_index]
 		local item_name = parent.FM_item.elem_value
 		if entity then
 			local player_force = player.force
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if item_name then
 				if box_data and box_data[3] == TRANSFER_TYPE then
-					rendering_destroy(box_data[2])
+					local rendered = get_rendered_by_id(box_data[2])
+					rendered.destroy()
 					remove_certain_transfer_box(entity, box_data)
 					set_transfer_box_data(item_name, entity)
 					show_item_sprite_above_chest(item_name, player_force, entity)
@@ -3082,27 +3093,29 @@ local GUIS = {
 					player.print({"gui-train.invalid"})
 				end
 			else
-				rendering_destroy(box_data[2])
+				local rendered = get_rendered_by_id(box_data[2])
+				rendered.destroy()
 				remove_certain_transfer_box(entity, box_data)
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
-		open_box[player_index] = nil
+		__open_box[player_index] = nil
 		local box_operations = element.parent.parent
 		box_operations.clear()
 	end,
 	FM_change_bin_box = function(element, player)
 		local parent = element.parent
 		local player_index = player.index
-		local entity = open_box[player_index]
+		local entity = __open_box[player_index]
 		local item_name = parent.FM_item.elem_value
 		if entity then
 			local player_force = player.force
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if item_name then
 				if box_data and box_data[3] == BIN_TYPE then
-					rendering_destroy(box_data[2])
+					local rendered = get_rendered_by_id(box_data[2])
+					rendered.destroy()
 					remove_certain_bin_box(entity, box_data)
 					set_bin_box_data(item_name, entity)
 					show_item_sprite_above_chest(item_name, player_force, entity)
@@ -3110,27 +3123,29 @@ local GUIS = {
 					player.print({"gui-train.invalid"})
 				end
 			else
-				rendering_destroy(box_data[2])
+				local rendered = get_rendered_by_id(box_data[2])
+				rendered.destroy()
 				remove_certain_bin_box(entity, box_data)
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
-		open_box[player_index] = nil
+		__open_box[player_index] = nil
 		local box_operations = element.parent.parent
 		box_operations.clear()
 	end,
 	FM_change_pull_box = function(element, player)
 		local parent = element.parent
 		local player_index = player.index
-		local entity = open_box[player_index]
+		local entity = __open_box[player_index]
 		local item_name = parent.FM_item.elem_value
 		if entity then
 			local player_force = player.force
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if item_name then
 				if box_data and box_data[3] == PULL_TYPE then
-					rendering_destroy(box_data[2])
+					local rendered = get_rendered_by_id(box_data[2])
+					rendered.destroy()
 					remove_certain_pull_box(entity, box_data)
 					set_pull_box_data(item_name, entity)
 					show_item_sprite_above_chest(item_name, player_force, entity)
@@ -3138,32 +3153,34 @@ local GUIS = {
 					player.print({"gui-train.invalid"})
 				end
 			else
-				rendering_destroy(box_data[2])
+				local rendered = get_rendered_by_id(box_data[2])
+				rendered.destroy()
 				remove_certain_pull_box(entity, box_data)
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
-		open_box[player_index] = nil
+		__open_box[player_index] = nil
 		local box_operations = element.parent.parent
 		box_operations.clear()
 	end,
 	FM_change_buy_box = function(element, player)
 		local parent = element.parent
 		local player_index = player.index
-		local entity = open_box[player_index]
+		local entity = __open_box[player_index]
 		local count = tonumber(parent.count.text)
 		local item_name = parent.FM_item.elem_value
 		if entity then
 			local player_force = player.force
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if item_name and count then
 				local prev_item_name = box_data[5]
 				if prev_item_name == item_name then
 					change_count_in_buy_box_data(entity, item_name, count)
 				else
 					if box_data and box_data[3] == BUY_TYPE then
-						rendering_destroy(box_data[2])
+						local rendered = get_rendered_by_id(box_data[2])
+						rendered.destroy()
 						remove_certain_buy_box(entity, box_data)
 						set_buy_box_data(item_name, entity)
 						show_item_sprite_above_chest(item_name, player_force, entity)
@@ -3172,13 +3189,14 @@ local GUIS = {
 					end
 				end
 			else
-				rendering_destroy(box_data[2])
+				local rendered = get_rendered_by_id(box_data[2])
+				rendered.destroy()
 				remove_certain_buy_box(entity, box_data)
 			end
 		else
 			player.print({"multiplayer.no-address", {"item-name.linked-chest"}})
 		end
-		open_box[player_index] = nil
+		__open_box[player_index] = nil
 		local box_operations = element.parent.parent
 		box_operations.clear()
 	end,
@@ -3213,13 +3231,13 @@ local GUIS = {
 		if item_name == nil then return end
 
 		local force_index = player.force_index
-		item_row.buy_price.text = tostring(buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name] or '')
-		item_row.sell_price.text = tostring(sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name] or '')
+		item_row.buy_price.text = tostring(__buy_prices[force_index][item_name] or __inactive_buy_prices[force_index][item_name] or '')
+		item_row.sell_price.text = tostring(__sell_prices[force_index][item_name] or __inactive_sell_prices[force_index][item_name] or '')
 
 		local storage_row = content_flow.storage_row
-		local count = storages[force_index][item_name] or 0
+		local count = __storages[force_index][item_name] or 0
 		storage_row.storage_count.caption = tostring(count)
-		local limit = storages_limit[force_index][item_name] or default_storage_limit[force_index] or max_storage_threshold
+		local limit = __storages_limit[force_index][item_name] or __default_storage_limit[force_index] or max_storage_threshold
 		storage_row.storage_limit.text = tostring(limit)
 
 		update_prices_table(player, item_name, content_flow.other_prices_frame["scroll-pane"].prices_table)
@@ -3233,7 +3251,7 @@ local GUIS = {
 				return
 			end
 
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if box_data then
 				local box_type = box_data[3]
 				if box_type == TRANSFER_TYPE then
@@ -3264,7 +3282,7 @@ local GUIS = {
 					check_sell_price(player, item_name)
 				end
 			end
-			open_box[player.index] = entity
+			__open_box[player.index] = entity
 		end
 	end,
 	FM_set_universal_transfer_box = function(element, player)
@@ -3276,7 +3294,7 @@ local GUIS = {
 				return
 			end
 
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if box_data then
 				local box_type = box_data[3]
 				if box_type == TRANSFER_TYPE then
@@ -3298,7 +3316,7 @@ local GUIS = {
 			else
 				set_universal_transfer_box_data(entity)
 			end
-			open_box[player.index] = entity -- is this necessary?
+			__open_box[player.index] = entity -- is this necessary?
 		end
 	end,
 	FM_set_bin_box = function(element, player)
@@ -3310,7 +3328,7 @@ local GUIS = {
 				return
 			end
 
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if box_data then
 				local box_type = box_data[3]
 				if box_type == BIN_TYPE then
@@ -3336,7 +3354,7 @@ local GUIS = {
 					set_bin_box_data(item.name, entity)
 				end
 			end
-			open_box[player.index] = entity
+			__open_box[player.index] = entity
 		end
 	end,
 	FM_set_universal_bin_box = function(element, player)
@@ -3348,7 +3366,7 @@ local GUIS = {
 				return
 			end
 
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if box_data then
 				local box_type = box_data[3]
 				if box_type == UNIVERSAL_BIN_TYPE then
@@ -3367,7 +3385,7 @@ local GUIS = {
 			else
 				set_universal_bin_box_data(entity)
 			end
-			open_box[player.index] = entity -- is this necessary?
+			__open_box[player.index] = entity -- is this necessary?
 		end
 	end,
 	FM_set_pull_box = function(element, player)
@@ -3379,7 +3397,7 @@ local GUIS = {
 				return
 			end
 
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if box_data then
 				local box_type = box_data[3]
 				if box_type == PULL_TYPE then
@@ -3408,7 +3426,7 @@ local GUIS = {
 					set_pull_box_data(item.name, entity)
 				end
 			end
-			open_box[player.index] = entity
+			__open_box[player.index] = entity
 		end
 	end,
 	FM_set_buy_box = function(element, player)
@@ -3420,7 +3438,7 @@ local GUIS = {
 				return
 			end
 
-			local box_data = all_boxes[entity.unit_number]
+			local box_data = __all_boxes[entity.unit_number]
 			if box_data then
 				local box_type = box_data[3]
 				if box_type == BUY_TYPE then
@@ -3452,7 +3470,7 @@ local GUIS = {
 					check_buy_price_for_opened_chest(player, box_operations, item_name)
 				end
 			end
-			open_box[player.index] = entity
+			__open_box[player.index] = entity
 		end
 	end,
 	FM_print_force_data = function(element, player)
@@ -3466,8 +3484,8 @@ local GUIS = {
 	FM_reset_buy_prices = function(element, player)
 		if is_reset_public or #player.force.players == 1 or player.admin then
 			local force_index = player.force_index
-			buy_prices[force_index] = {}
-			inactive_buy_prices[force_index] = {}
+			__buy_prices[force_index] = {}
+			__inactive_buy_prices[force_index] = {}
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end
@@ -3475,8 +3493,8 @@ local GUIS = {
 	FM_reset_sell_prices = function(element, player)
 		if is_reset_public or #player.force.players == 1 or player.admin then
 			local force_index = player.force_index
-			sell_prices[force_index] = {}
-			inactive_sell_prices[force_index] = {}
+			__sell_prices[force_index] = {}
+			__inactive_sell_prices[force_index] = {}
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end
@@ -3484,10 +3502,10 @@ local GUIS = {
 	FM_reset_all_prices = function(element, player)
 		if is_reset_public or #player.force.players == 1 or player.admin then
 			local force_index = player.force_index
-			inactive_sell_prices[force_index] = {}
-			inactive_buy_prices[force_index] = {}
-			sell_prices[force_index] = {}
-			buy_prices[force_index] = {}
+			__inactive_sell_prices[force_index] = {}
+			__inactive_buy_prices[force_index] = {}
+			__sell_prices[force_index] = {}
+			__buy_prices[force_index] = {}
 		else
 			player.print({"command-output.parameters-require-admin"})
 		end
@@ -3550,7 +3568,7 @@ local GUIS = {
 		local other_force = game.forces[force_name]
 		if other_force and other_force.valid then
 			local force = player.force
-			embargoes[force.index][other_force.index] = true
+			__embargoes[force.index][other_force.index] = true
 			local message = {"free-market.declared-embargo", force.name, other_force.name, player.name}
 			force.print(message)
 			other_force.print(message)
@@ -3566,7 +3584,7 @@ local GUIS = {
 		local other_force = game.forces[force_name]
 		if other_force and other_force.valid then
 			local force = player.force
-			embargoes[force.index][other_force.index] = nil
+			__embargoes[force.index][other_force.index] = nil
 			local message = {"free-market.canceled-embargo", force.name, other_force.name, player.name}
 			force.print(message)
 			other_force.print(message)
@@ -3594,12 +3612,12 @@ local GUIS = {
 		end
 
 		local item_name = sub(element.sprite, 6)
-		if game.item_prototypes[item_name] == nil then
+		if prototypes.item[item_name] == nil then
 			game.print({"missing-item", item_name})
 			return
 		end
 
-		local price = sell_prices[force_index][item_name] or inactive_sell_prices[force_index][item_name]
+		local price = __sell_prices[force_index][item_name] or __inactive_sell_prices[force_index][item_name]
 		if price then
 			if event.shift then
 				-- use buy price for sell price
@@ -3627,12 +3645,12 @@ local GUIS = {
 		end
 
 		local item_name = sub(element.sprite, 6)
-		if game.item_prototypes[item_name] == nil then
+		if prototypes.item[item_name] == nil then
 			game.print({"missing-item", item_name})
 			return
 		end
 
-		local price = buy_prices[force_index][item_name] or inactive_buy_prices[force_index][item_name]
+		local price = __buy_prices[force_index][item_name] or __inactive_buy_prices[force_index][item_name]
 		if price then
 			if event.shift then
 				-- copy price
@@ -3740,12 +3758,12 @@ end
 
 local function check_pull_boxes()
 	local pulled_item_count = {}
-	for force_index, _items_data in pairs(pull_boxes) do
+	for force_index, _items_data in pairs(__pull_boxes) do
 		local force_money = call("EasyAPI", "get_force_money", force_index)
 		if force_money and (pull_cost_per_item == 0 or call("EasyAPI", "get_force_money", force_index) > money_treshold) then
 			local inserted_count_in_total = 0
 			pulled_item_count[force_index] = 0
-			local storage = storages[force_index]
+			local storage = __storages[force_index]
 			for item_name, force_entities in pairs(_items_data) do
 				local count_in_storage = storage[item_name]
 				if count_in_storage and count_in_storage > 0 then
@@ -3789,8 +3807,8 @@ end
 
 local function check_transfer_boxes()
 	stack.count = 4000000000
-	for force_index, force_entities in pairs(universal_bin_boxes) do
-		local storage = storages[force_index]
+	for force_index, force_entities in pairs(__universal_bin_boxes) do
+		local storage = __storages[force_index]
 		for i=#force_entities, 1, -1 do
 			local entity = force_entities[i]
 			--#if EXTRA_STABILITY then
@@ -3800,7 +3818,8 @@ local function check_transfer_boxes()
 				end
 			--#end
 			local contents = entity.get_inventory(chest_inventory_type).get_contents()
-			for item_name in pairs(contents) do
+			for _, item in pairs(contents) do
+				local item_name = item.name
 				local count = storage[item_name] or 0
 				stack["name"] = item_name
 				local sum = entity.remove_item(stack)
@@ -3814,8 +3833,8 @@ local function check_transfer_boxes()
 		end
 	end
 
-	for force_index, _items_data in pairs(bin_boxes) do
-		local storage = storages[force_index]
+	for force_index, _items_data in pairs(__bin_boxes) do
+		local storage = __storages[force_index]
 		for item_name, force_entities in pairs(_items_data) do
 			local count = storage[item_name] or 0
 			stack["name"] = item_name
@@ -3840,10 +3859,10 @@ local function check_transfer_boxes()
 	end
 
 	-- Works has much more impact on UPS than transfer_boxes
-	for force_index, force_entities in pairs(universal_transfer_boxes) do
-		local default_limit = default_storage_limit[force_index]
-		local storage_limit = storages_limit[force_index]
-		local storage = storages[force_index]
+	for force_index, force_entities in pairs(__universal_transfer_boxes) do
+		local default_limit = __default_storage_limit[force_index]
+		local storage_limit = __storages_limit[force_index]
+		local storage = __storages[force_index]
 		for i=#force_entities, 1, -1 do
 			local entity = force_entities[i]
 			--#if EXTRA_STABILITY then
@@ -3853,12 +3872,13 @@ local function check_transfer_boxes()
 				end
 			--#end
 			local contents = entity.get_inventory(chest_inventory_type).get_contents()
-			for item_name in pairs(contents) do
+			for _, item in pairs(contents) do
+				local item_name = item.name
 				local count = storage[item_name] or 0
 				local max_count = (storage_limit[item_name] or default_limit or max_storage_threshold) - count
 				if max_count > 0 then
 					stack["count"] = max_count
-					stack["name"] = item_name
+					stack["name"]  = item_name
 					local sum = entity.remove_item(stack)
 					if sum > 0 then
 						storage[item_name] = count + sum
@@ -3871,10 +3891,10 @@ local function check_transfer_boxes()
 		end
 	end
 
-	for force_index, _items_data in pairs(transfer_boxes) do
-		local default_limit = default_storage_limit[force_index]
-		local storage_limit = storages_limit[force_index]
-		local storage = storages[force_index]
+	for force_index, _items_data in pairs(__transfer_boxes) do
+		local default_limit = __default_storage_limit[force_index]
+		local storage_limit = __storages_limit[force_index]
+		local storage = __storages[force_index]
 		for item_name, force_entities in pairs(_items_data) do
 			local count = storage[item_name] or 0
 			local max_count = (storage_limit[item_name] or default_limit or max_storage_threshold) - count
@@ -3905,26 +3925,26 @@ local function check_transfer_boxes()
 end
 
 local function check_buy_boxes()
-	local last_checked_index = mod_data.last_checked_index
+	local last_checked_index = __mod_data.last_checked_index
 	local buyer_index
 	if last_checked_index then
-		buyer_index = active_forces[last_checked_index]
+		buyer_index = __active_forces[last_checked_index]
 		if buyer_index then
-			mod_data.last_checked_index = last_checked_index + 1
+			__mod_data.last_checked_index = last_checked_index + 1
 		else
-			mod_data.last_checked_index = nil
+			__mod_data.last_checked_index = nil
 			return
 		end
 	else
-		last_checked_index, buyer_index = next(active_forces)
+		last_checked_index, buyer_index = next(__active_forces)
 		if last_checked_index then
-			mod_data.last_checked_index = last_checked_index
+			__mod_data.last_checked_index = last_checked_index
 		else
 			return
 		end
 	end
 
-	local items_data = buy_boxes[buyer_index]
+	local items_data = __buy_boxes[buyer_index]
 	-- TODO: improve \/
 	if items_data == nil then return end
 
@@ -3936,7 +3956,7 @@ local function check_buy_boxes()
 
 	local stack_count = 0 -- for optimization
 	local payment = 0
-	local f_buy_prices = buy_prices[buyer_index]
+	local f_buy_prices = __buy_prices[buyer_index]
 	local inserted_count_in_total = 0
 	for item_name, entities in pairs(items_data) do
 		if money_treshold >= buyer_money then
@@ -3974,7 +3994,7 @@ local function check_buy_boxes()
 						goto skip_buy
 					end
 
-					local buyer_storage = storages[buyer_index]
+					local buyer_storage = __storages[buyer_index]
 					local count_in_storage = buyer_storage[item_name]
 					if count_in_storage and count_in_storage > 0 then
 						stack_count = need_count - count_in_storage
@@ -3989,9 +4009,9 @@ local function check_buy_boxes()
 						stack_count = need_count
 					end
 
-					for seller_index, seller_storage in pairs(storages) do
-						if buyer_index ~= seller_index and forces_money[seller_index] and not embargoes[seller_index][buyer_index] then
-							local sell_price = sell_prices[seller_index][item_name]
+					for seller_index, seller_storage in pairs(__storages) do
+						if buyer_index ~= seller_index and forces_money[seller_index] and not __embargoes[seller_index][buyer_index] then
+							local sell_price = __sell_prices[seller_index][item_name]
 							if sell_price and buy_price >= sell_price then
 								count_in_storage = seller_storage[item_name]
 								if count_in_storage then
@@ -4048,12 +4068,12 @@ local function on_player_changed_force(event)
 	local player = game.get_player(player_index)
 	if not (player and player.valid) then return end
 
-	if open_box[player_index] then
+	if __open_box[player_index] then
 		clear_boxes_gui(player)
 	end
 
 	local force_index = player.force_index
-	if transfer_boxes[force_index] == nil then
+	if __transfer_boxes[force_index] == nil then
 		init_force_data(force_index)
 	end
 end
@@ -4063,7 +4083,7 @@ local function on_player_changed_surface(event)
 	local player = game.get_player(player_index)
 	if not (player and player.valid) then return end
 
-	if open_box[player_index] then
+	if __open_box[player_index] then
 		clear_boxes_gui(player)
 	end
 end
@@ -4086,7 +4106,7 @@ local function on_selected_entity_changed(event)
 	if not (entity and entity.valid) then return end
 	if not ALLOWED_CHEST_TYPES[entity.type] then return end
 	if entity.force ~= player.force then return end
-	local box_data = all_boxes[entity.unit_number]
+	local box_data = __all_boxes[entity.unit_number]
 	if box_data == nil then return end
 	local item_name = box_data[5]
 	if item_name == nil then return end
@@ -4111,7 +4131,7 @@ local function on_player_selected_area(event)
 		local entities = event.entities
 		for i=1, #entities do
 			local entity = entities[i]
-			if entity.valid and all_boxes[entity.unit_number] == nil then
+			if entity.valid and __all_boxes[entity.unit_number] == nil then
 				local item = entity.get_inventory(chest_inventory_type)[1]
 				if item.valid_for_read then
 					func(item.name, entity)
@@ -4122,7 +4142,7 @@ local function on_player_selected_area(event)
 		local entities = event.entities
 		for i=1, #entities do
 			local entity = entities[i]
-			if entity.valid and all_boxes[entity.unit_number] == nil then
+			if entity.valid and __all_boxes[entity.unit_number] == nil then
 				set_universal_transfer_box_data(entity)
 			end
 		end
@@ -4130,7 +4150,7 @@ local function on_player_selected_area(event)
 		local entities = event.entities
 		for i=1, #entities do
 			local entity = entities[i]
-			if entity.valid and all_boxes[entity.unit_number] == nil then
+			if entity.valid and __all_boxes[entity.unit_number] == nil then
 				set_universal_bin_box_data(entity)
 			end
 		end
@@ -4173,9 +4193,10 @@ do
 			local entity = entities[i]
 			if entity.valid then
 				local unit_number = entity.unit_number
-				local box_data = all_boxes[unit_number]
+				local box_data = __all_boxes[unit_number]
 				if box_data and box_data[3] == box_type then
-					rendering_destroy(box_data[2])
+					local rendered = get_rendered_by_id(box_data[2])
+					rendered.destroy()
 					remove_box(entity, box_data)
 				end
 			end
@@ -4326,8 +4347,8 @@ local function add_remote_interface()
 	-- https://lua-api.factorio.com/latest/LuaRemote.html
 	remote.remove_interface("free-market") -- For safety
 	remote.add_interface("free-market", {
-		get_mod_data = function() return mod_data end,
-		get_internal_data = function(name) return mod_data[name] end,
+		get_mod_data = function() return __mod_data end,
+		get_internal_data = function(name) return __mod_data[name] end,
 		change_count_in_buy_box_data = change_count_in_buy_box_data,
 		remove_certain_pull_box = remove_certain_pull_box,
 		remove_certain_transfer_box = remove_certain_transfer_box,
@@ -4352,73 +4373,73 @@ local function add_remote_interface()
 		set_pull_box_data = set_pull_box_data,
 		set_buy_box_data = set_buy_box_data,
 		set_item_limit = function(item_name, force_index, count)
-			local f_storages_limit = storages_limit[force_index]
+			local f_storages_limit = __storages_limit[force_index]
 			if f_storages_limit == nil then return end
 			f_storages_limit[item_name] = count
 		end,
 		set_default_storage_limit = function(force_index, count)
-			local f_default_storage_limit = default_storage_limit[force_index]
+			local f_default_storage_limit = __default_storage_limit[force_index]
 			if f_default_storage_limit == nil then return end
-			default_storage_limit[force_index] = count
+			__default_storage_limit[force_index] = count
 		end,
 		set_sell_price = function(item_name, force_index, price)
-			local f_sell_prices = sell_prices[force_index]
+			local f_sell_prices = __sell_prices[force_index]
 			if f_sell_prices == nil then return end
 
-			local transferers = transfer_boxes[force_index][item_name]
-			local count_in_storage = storages[force_index][item_name]
+			local transferers = __transfer_boxes[force_index][item_name]
+			local count_in_storage = __storages[force_index][item_name]
 			if f_sell_prices[item_name] or transferers ~= nil or (count_in_storage and count_in_storage > 0) then
 				f_sell_prices[item_name] = price
-				inactive_sell_prices[force_index] = nil
+				__inactive_sell_prices[force_index] = nil
 			else
 				f_sell_prices[item_name] = nil
-				inactive_sell_prices[force_index][item_name] = price
+				__inactive_sell_prices[force_index][item_name] = price
 			end
 		end,
 		set_buy_price = function(item_name, force_index, price)
-			local f_buy_prices = buy_prices[force_index]
+			local f_buy_prices = __buy_prices[force_index]
 			if f_buy_prices == nil then return end
 
-			local f_buy_boxes = buy_boxes[force_index][item_name]
+			local f_buy_boxes = __buy_boxes[force_index][item_name]
 			if f_buy_prices[item_name] or f_buy_boxes ~= nil then
 				f_buy_prices[item_name] = price
-				inactive_buy_prices[force_index] = nil
+				__inactive_buy_prices[force_index] = nil
 			else
 				f_buy_prices[item_name] = nil
-				inactive_buy_prices[force_index][item_name] = price
+				__inactive_buy_prices[force_index][item_name] = price
 			end
 		end,
 		force_set_sell_price = function(item_name, force_index, price)
-			local f_sell_prices = sell_prices[force_index]
+			local f_sell_prices = __sell_prices[force_index]
 			if f_sell_prices == nil then return end
 			f_sell_prices[item_name] = price
-			inactive_sell_prices[force_index][item_name] = nil
+			__inactive_sell_prices[force_index][item_name] = nil
 		end,
 		force_set_buy_price = function(item_name, force_index, price)
-			local f_buy_prices = buy_prices[force_index]
+			local f_buy_prices = __buy_prices[force_index]
 			if f_buy_prices == nil then return end
 			f_buy_prices[item_name] = price
-			inactive_buy_prices[force_index][item_name] = nil
+			__inactive_buy_prices[force_index][item_name] = nil
 		end,
 		reset_AI_force_storage = function(force_index)
-			local f_sell_prices = sell_prices[force_index]
+			local f_sell_prices = __sell_prices[force_index]
 			if f_sell_prices == nil then return end
 
-			local f_inactive_sell_prices = inactive_sell_prices[force_index]
+			local f_inactive_sell_prices = __inactive_sell_prices[force_index]
 			for item_name, price in pairs(f_inactive_sell_prices) do
 				f_sell_prices[item_name] = price
 				f_inactive_sell_prices[item_name] = nil
 			end
-			local f_buy_prices = buy_prices[force_index]
-			local f_inactive_buy_prices = inactive_buy_prices[force_index]
+			local f_buy_prices = __buy_prices[force_index]
+			local f_inactive_buy_prices = __inactive_buy_prices[force_index]
 			for item_name, price in pairs(f_inactive_buy_prices) do
 				f_buy_prices[item_name] = price
 				f_inactive_buy_prices[item_name] = nil
 			end
 
 			-- TODO: change
-			local f_storages_limit = storages_limit[force_index]
-			local f_storage = storages[force_index]
+			local f_storages_limit = __storages_limit[force_index]
+			local f_storage = __storages[force_index]
 			for item_name in pairs(f_buy_prices) do
 				f_storage[item_name] = 2000000000
 				f_storages_limit[item_name] = 4000000000
@@ -4429,60 +4450,60 @@ local function add_remote_interface()
 			end
 		end,
 		get_item_limit = function(item_name, force_index)
-			local f_storages_limit = storages_limit[force_index]
+			local f_storages_limit = __storages_limit[force_index]
 			if f_storages_limit == nil then return end
 			return f_storages_limit[item_name]
 		end,
 		get_default_storage_limit = function(force_index)
-			return default_storage_limit[force_index]
+			return __default_storage_limit[force_index]
 		end,
-		get_inactive_universal_transfer_boxes = function() return inactive_universal_transfer_boxes end,
-		get_inactive_universal_bin_boxes = function() return inactive_universal_bin_boxes end,
-		get_inactive_bin_boxes = function() return inactive_bin_boxes end,
-		get_inactive_transfer_boxes = function() return inactive_transfer_boxes end,
-		get_inactive_sell_prices = function() return inactive_sell_prices end,
-		get_inactive_buy_prices  = function() return inactive_buy_prices end,
-		get_inactive_buy_boxes   = function() return inactive_buy_boxes end,
-		get_universal_bin_boxes  = function() return universal_bin_boxes end,
-		get_transfer_boxes = function() return transfer_boxes end,
-		get_bin_boxes      = function() return bin_boxes end,
-		get_pull_boxes     = function() return pull_boxes end,
-		get_buy_boxes      = function() return buy_boxes end,
-		get_sell_prices    = function() return sell_prices end,
-		get_buy_prices     = function() return buy_prices end,
-		get_embargoes      = function() return embargoes end,
-		get_open_box       = function() return open_box end,
-		get_all_boxes      = function() return all_boxes end,
-		get_active_forces  = function() return active_forces end,
-		get_storages       = function() return storages end,
+		get_inactive_universal_transfer_boxes = function() return __inactive_universal_transfer_boxes end,
+		get_inactive_universal_bin_boxes = function() return __inactive_universal_bin_boxes end,
+		get_inactive_bin_boxes = function() return __inactive_bin_boxes end,
+		get_inactive_transfer_boxes = function() return __inactive_transfer_boxes end,
+		get_inactive_sell_prices = function() return __inactive_sell_prices end,
+		get_inactive_buy_prices  = function() return __inactive_buy_prices end,
+		get_inactive_buy_boxes   = function() return __inactive_buy_boxes end,
+		get_universal_bin_boxes  = function() return __universal_bin_boxes end,
+		get_transfer_boxes = function() return __transfer_boxes end,
+		get_bin_boxes      = function() return __bin_boxes end,
+		get_pull_boxes     = function() return __pull_boxes end,
+		get_buy_boxes      = function() return __buy_boxes end,
+		get_sell_prices    = function() return __sell_prices end,
+		get_buy_prices     = function() return __buy_prices end,
+		get_embargoes      = function() return __embargoes end,
+		get_open_box       = function() return __open_box end,
+		get_all_boxes      = function() return __all_boxes end,
+		get_active_forces  = function() return __active_forces end,
+		get_storages       = function() return __storages end,
 	})
 end
 
 local function link_data()
-	mod_data = global.free_market
-	bin_boxes = mod_data.bin_boxes
-	inactive_bin_boxes = mod_data.inactive_bin_boxes
-	universal_bin_boxes = mod_data.universal_bin_boxes
-	inactive_universal_bin_boxes = mod_data.universal_inactive_bin_boxes
-	pull_boxes = mod_data.pull_boxes
-	inactive_universal_transfer_boxes = mod_data.inactive_universal_transfer_boxes
-	inactive_transfer_boxes = mod_data.inactive_transfer_boxes
-	inactive_buy_boxes = mod_data.inactive_buy_boxes
-	universal_transfer_boxes = mod_data.universal_transfer_boxes
-	transfer_boxes = mod_data.transfer_boxes
-	buy_boxes = mod_data.buy_boxes
-	embargoes = mod_data.embargoes
-	inactive_sell_prices = mod_data.inactive_sell_prices
-	inactive_buy_prices = mod_data.inactive_buy_prices
-	sell_prices = mod_data.sell_prices
-	buy_prices = mod_data.buy_prices
-	item_HUD = mod_data.item_hinter
-	open_box = mod_data.open_box
-	all_boxes = mod_data.all_boxes
-	active_forces = mod_data.active_forces
-	default_storage_limit = mod_data.default_storage_limit
-	storages_limit = mod_data.storages_limit
-	storages = mod_data.storages
+	__mod_data = storage.free_market
+	__bin_boxes = __mod_data.bin_boxes
+	__inactive_bin_boxes = __mod_data.inactive_bin_boxes
+	__universal_bin_boxes = __mod_data.universal_bin_boxes
+	__inactive_universal_bin_boxes = __mod_data.universal_inactive_bin_boxes
+	__pull_boxes = __mod_data.pull_boxes
+	__inactive_universal_transfer_boxes = __mod_data.inactive_universal_transfer_boxes
+	__inactive_transfer_boxes = __mod_data.inactive_transfer_boxes
+	__inactive_buy_boxes = __mod_data.inactive_buy_boxes
+	__universal_transfer_boxes = __mod_data.universal_transfer_boxes
+	__transfer_boxes = __mod_data.transfer_boxes
+	__buy_boxes = __mod_data.buy_boxes
+	__embargoes = __mod_data.embargoes
+	__inactive_sell_prices = __mod_data.inactive_sell_prices
+	__inactive_buy_prices = __mod_data.inactive_buy_prices
+	__sell_prices = __mod_data.sell_prices
+	__buy_prices = __mod_data.buy_prices
+	__item_HUD = __mod_data.item_hinter
+	__open_box = __mod_data.open_box
+	__all_boxes = __mod_data.all_boxes
+	__active_forces = __mod_data.active_forces
+	__default_storage_limit = __mod_data.default_storage_limit
+	__storages_limit = __mod_data.storages_limit
+	__storages = __mod_data.storages
 
 	local id = call("EasyAPI", "get_event_name", "on_entity_changed_force")
 	script.on_event(id, function(event)
@@ -4493,39 +4514,39 @@ local function link_data()
 end
 
 local function update_global_data()
-	global.free_market = global.free_market or {}
-	mod_data = global.free_market
-	mod_data.item_hinter = mod_data.item_hinter or {}
-	mod_data.open_box = {}
-	mod_data.active_forces = mod_data.active_forces or {}
-	mod_data.bin_boxes = mod_data.bin_boxes or {}
-	mod_data.inactive_bin_boxes = mod_data.inactive_bin_boxes or {}
-	mod_data.universal_bin_boxes = mod_data.universal_bin_boxes or {}
-	mod_data.universal_inactive_bin_boxes = mod_data.universal_inactive_bin_boxes or {}
-	mod_data.inactive_universal_transfer_boxes = mod_data.inactive_universal_transfer_boxes or {}
-	mod_data.inactive_transfer_boxes = mod_data.inactive_transfer_boxes or {}
-	mod_data.inactive_buy_boxes = mod_data.inactive_buy_boxes or {}
-	mod_data.universal_transfer_boxes = mod_data.universal_transfer_boxes or {}
-	mod_data.transfer_boxes = mod_data.transfer_boxes or {}
-	mod_data.pull_boxes = mod_data.pull_boxes or {}
-	mod_data.buy_boxes = mod_data.buy_boxes or {}
-	mod_data.inactive_sell_prices = mod_data.inactive_sell_prices or {}
-	mod_data.inactive_buy_prices = mod_data.inactive_buy_prices or {}
-	mod_data.sell_prices = mod_data.sell_prices or {}
-	mod_data.buy_prices = mod_data.buy_prices or {}
-	mod_data.embargoes = mod_data.embargoes or {}
-	mod_data.all_boxes = mod_data.all_boxes or {}
-	mod_data.default_storage_limit = mod_data.default_storage_limit or {}
-	mod_data.storages_limit = mod_data.storages_limit or {}
-	mod_data.storages = mod_data.storages or {}
+	storage.free_market = storage.free_market or {}
+	__mod_data = storage.free_market
+	__mod_data.item_hinter = __mod_data.item_hinter or {}
+	__mod_data.open_box = {}
+	__mod_data.active_forces = __mod_data.active_forces or {}
+	__mod_data.bin_boxes = __mod_data.bin_boxes or {}
+	__mod_data.inactive_bin_boxes = __mod_data.inactive_bin_boxes or {}
+	__mod_data.universal_bin_boxes = __mod_data.universal_bin_boxes or {}
+	__mod_data.universal_inactive_bin_boxes = __mod_data.universal_inactive_bin_boxes or {}
+	__mod_data.inactive_universal_transfer_boxes = __mod_data.inactive_universal_transfer_boxes or {}
+	__mod_data.inactive_transfer_boxes = __mod_data.inactive_transfer_boxes or {}
+	__mod_data.inactive_buy_boxes = __mod_data.inactive_buy_boxes or {}
+	__mod_data.universal_transfer_boxes = __mod_data.universal_transfer_boxes or {}
+	__mod_data.transfer_boxes = __mod_data.transfer_boxes or {}
+	__mod_data.pull_boxes = __mod_data.pull_boxes or {}
+	__mod_data.buy_boxes = __mod_data.buy_boxes or {}
+	__mod_data.inactive_sell_prices = __mod_data.inactive_sell_prices or {}
+	__mod_data.inactive_buy_prices = __mod_data.inactive_buy_prices or {}
+	__mod_data.sell_prices = __mod_data.sell_prices or {}
+	__mod_data.buy_prices = __mod_data.buy_prices or {}
+	__mod_data.embargoes = __mod_data.embargoes or {}
+	__mod_data.all_boxes = __mod_data.all_boxes or {}
+	__mod_data.default_storage_limit = __mod_data.default_storage_limit or {}
+	__mod_data.storages_limit = __mod_data.storages_limit or {}
+	__mod_data.storages = __mod_data.storages or {}
 
 	link_data()
 
 	clear_invalid_data()
 
-	for item_name, item in pairs(game.item_prototypes) do
+	for item_name, item in pairs(prototypes.item) do
 		if item.stack_size <= 5 then
-			for _, f_storage_limit in pairs(storages_limit) do
+			for _, f_storage_limit in pairs(__storages_limit) do
 				f_storage_limit[item_name] = f_storage_limit[item_name] or 1
 			end
 		end
@@ -4571,7 +4592,7 @@ local function on_configuration_changed(event)
 	if version < 0.34 then
 		for _, force in pairs(game.forces) do
 			local index = force.index
-			if sell_prices[index] then
+			if __sell_prices[index] then
 				init_force_data(index)
 			end
 		end
@@ -4587,12 +4608,12 @@ local function on_configuration_changed(event)
 		for _, force in pairs(game.forces) do
 			local index = force.index
 			-- sell_boxes -> transfer_boxes
-			if sell_prices[index] and mod_data.sell_boxes then
-				transfer_boxes[index] = mod_data.sell_boxes[index]
-				inactive_transfer_boxes[index] = mod_data.inactive_sell_boxes[index]
+			if __sell_prices[index] and __mod_data.sell_boxes then
+				__transfer_boxes[index] = __mod_data.sell_boxes[index]
+				__inactive_transfer_boxes[index] = __mod_data.inactive_sell_boxes[index]
 			end
-			mod_data.sell_boxes = nil
-			mod_data.inactive_sell_boxes = nil
+			__mod_data.sell_boxes = nil
+			__mod_data.inactive_sell_boxes = nil
 		end
 
 		local sprite_data = {
@@ -4600,8 +4621,9 @@ local function on_configuration_changed(event)
 			only_in_alt_mode = true,
 			x_scale = 0.4, y_scale = 0.4
 		}
-		for  _, box_data in pairs(all_boxes) do
-			rendering_destroy(box_data[2])
+		for  _, box_data in pairs(__all_boxes) do
+			local rendered = get_rendered_by_id(box_data[2])
+			rendered.destroy()
 
 			local entity = box_data[1]
 			sprite_data.target = entity
@@ -4620,7 +4642,7 @@ local function on_configuration_changed(event)
 				sprite_data.sprite = "FM_transparent-buy"
 			end
 
-			box_data[2] = draw_sprite(sprite_data)
+			box_data[2] = draw_sprite(sprite_data).id
 		end
 
 		for _, player in pairs(game.players) do
@@ -4633,9 +4655,9 @@ local function on_configuration_changed(event)
 	if version < 0.32 then
 		for _, force in pairs(game.forces) do
 			local index = force.index
-			if transfer_boxes[index] then
+			if __transfer_boxes[index] then
 				init_force_data(index)
-				default_storage_limit[index] = max_storage_threshold
+				__default_storage_limit[index] = max_storage_threshold
 			end
 		end
 	end
@@ -4792,7 +4814,7 @@ M.events = {
 	[defines.events.on_entity_settings_pasted] = function(event)
 		local source = event.source
 		if not (source and source.valid) then return end
-		local box_data = all_boxes[source.unit_number]
+		local box_data = __all_boxes[source.unit_number]
 		if box_data == nil then return end
 
 		local destination = event.destination
@@ -4803,9 +4825,10 @@ M.events = {
 		local player = game.get_player(event.player_index)
 		if not (player and player.valid) then return end
 
-		local destination_box_data = all_boxes[destination.unit_number]
+		local destination_box_data = __all_boxes[destination.unit_number]
 		if destination_box_data then
-			rendering_destroy(destination_box_data[2])
+			local rendered = get_rendered_by_id(destination_box_data[2])
+			rendered.destroy()
 			REMOVE_BOX_FUNCS[destination_box_data[3]](destination, destination_box_data)
 		end
 
