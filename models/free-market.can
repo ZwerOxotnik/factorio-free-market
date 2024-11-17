@@ -2213,17 +2213,23 @@ local function create_top_relative_gui(player)
 	main_frame.style.vertical_align = "center"
 	main_frame.style.horizontally_stretchable = false
 	main_frame.style.bottom_margin = -14
-	local frame = main_frame.add{type = "frame", name = "content", style = "inside_shallow_frame"}
-	local main_flow = frame.add{type = "flow", name = "main_flow", direction = "vertical"}
+	local frame = main_frame.add{type = "frame", name = "content",   style = "inside_shallow_frame"}
+	local main_flow =  frame.add{type = "flow",  name = "main_flow", direction = "vertical"}
 	main_flow.style.vertical_spacing = 0
 	main_flow.add(FLOW).name = "box_operations"
+
 	local flow = main_flow.add(FLOW)
-	flow.add{type = "button", style="FM_transfer_button", name = "FM_set_transfer_box"}.style.right_margin = -6
-	flow.add{type = "button", style="FM_universal_transfer_button", name = "FM_set_universal_transfer_box"}.style.right_margin = -6
-	flow.add{type = "button", style="FM_bin_button", name = "FM_set_bin_box"}.style.right_margin = -6
-	flow.add{type = "button", style="FM_universal_bin_button", name = "FM_set_universal_bin_box"}.style.right_margin = -6
-	flow.add{type = "button", style="FM_pull_out_button", name = "FM_set_pull_box"}.style.right_margin = -6
-	flow.add{type = "button", style="FM_buy_button", name = "FM_set_buy_box"}
+	flow.add{type = "button", style = "FM_transfer_button", name = "FM_set_transfer_box"}.style.right_margin = -6
+	flow.add{type = "button", style = "FM_universal_transfer_button", name = "FM_set_universal_transfer_box"}.style.right_margin = -6
+	flow.add{type = "button", style = "FM_bin_button", name = "FM_set_bin_box"}.style.right_margin = -6
+	flow.add{type = "button", style = "FM_universal_bin_button", name = "FM_set_universal_bin_box"}.style.right_margin = -6
+	flow.add{type = "button", style = "FM_pull_out_button", name = "FM_set_pull_box"}.style.right_margin = -6
+	flow.add{type = "button", style = "FM_buy_button",      name = "FM_set_buy_box"}
+	local button = flow.add(CLOSE_BUTTON) -- TODO: use style instead and make it red
+	button.tooltip    = {"free-market.remove-market-settings"}
+	button.name       = "FM_remove_box_data"
+	button.style.size = 38
+	button.visible    = true
 end
 
 ---@param player LuaPlayer
@@ -3743,6 +3749,14 @@ local GUIS = {
 		else -- it's buy request
 			update_price_list_by_buy_filter(force, scroll_pane, search_text)
 		end
+	end,
+	FM_remove_box_data = function(element, player)
+		local entity = player.opened
+		if not (entity and entity.valid) then return end
+
+		clear_box_data_by_entity(entity)
+		player.opened = nil
+		-- element.destroy()
 	end
 }
 local function on_gui_click(event)
@@ -4898,7 +4912,13 @@ M.events = {
 	end,
 	["FM_set-buy-box"] = function(event)
 		pcall(set_buy_box_key_pressed, event)
-	end
+	end,
+	["FM_remove-market-settings"] = function(event)
+		local entity = player.selected or player.opened
+		if not (entity and entity.valid) then return end
+
+		clear_box_data_by_entity(entity)
+	end,
 }
 
 M.on_nth_tick = {

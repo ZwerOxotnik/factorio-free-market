@@ -1,4 +1,10 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 0.39.3
+Date: 2024-11-17
+  Features:
+    - Added new hotkey with name "Remove market settings for selected entity"
+    - Added new button to remove market settings for an opened entity (Don't confuse with close button, I'll change it later)
+---------------------------------------------------------------------------------------------------
 Version: 0.39.2
 Date: 2024-11-17
   Bugfixes:

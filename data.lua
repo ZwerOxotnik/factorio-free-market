@@ -2,6 +2,7 @@ require("prototypes/style")
 require("prototypes/tools")
 
 data:extend({
+	{type = "custom-input", name = "FM_remove-market-settings", key_sequence = "", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-pull-box", key_sequence = "", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-transfer-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
 	{type = "custom-input", name = "FM_set-universal-transfer-box", key_sequence = "mouse-wheel-left", consuming = "game-only"},
