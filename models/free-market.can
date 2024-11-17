@@ -151,7 +151,7 @@ local print_to_rcon = rcon.print
 	local PULL_TYPE = 3
 	local SELL_TYPE = 2
 	local BUY_TYPE = 1
-	local chest_inventory_type = defines.inventory.chest
+	local CHEST_INVENTORY_TYPE = defines.inventory.chest
 --#else
 	--#define("UNIVERSAL_BIN_TYPE", "7")
 	--#define("BIN_TYPE", "6")
@@ -160,7 +160,7 @@ local print_to_rcon = rcon.print
 	--#define("PULL_TYPE", "3")
 	--#define("SELL_TYPE", "2")
 	--#define("BUY_TYPE", "1")
-	--#define("chest_inventory_type", "1") -- defines.inventory.chest
+	--#define("CHEST_INVENTORY_TYPE", "1") -- defines.inventory.chest
 --#end
 local CHECK_FORCES_TICK = 60 * 60 * 1.5
 local CHECK_TEAMS_DATA_TICK = 60 * 60 * 25
@@ -1565,6 +1565,9 @@ end
 ---@param item_name string
 ---@param entity LuaEntity
 local function set_transfer_box_data(item_name, entity)
+	local inventory = entity.get_inventory(CHEST_INVENTORY_TYPE)
+	if not (inventory and inventory.supports_bar()) then return end
+
 	local force = entity.force
 	local force_index = force.index
 	local f_transfer_boxes = __transfer_boxes[force_index]
@@ -1595,7 +1598,9 @@ local function set_transfer_box_data(item_name, entity)
 	local id = draw_sprite(sprite_data).id
 	show_item_sprite_above_chest(item_name, force, entity)
 
-	entity.get_inventory(chest_inventory_type).set_bar(2)
+	if #inventory > 2 then
+		inventory.set_bar(2)
+	end
 
 	-- (it's kind of messy data. Perhaps, there's another way)
 	__all_boxes[entity.unit_number] = {entity, id, TRANSFER_TYPE, entities, item_name}
@@ -1603,6 +1608,9 @@ end
 
 ---@param entity LuaEntity
 local function set_universal_transfer_box_data(entity)
+	local inventory = entity.get_inventory(CHEST_INVENTORY_TYPE)
+	if not (inventory and inventory.supports_bar()) then return end
+
 	local force = entity.force
 	local force_index = force.index
 	local entities = __universal_transfer_boxes[force_index]
@@ -1628,6 +1636,9 @@ end
 ---@param item_name string
 ---@param entity LuaEntity
 local function set_bin_box_data(item_name, entity)
+	local inventory = entity.get_inventory(CHEST_INVENTORY_TYPE)
+	if not (inventory and inventory.supports_bar()) then return end
+
 	local force = entity.force
 	local force_index = force.index
 	local f_bin_boxes = __bin_boxes[force_index]
@@ -1657,6 +1668,9 @@ end
 
 ---@param entity LuaEntity
 local function set_universal_bin_box_data(entity)
+	local inventory = entity.get_inventory(CHEST_INVENTORY_TYPE)
+	if not (inventory and inventory.supports_bar()) then return end
+
 	local force = entity.force
 	local force_index = force.index
 	local entities = __universal_bin_boxes[force_index]
@@ -1682,6 +1696,9 @@ end
 ---@param item_name string
 ---@param entity LuaEntity
 local function set_pull_box_data(item_name, entity)
+	local inventory = entity.get_inventory(CHEST_INVENTORY_TYPE)
+	if not (inventory and inventory.supports_bar()) then return end
+
 	local force = entity.force
 	local force_index = force.index
 	local force_pull_boxes = __pull_boxes[force_index]
@@ -1703,7 +1720,9 @@ local function set_pull_box_data(item_name, entity)
 	local id = draw_sprite(sprite_data).id
 	show_item_sprite_above_chest(item_name, force, entity)
 
-	entity.get_inventory(chest_inventory_type).set_bar(2)
+	if #inventory > 2 then
+		inventory.set_bar(2)
+	end
 
 	-- (it's kind of messy data. Perhaps, there's another way)
 	__all_boxes[entity.unit_number] = {entity, id, PULL_TYPE, items, item_name}
@@ -1713,6 +1732,9 @@ end
 ---@param entity LuaEntity
 ---@param count? number
 local function set_buy_box_data(item_name, entity, count)
+	local inventory = entity.get_inventory(CHEST_INVENTORY_TYPE)
+	if not (inventory and inventory.supports_bar()) then return end
+
 	count = count or prototypes.item[item_name].stack_size
 
 	local force = entity.force
@@ -2700,7 +2722,7 @@ local function set_transfer_box_key_pressed(event)
 		return
 	end
 
-	local item = entity.get_inventory(chest_inventory_type)[1]
+	local item = entity.get_inventory(CHEST_INVENTORY_TYPE)[1]
 	if not item.valid_for_read then
 		player.print({"multiplayer.no-address", {"item"}})
 		return
@@ -2722,7 +2744,7 @@ local function set_bin_box_key_pressed(event)
 		return
 	end
 
-	local item = entity.get_inventory(chest_inventory_type)[1]
+	local item = entity.get_inventory(CHEST_INVENTORY_TYPE)[1]
 	if not item.valid_for_read then
 		player.print({"multiplayer.no-address", {"item"}})
 		return
@@ -2781,7 +2803,7 @@ local function set_pull_box_key_pressed(event)
 		return
 	end
 
-	local item = entity.get_inventory(chest_inventory_type)[1]
+	local item = entity.get_inventory(CHEST_INVENTORY_TYPE)[1]
 	if not item.valid_for_read then
 		player.print({"multiplayer.no-address", {"item"}})
 		return
@@ -2811,7 +2833,7 @@ local function set_buy_box_key_pressed(event)
 		return
 	end
 
-	local item = entity.get_inventory(chest_inventory_type)[1]
+	local item = entity.get_inventory(CHEST_INVENTORY_TYPE)[1]
 	if not item.valid_for_read then
 		player.print({"multiplayer.no-address", {"item"}})
 		return
@@ -2946,7 +2968,7 @@ local GUIS = {
 		local player_index = player.index
 		local entity = __open_box[player_index] -- TODO: change?
 		if entity then
-			local inventory_size = #entity.get_inventory(chest_inventory_type)
+			local inventory_size = #entity.get_inventory(CHEST_INVENTORY_TYPE)
 			local max_count = prototypes.item[item_name].stack_size * inventory_size
 			if count > max_count then
 				player.print({"gui-map-generator.invalid-value-for-field", count, 1, max_count})
@@ -3273,7 +3295,7 @@ local GUIS = {
 					return
 				end
 			else
-				local item = entity.get_inventory(chest_inventory_type)[1]
+				local item = entity.get_inventory(CHEST_INVENTORY_TYPE)[1]
 				if not item.valid_for_read then
 					open_transfer_box_gui(player, true)
 				else
@@ -3347,7 +3369,7 @@ local GUIS = {
 					return
 				end
 			else
-				local item = entity.get_inventory(chest_inventory_type)[1]
+				local item = entity.get_inventory(CHEST_INVENTORY_TYPE)[1]
 				if not item.valid_for_read then
 					open_bin_box_gui(player, true)
 				else
@@ -3419,7 +3441,7 @@ local GUIS = {
 					return
 				end
 			else
-				local item = entity.get_inventory(chest_inventory_type)[1]
+				local item = entity.get_inventory(CHEST_INVENTORY_TYPE)[1]
 				if not item.valid_for_read then
 					open_pull_box_gui(player, true)
 				else
@@ -3460,7 +3482,7 @@ local GUIS = {
 					return
 				end
 			else
-				local item = entity.get_inventory(chest_inventory_type)[1]
+				local item = entity.get_inventory(CHEST_INVENTORY_TYPE)[1]
 				if not item.valid_for_read then
 					open_buy_box_gui(player, true)
 				else
@@ -3817,7 +3839,7 @@ local function check_transfer_boxes()
 					goto continue
 				end
 			--#end
-			local contents = entity.get_inventory(chest_inventory_type).get_contents()
+			local contents = entity.get_inventory(CHEST_INVENTORY_TYPE).get_contents()
 			for _, item in pairs(contents) do
 				local item_name = item.name
 				local count = storage[item_name] or 0
@@ -3871,7 +3893,7 @@ local function check_transfer_boxes()
 					goto continue
 				end
 			--#end
-			local contents = entity.get_inventory(chest_inventory_type).get_contents()
+			local contents = entity.get_inventory(CHEST_INVENTORY_TYPE).get_contents()
 			for _, item in pairs(contents) do
 				local item_name = item.name
 				local count = storage[item_name] or 0
@@ -4132,7 +4154,7 @@ local function on_player_selected_area(event)
 		for i=1, #entities do
 			local entity = entities[i]
 			if entity.valid and __all_boxes[entity.unit_number] == nil then
-				local item = entity.get_inventory(chest_inventory_type)[1]
+				local item = entity.get_inventory(CHEST_INVENTORY_TYPE)[1]
 				if item.valid_for_read then
 					func(item.name, entity)
 				end
