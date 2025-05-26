@@ -2644,7 +2644,9 @@ local function on_forces_merging(event)
 			local target = rendered.target
 			if target then
 				local entity = target.entity
-				if (not (entity and entity.valid) or entity.force == source) and rendered.type == "text" then
+				if not (entity and entity.valid) then
+					rendered.destroy()
+				elseif entity.force == source and rendered.type == "text" then
 					rendered.destroy()
 					__all_boxes[entity.unit_number] = nil
 				end
