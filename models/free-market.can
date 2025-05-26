@@ -2639,7 +2639,7 @@ local function on_forces_merging(event)
 
 	local ids = rendering.get_all_objects()
 	for i = 1, #ids do
-		local rendered = get_rendered_by_id(ids[i])
+		local rendered = ids[i]
 		if rendered.valid then
 			local target = rendered.target
 			if target then
