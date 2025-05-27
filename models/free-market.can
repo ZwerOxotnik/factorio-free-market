@@ -2642,17 +2642,19 @@ local function on_forces_merging(event)
 		local rendered = ids[i]
 		if rendered.valid then
 			local target = rendered.target
+			--WARNING: very unnstable way for future changes
 			if target then
 				local entity = target.entity
-				if not (entity and entity.valid) then
-					rendered.destroy()
-				elseif entity.force == source and rendered.type == "text" then
+				if entity and entity.valid
+				   and entity.force == source and rendered.type == "sprite"
+				then
 					rendered.destroy()
 					__all_boxes[entity.unit_number] = nil
 				end
 			end
 		end
 	end
+
 	check_forces()
 end
 
