@@ -70,6 +70,10 @@ fi
 ### https://www.7-zip.org/download.html
 local name="${MOD_NAME}_${MOD_VERSION}"
 if command -v git &> /dev/null; then
+	git add models/free-market.lua
+	git add models/free-market-debug.lua
+	git add models/free-market-extra-stability.lua
+	git commit -m "Don't delete this files"
 	git clean -xdf
 fi
 
